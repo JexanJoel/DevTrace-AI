@@ -4,13 +4,13 @@
 
 **AI-powered debugging assistant for developers**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
-[![PowerSync Hackathon](https://img.shields.io/badge/PowerSync_Hackathon-2026-6366f1?style=flat-square)](https://www.powersync.com/)
-
 [![Live Demo](https://img.shields.io/badge/Live_Demo-4f46e5?style=for-the-badge&logo=vercel&logoColor=white)](https://devtrace-ai.vercel.app)
 [![Report Bug](https://img.shields.io/badge/Report_Bug-dc2626?style=for-the-badge&logo=github&logoColor=white)](https://github.com/JexanJoel/DevTrace-AI/issues)
 [![Request Feature](https://img.shields.io/badge/Request_Feature-16a34a?style=for-the-badge&logo=github&logoColor=white)](https://github.com/JexanJoel/DevTrace-AI/issues)
+
+![MIT License](https://img.shields.io/github/license/JexanJoel/DevTrace-AI?style=flat-square)
+![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)
+![PowerSync Hackathon](https://img.shields.io/badge/PowerSync_Hackathon-2026-6366f1?style=flat-square)
 
 </div>
 
@@ -85,18 +85,50 @@
 
 <div align="center">
 
-| | Feature | Description |
-|:---:|:---|:---|
-| 🐛 | **Session Tracking** | Log errors with stack traces, severity levels and status |
-| ⚡ | **AI Fix Suggestions** | Groq + Llama 3.3 70B returns fixes with confidence scores |
-| 📚 | **Fix Library** | Save and reuse AI fixes across all your projects |
-| 📁 | **Project Management** | Organize sessions by project, link GitHub repos |
-| 📊 | **Error Analytics** | Charts for resolution rates, trends and severity breakdowns |
-| 🐙 | **GitHub Integration** | Stars, forks, open issues and last push per project |
-| 🎨 | **Dark Mode** | Full dark theme, synced to your profile in the database |
-| 📱 | **Mobile Responsive** | Slide-in sidebar drawer, works on all screen sizes |
-| 🔐 | **Auth** | GitHub OAuth, Google OAuth and Email + Password |
-| 🧭 | **Onboarding** | 3-step walkthrough for new users |
+<table>
+  <tr>
+    <td align="center" width="200">
+      <strong>🐛 Session Tracking</strong><br/>
+      <sub>Log errors with stack traces, severity and status</sub>
+    </td>
+    <td align="center" width="200">
+      <strong>⚡ AI Fix Suggestions</strong><br/>
+      <sub>Groq + Llama 3.3 70B with confidence scores</sub>
+    </td>
+    <td align="center" width="200">
+      <strong>📚 Fix Library</strong><br/>
+      <sub>Save and reuse AI fixes across projects</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="200">
+      <strong>📁 Project Management</strong><br/>
+      <sub>Organize sessions by project, link GitHub repos</sub>
+    </td>
+    <td align="center" width="200">
+      <strong>📊 Error Analytics</strong><br/>
+      <sub>Charts for trends, resolution rates and severity</sub>
+    </td>
+    <td align="center" width="200">
+      <strong>🐙 GitHub Integration</strong><br/>
+      <sub>Stars, forks, open issues and last push</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="200">
+      <strong>🎨 Dark Mode</strong><br/>
+      <sub>Full dark theme, synced to your profile</sub>
+    </td>
+    <td align="center" width="200">
+      <strong>📱 Mobile Responsive</strong><br/>
+      <sub>Slide-in sidebar, works on all screen sizes</sub>
+    </td>
+    <td align="center" width="200">
+      <strong>🔐 Auth</strong><br/>
+      <sub>GitHub OAuth, Google OAuth, Email + Password</sub>
+    </td>
+  </tr>
+</table>
 
 </div>
 
@@ -150,7 +182,7 @@ git clone https://github.com/JexanJoel/DevTrace-AI.git
 cd DevTrace-AI/DevTrace
 ```
 
-### 2. Supabase setup
+### 2. Supabase Setup
 
 1. Create a project at [supabase.com](https://supabase.com)
 2. Run the SQL:
@@ -302,9 +334,5 @@ MIT License — see [LICENSE](LICENSE) for details.
 ---
 
 <div align="center">
-
-Built with ❤️ for the **PowerSync AI Hackathon 2026**
-
-[Star this repo](https://github.com/JexanJoel/DevTrace-AI) if you found it useful!
-
+Built with ❤️ for the <strong>PowerSync AI Hackathon 2026</strong>
 </div>
