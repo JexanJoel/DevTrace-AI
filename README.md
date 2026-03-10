@@ -1,17 +1,15 @@
 <div align="center">
 
-# 💡 DevTrace AI
+# DevTrace AI
 
-### AI-powered debugging assistant for developers
+**An open-source debugging workspace for developers.**
+Log errors with full stack traces, get instant AI-powered fix suggestions, and track resolution across all your projects — in one place.
 
-**Log errors → Get AI fixes → Ship faster**
+> Debugging is already painful. Finding, storing, and revisiting fixes shouldn't be.
 
 <br/>
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-4f46e5?style=for-the-badge&logo=vercel&logoColor=white)](https://dev-trace-ai.vercel.app)
-[![Report Bug](https://img.shields.io/badge/Report_Bug-dc2626?style=for-the-badge&logo=github&logoColor=white)](https://github.com/JexanJoel/DevTrace-AI/issues)
-[![Request Feature](https://img.shields.io/badge/Request_Feature-16a34a?style=for-the-badge&logo=github&logoColor=white)](https://github.com/JexanJoel/DevTrace-AI/issues)
-[![MIT License](https://img.shields.io/badge/⚖_License-MIT-f59e0b?style=for-the-badge)](LICENSE)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-4f46e5?style=flat-square&logo=vercel&logoColor=white)](https://dev-trace-ai.vercel.app) [![MIT License](https://img.shields.io/badge/License-MIT-f59e0b?style=flat-square)](LICENSE) [![Report Bug](https://img.shields.io/badge/Report_Bug-dc2626?style=flat-square&logo=github&logoColor=white)](https://github.com/JexanJoel/DevTrace-AI/issues) [![Request Feature](https://img.shields.io/badge/Request_Feature-16a34a?style=flat-square&logo=github&logoColor=white)](https://github.com/JexanJoel/DevTrace-AI/issues)
 
 </div>
 
@@ -106,7 +104,7 @@
 
 ---
 
-## 🏆 Hackathon- PowerSync AI Hackathon 2026
+## 🏆 Hackathon — PowerSync AI Hackathon 2026
 
 DevTrace AI is submitted to the **[PowerSync AI Hackathon 2026](https://www.powersync.com/)** targeting:
 
