@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Terminal, Bug, Sparkles, GitBranch, BookOpen,
   BarChart2, Shield, Zap, ArrowRight, Github,
-  CheckCircle, Star, Users, Activity, Menu, X
+  CheckCircle, Users, Activity, Menu, X
 } from 'lucide-react';
 
 const FEATURES = [
