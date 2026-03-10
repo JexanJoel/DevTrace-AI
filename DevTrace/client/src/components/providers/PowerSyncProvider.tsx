@@ -10,7 +10,7 @@ interface Props { children: ReactNode; }
 
 export const PowerSyncProvider = ({ children }: Props) => {
   const { user } = useAuthStore();
-  const [ready, setReady] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -18,19 +18,33 @@ export const PowerSyncProvider = ({ children }: Props) => {
     const connector = new SupabaseConnector();
 
     const init = async () => {
-      await powerSync.init();
-      await powerSync.connect(connector);
-      setReady(true);
+      try {
+        await powerSync.init();
+        // Connect but don't wait — works offline too
+        powerSync.connect(connector).catch(() => {
+          // Connection failed (offline) — that's fine, local data still works
+          console.log('PowerSync connect failed — offline mode');
+        });
+      } catch (e) {
+        console.error('PowerSync init error:', e);
+      } finally {
+        // Always mark as initialized so UI renders with local data
+        setInitialized(true);
+      }
     };
 
-    init().catch(console.error);
+    init();
 
     return () => {
       powerSync.disconnect();
     };
   }, [user]);
 
-  if (!user || !ready) return <>{children}</>;
+  // Always render children — even before user logs in (for landing/login pages)
+  // Once initialized, wrap with PowerSyncContext so useQuery hooks work
+  if (!user || !initialized) {
+    return <>{children}</>;
+  }
 
   return (
     <PowerSyncContext.Provider value={powerSync}>
