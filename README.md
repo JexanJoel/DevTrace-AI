@@ -1,8 +1,10 @@
 <div align="center">
 
-# DevTrace AI
+# 🔍 DevTrace AI
 
-**DevTrace** AI is an open-source debugging workspace built for developers who are tired of losing fixes in Slack threads, Notion pages, and browser tabs. Log errors with full stack traces, get instant AI-powered suggestions, and build a searchable fix library over time. One place for every bug you've ever solved.
+Log errors with full stack traces and severity levels. <br/>
+Get instant AI-powered fix suggestions via Groq + Llama 3.3 70B. <br/>
+Save what works — build a fix library you'll actually reuse.
 
 > Debugging is already painful. Finding, storing, and revisiting fixes shouldn't be.
 
