@@ -11,7 +11,7 @@
 | 🐛 | **Log errors** with full stack traces and severity levels |
 | ⚡ | **Get AI fixes** instantly via Groq + Llama 3.3 70B |
 | 📚 | **Save what works** to a fix library you'll actually reuse |
-| 📶 | **Works offline** — browse, create, and debug without internet |
+| 📶 | **Works offline** - browse, create, and debug without internet |
 
 </div>
 
@@ -32,10 +32,10 @@
 | 🐛 Session Tracking | Log errors with full stack traces, severity levels and status |
 | ⚡ AI Fix Suggestions | Groq + Llama 3.3 70B analyzes errors and returns fixes instantly |
 | 📚 Fix Library | Save AI-generated fixes and reuse them across all your projects |
-| 📁 Project Management | Organize debug sessions by project and link GitHub repos |
+| 📁 Projects | Organize debug sessions by project and link GitHub repos |
 | 📊 Error Analytics | Visualize resolution rates, error trends and severity breakdowns |
-| 🐙 GitHub Integration | View stars, forks, open issues and last push date per project |
-| 📶 Offline-First | Full offline support via PowerSync — create projects and sessions without internet, auto-syncs on reconnect |
+| 🐙 Github Sync | View stars, forks, open issues and last push date per project |
+| 📶 Offline-First | Offline first with PowerSync - work offline, sync on reconnect |
 | 🔄 Real-Time Sync | PowerSync streams Supabase changes to a local SQLite database instantly |
 | 📱 Mobile Responsive | Collapsible slide-in sidebar that works on all screen sizes |
 | 🔐 Auth | GitHub OAuth, Google OAuth and Email + Password via Supabase |
@@ -110,7 +110,7 @@
 
 ## 📶 Offline-First Architecture (PowerSync)
 
-DevTrace AI is fully **local-first** powered by [PowerSync](https://www.powersync.com/). Your data is always available — even without internet.
+DevTrace AI is fully **local-first** powered by [PowerSync](https://www.powersync.com/). Your data is always available - even without internet.
 
 ```
 Online:   Supabase ──► PowerSync ──► Local SQLite ──► UI (instant reads)
@@ -121,18 +121,18 @@ Offline:  Create/browse locally ──► queued in localStorage ──► auto-
 |:---|:---|
 | ✅ Online | Data syncs in real-time from Supabase via PowerSync streams |
 | 🟠 Offline | Orange banner shown — all existing data available from local SQLite |
-| ✏️ Create offline | Projects/sessions saved locally and queued — synced to Supabase on reconnect |
+| ✏️ Create offline | Projects/sessions saved locally and queued - synced to Supabase on reconnect |
 | 🔄 Reconnect | Pending items automatically uploaded, duplicates safely handled |
 
 ---
 
-## 🏆 Hackathon — PowerSync AI Hackathon 2026
+## 🏆 Hackathon - PowerSync AI Hackathon 2026
 
 DevTrace AI is submitted to the **[PowerSync AI Hackathon 2026](https://www.powersync.com/)** targeting:
 
-- **🥇 Core Prize** — AI-powered developer tool built during the hackathon window
-- **🏅 Best Submission Using Supabase** — Supabase powers auth, database (RLS), and storage throughout
-- **🏅 Best Local-First App** — Full offline-first experience powered by PowerSync with real-time sync, local SQLite reads, and offline write queuing
+- **🥇 Core Prize** - AI-powered developer tool built during the hackathon window
+- **🏅 Best Submission Using Supabase** - Supabase powers auth, database (RLS), and storage throughout
+- **🏅 Best Local-First App** - Full offline-first experience powered by PowerSync with real-time sync, local SQLite reads, and offline write queuing
 
 ---
 
@@ -327,7 +327,7 @@ Contributions, issues, and feature requests are welcome!
 <details>
 <summary><b>Is DevTrace AI free to use?</b></summary>
 <br/>
-Yes — fully open source under MIT. Groq, Supabase, and PowerSync all have generous free tiers, so you can self-host at zero cost.
+Yes - fully open source under MIT. Groq, Supabase, and PowerSync all have generous free tiers, so you can self-host at zero cost.
 </details>
 
 <details>
