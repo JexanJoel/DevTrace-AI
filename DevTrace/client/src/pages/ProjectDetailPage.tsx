@@ -8,7 +8,6 @@ import DashboardLayout from '../components/dashboard/DashboardLayout';
 import { StatusBadge, SeverityBadge } from '../components/sessions/StatusBadge';
 import GitHubStatsCard from '../components/github/GitHubStatsCard';
 import useProjects from '../hooks/useProjects';
-import type { Project } from '../hooks/useProjects';
 import useSessions from '../hooks/useSessions';
 import CreateSessionModal from '../components/sessions/CreateSessionModal';
 
