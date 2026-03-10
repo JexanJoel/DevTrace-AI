@@ -79,18 +79,17 @@
 
 ## Features
 
-| &nbsp; | Feature | Description |
-|:---:|:---|:---|
-| 🐛 | **Session Tracking** | Log errors with full stack traces, severity levels and status |
-| ⚡ | **AI Fix Suggestions** | Groq + Llama 3.3 70B analyzes errors and returns fixes with confidence scores |
-| 📚 | **Fix Library** | Save AI-generated fixes and reuse them across all your projects |
-| 📁 | **Project Management** | Organize debug sessions by project and link GitHub repos |
-| 📊 | **Error Analytics** | Visualize resolution rates, error trends and severity breakdowns |
-| 🐙 | **GitHub Integration** | View stars, forks, open issues and last push date per project |
-| 🎨 | **Dark Mode** | Full dark theme toggled from settings and saved to your profile |
-| 📱 | **Mobile Responsive** | Collapsible slide-in sidebar that works on all screen sizes |
-| 🔐 | **Auth** | GitHub OAuth, Google OAuth and Email + Password via Supabase |
-| 🧭 | **Onboarding** | 3-step guided walkthrough for new users |
+| Feature | Description |
+|:---|:---|
+|🐛 **Session Tracking** | Log errors with full stack traces, severity levels and status |
+|⚡**AI Fix Suggestions** | Groq + Llama 3.3 70B analyzes errors and returns fixes |
+|📚 **Fix Library** | Save AI-generated fixes and reuse them across all your projects |
+|📁 **Project Management** | Organize debug sessions by project and link GitHub repos |
+|📊 **Error Analytics** | Visualize resolution rates, error trends and severity breakdowns |
+|🐙 **GitHub Integration** | View stars, forks, open issues and last push date per project |
+|🎨 **Dark Mode** | Full dark theme toggled from settings and saved to your profile |
+|📱 **Mobile Responsive** | Collapsible slide-in sidebar that works on all screen sizes |
+|🔐 **Auth** | GitHub OAuth, Google OAuth and Email + Password via Supabase |
 
 ---
 
@@ -98,8 +97,8 @@
 
 DevTrace AI is submitted to the **[PowerSync AI Hackathon 2026](https://www.powersync.com/)** targeting:
 
-- **Core Prize** — AI-powered developer tool built during the hackathon window
-- **Best Submission Using Supabase** — Supabase powers auth, database (RLS), and storage throughout
+- **Core Prize** -> AI powered developer tool built during the hackathon window
+- **Best Submission Using Supabase** -> Supabase powers auth, database (RLS), and storage throughout
 
 PowerSync could extend DevTrace into a local-first experience where debug sessions are available offline and sync when connectivity is restored — a natural next step for the product.
 
@@ -289,7 +288,7 @@ cd server && npm run dev   # http://localhost:4000
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
+MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
