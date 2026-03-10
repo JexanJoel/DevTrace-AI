@@ -11,19 +11,18 @@ export default defineConfig({
           src: 'node_modules/@powersync/web/dist/*.wasm',
           dest: '',
         },
-        {
-          src: 'node_modules/@powersync/web/dist/*.js',
-          dest: 'powersync',
-        },
       ],
     }),
   ],
   optimizeDeps: {
     exclude: ['@powersync/web'],
   },
-  build: {
+  worker: {
+    format: 'es',
     rollupOptions: {
-      external: [],
+      output: {
+        inlineDynamicImports: true,
+      },
     },
   },
 });

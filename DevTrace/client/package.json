@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@powersync/react": "^1.9.0",
+    "@powersync/react": "^1.4.0",
     "@powersync/web": "^1.35.0",
     "@supabase/auth-ui-react": "^0.4.7",
     "@supabase/auth-ui-shared": "^0.1.8",
