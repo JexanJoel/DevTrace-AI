@@ -1,5 +1,4 @@
 // src/hooks/useProjects.ts — PowerSync version
-import { useState } from 'react';
 import { useQuery } from '@powersync/react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuthStore } from '../store/authStore';
@@ -18,21 +17,31 @@ export interface Project {
   updated_at: string;
 }
 
+export interface CreateProjectInput {
+  name: string;
+  description?: string;
+  language?: string;
+  github_url?: string;
+}
+
 const useProjects = () => {
   const { user } = useAuthStore();
-  const [loading, setLoading] = useState(false);
 
-  // Read from local SQLite via PowerSync
   const { data: projects = [] } = useQuery<Project>(
     'SELECT * FROM projects WHERE user_id = ? ORDER BY updated_at DESC',
     [user?.id ?? '']
   );
 
-  const createProject = async (data: Partial<Project>) => {
+  const getProject = async (id: string): Promise<Project | null> => {
+    const { data, error } = await supabase.from('projects').select('*').eq('id', id).single();
+    if (error) return null;
+    return data as Project;
+  };
+
+  const createProject = async (data: CreateProjectInput) => {
     if (!user) return null;
     const id = uuidv4();
     const now = new Date().toISOString();
-    // Write to Supabase — PowerSync will sync down to local SQLite
     const { data: result, error } = await supabase
       .from('projects')
       .insert({ id, user_id: user.id, error_count: 0, session_count: 0, created_at: now, updated_at: now, ...data })
@@ -51,7 +60,7 @@ const useProjects = () => {
     return !error;
   };
 
-  return { projects, loading, createProject, updateProject, deleteProject };
+  return { projects, loading: false, getProject, createProject, updateProject, deleteProject };
 };
 
 export default useProjects;

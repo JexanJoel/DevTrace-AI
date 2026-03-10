@@ -1,5 +1,4 @@
 // src/hooks/useSessions.ts — PowerSync version
-import { useState } from 'react';
 import { useQuery } from '@powersync/react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuthStore } from '../store/authStore';
@@ -24,9 +23,18 @@ export interface DebugSession {
   project?: { name: string; language?: string };
 }
 
+export interface CreateSessionInput {
+  title: string;
+  project_id?: string;
+  error_message?: string;
+  stack_trace?: string;
+  severity?: Severity;
+  status?: Status;
+  notes?: string;
+}
+
 const useSessions = (projectId?: string) => {
   const { user } = useAuthStore();
-  const [loading] = useState(false);
 
   const query = projectId
     ? 'SELECT * FROM debug_sessions WHERE user_id = ? AND project_id = ? ORDER BY created_at DESC'
@@ -34,7 +42,6 @@ const useSessions = (projectId?: string) => {
 
   const params = projectId ? [user?.id ?? '', projectId] : [user?.id ?? ''];
 
-  // Read from local SQLite
   const { data: sessions = [] } = useQuery<DebugSession>(query, params);
 
   const getSession = async (id: string): Promise<DebugSession | null> => {
@@ -47,7 +54,7 @@ const useSessions = (projectId?: string) => {
     return data as DebugSession;
   };
 
-  const createSession = async (data: Partial<DebugSession>) => {
+  const createSession = async (data: CreateSessionInput) => {
     if (!user) return null;
     const id = uuidv4();
     const now = new Date().toISOString();
@@ -72,7 +79,7 @@ const useSessions = (projectId?: string) => {
     return !error;
   };
 
-  return { sessions, loading, getSession, createSession, updateSession, deleteSession };
+  return { sessions, loading: false, getSession, createSession, updateSession, deleteSession };
 };
 
 export default useSessions;

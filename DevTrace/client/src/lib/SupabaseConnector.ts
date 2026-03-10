@@ -2,27 +2,24 @@
 import {
   AbstractPowerSyncDatabase,
   CrudEntry,
-  PowerSyncBackendConnector,
   UpdateType,
 } from '@powersync/web';
+import type { PowerSyncBackendConnector } from '@powersync/web';
 import { supabase } from './supabaseClient';
 
 export class SupabaseConnector implements PowerSyncBackendConnector {
-  // Fetch a fresh JWT token from Supabase for PowerSync auth
   async fetchCredentials() {
     const { data: { session }, error } = await supabase.auth.getSession();
     if (error || !session) throw new Error('No Supabase session');
     return {
-      endpoint: import.meta.env.VITE_POWERSYNC_URL,
+      endpoint: import.meta.env.VITE_POWERSYNC_URL as string,
       token: session.access_token,
     };
   }
 
-  // Upload local SQLite changes back to Supabase
   async uploadData(database: AbstractPowerSyncDatabase) {
     const transaction = await database.getNextCrudTransaction();
     if (!transaction) return;
-
     try {
       for (const op of transaction.crud) {
         await this.applyOperation(op);
@@ -38,7 +35,6 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
     const table = op.table;
     const id = op.id;
     const data = op.opData ?? {};
-
     switch (op.op) {
       case UpdateType.PUT:
         await supabase.from(table).upsert({ id, ...data });
