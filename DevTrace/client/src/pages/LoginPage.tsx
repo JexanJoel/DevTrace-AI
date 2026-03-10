@@ -62,14 +62,13 @@ const LoginPage = () => {
         </div>
 
         <div className="relative z-10 flex-1 flex items-center justify-center px-10">
-          <div className="w-full max-w-xs space-y-6 text-left">
+          <div className="w-full max-w-xs space-y-6 text-center">
             <div className="space-y-3">
-              <h2 className="text-3xl font-bold text-white leading-tight">
-                Debug smarter, ship faster.
-              </h2>
-              <p className="text-indigo-200 text-sm leading-relaxed">
-                AI-powered debugging for developers. Track sessions, get fixes, ship faster.
-              </p>
+              <h2 className="text-4xl font-bold text-white leading-tight">
+                Debug smarter,
+                <br />
+                ship faster.
+                </h2>
             </div>
             <div className="flex flex-col gap-2">
               {features.map((f, i) => (

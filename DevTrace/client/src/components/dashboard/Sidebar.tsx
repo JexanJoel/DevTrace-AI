@@ -1,12 +1,9 @@
-// Sidebar.tsx — dark mode + mobile close button
-
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, FolderOpen, Bug, BookOpen,
   User, Settings, Terminal, LogOut, BarChart2, X
 } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
-import { useThemeStore } from '../../store/themeStore';
 import toast from 'react-hot-toast';
 
 const NAV = [
@@ -22,13 +19,10 @@ const BOTTOM_NAV = [
   { to: '/settings', icon: <Settings size={18} />, label: 'Settings' },
 ];
 
-interface Props {
-  onClose?: () => void;
-}
+interface Props { onClose?: () => void; }
 
 const Sidebar = ({ onClose }: Props) => {
   const navigate = useNavigate();
-  const { isDark } = useThemeStore();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -45,8 +39,6 @@ const Sidebar = ({ onClose }: Props) => {
 
   return (
     <aside className="w-60 h-screen bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 flex flex-col">
-
-      {/* Logo + mobile close */}
       <div className="p-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center">
@@ -58,16 +50,13 @@ const Sidebar = ({ onClose }: Props) => {
           </div>
         </div>
         {onClose && (
-          <button
-            onClick={onClose}
-            className="lg:hidden w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-400"
-          >
+          <button onClick={onClose}
+            className="lg:hidden w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-400">
             <X size={16} />
           </button>
         )}
       </div>
 
-      {/* Nav */}
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
         {NAV.map((item) => (
           <NavLink key={item.to} to={item.to} className={linkClass} onClick={onClose}>
@@ -76,17 +65,14 @@ const Sidebar = ({ onClose }: Props) => {
         ))}
       </nav>
 
-      {/* Bottom */}
       <div className="p-3 border-t border-gray-100 dark:border-gray-800 space-y-1">
         {BOTTOM_NAV.map((item) => (
           <NavLink key={item.to} to={item.to} className={linkClass} onClick={onClose}>
             {item.icon} {item.label}
           </NavLink>
         ))}
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950 dark:hover:text-red-400 transition"
-        >
+        <button onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950 dark:hover:text-red-400 transition">
           <LogOut size={18} /> Sign Out
         </button>
       </div>

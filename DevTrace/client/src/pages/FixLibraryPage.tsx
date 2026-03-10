@@ -1,124 +1,101 @@
-// FixLibraryPage.tsx — searchable fix library
-
 import { useState } from 'react';
-import { BookOpen, Search, Plus, Sparkles } from 'lucide-react';
+import { Search, BookOpen, Copy, Trash2, CheckCircle } from 'lucide-react';
 import DashboardLayout from '../components/dashboard/DashboardLayout';
 import FixCard from '../components/fixes/FixCard';
 import useFixes from '../hooks/useFixes';
-import type { Fix } from '../hooks/useFixes';
 import toast from 'react-hot-toast';
 
-const LANGUAGE_FILTERS = ['all', 'javascript', 'typescript', 'react', 'nextjs', 'nodejs', 'python', 'other'];
+const LANGUAGES = ['all', 'javascript', 'typescript', 'react', 'nextjs', 'nodejs', 'python', 'other'];
 
 const FixLibraryPage = () => {
-  const { fixes, loading, createFix, deleteFix, incrementUseCount } = useFixes();
+  const { fixes, loading, deleteFix, incrementUseCount } = useFixes();
   const [search, setSearch] = useState('');
-  const [langFilter, setLangFilter] = useState('all');
+  const [lang, setLang] = useState('all');
 
   const filtered = fixes.filter((f) => {
-    const matchSearch =
-      f.title.toLowerCase().includes(search.toLowerCase()) ||
-      f.fix_content.toLowerCase().includes(search.toLowerCase()) ||
+    const matchSearch = f.title.toLowerCase().includes(search.toLowerCase()) ||
       f.error_pattern?.toLowerCase().includes(search.toLowerCase());
-    const matchLang = langFilter === 'all' || f.language === langFilter;
+    const matchLang = lang === 'all' || f.language === lang;
     return matchSearch && matchLang;
   });
 
-  const handleUse = (fix: Fix) => {
-    navigator.clipboard.writeText(fix.fix_content);
-    incrementUseCount(fix.id);
-    toast.success('Fix copied & usage tracked!');
+  const handleCopy = (content: string) => {
+    navigator.clipboard.writeText(content);
+    toast.success('Copied to clipboard!');
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this fix from your library?')) return;
+    if (!confirm('Delete this fix?')) return;
     await deleteFix(id);
+    toast.success('Fix deleted');
+  };
+
+  const handleUse = async (id: string) => {
+    await incrementUseCount(id);
+    toast.success('Marked as used!');
   };
 
   return (
     <DashboardLayout title="Fix Library">
       <div className="space-y-6">
 
-        {/* Header */}
-        <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-4 flex-wrap">
           <div className="relative flex-1 max-w-sm">
             <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search fixes..."
-              value={search}
+            <input type="text" placeholder="Search fixes..." value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-white border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-50 transition placeholder-gray-400"
-            />
-          </div>
-          <div className="flex items-center gap-2 text-sm text-gray-400">
-            <Sparkles size={14} className="text-indigo-400" />
-            <span>{fixes.length} fix{fixes.length !== 1 ? 'es' : ''} saved</span>
+              className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-indigo-300 transition placeholder-gray-400" />
           </div>
         </div>
 
-        {/* Language filter pills */}
         <div className="flex gap-2 flex-wrap">
-          {LANGUAGE_FILTERS.map((lang) => (
-            <button
-              key={lang}
-              onClick={() => setLangFilter(lang)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium capitalize transition border ${
-                langFilter === lang
-                  ? 'bg-indigo-600 text-white border-indigo-600'
-                  : 'bg-white text-gray-500 border-gray-200 hover:border-indigo-300'
-              }`}
-            >
-              {lang}
+          {LANGUAGES.map((l) => (
+            <button key={l} onClick={() => setLang(l)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition ${
+                lang === l
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-indigo-300'
+              }`}>
+              {l === 'all' ? 'All Languages' : l}
             </button>
           ))}
         </div>
 
-        {/* Grid */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl border border-gray-100 p-5 animate-pulse space-y-3">
-                <div className="h-4 bg-gray-100 rounded w-2/3" />
-                <div className="h-16 bg-gray-100 rounded" />
-                <div className="h-3 bg-gray-100 rounded w-1/3" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 animate-pulse">
+                <div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-1/2 mb-3" />
+                <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-3/4 mb-2" />
+                <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-1/2" />
               </div>
             ))}
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mb-4">
-              <BookOpen size={28} className="text-indigo-400" />
+            <div className="w-16 h-16 bg-green-50 dark:bg-green-950 rounded-2xl flex items-center justify-center mb-4">
+              <BookOpen size={28} className="text-green-400" />
             </div>
-            <h3 className="font-bold text-gray-900 mb-1">
-              {search || langFilter !== 'all' ? 'No fixes found' : 'Fix library is empty'}
+            <h3 className="font-bold text-gray-900 dark:text-white mb-1">
+              {search || lang !== 'all' ? 'No fixes found' : 'Fix library is empty'}
             </h3>
-            <p className="text-gray-400 text-sm mb-4 max-w-xs">
-              {search || langFilter !== 'all'
-                ? 'Try a different search or filter'
-                : 'Save AI fixes from your debug sessions to build your personal library'
-              }
+            <p className="text-gray-400 text-sm max-w-xs">
+              {search || lang !== 'all' ? 'Try adjusting your search or filter' : 'Save AI fixes from your debug sessions to build your library'}
             </p>
-            {!search && langFilter === 'all' && (
-              <div className="flex items-center gap-2 text-xs text-indigo-500 bg-indigo-50 border border-indigo-100 px-4 py-2.5 rounded-xl">
-                <Sparkles size={13} />
-                Go to a session → Get AI Fix → Save to Library
-              </div>
-            )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filtered.map((fix) => (
               <FixCard
                 key={fix.id}
                 fix={fix}
-                onDelete={handleDelete}
-                onUse={handleUse}
+                onCopy={() => handleCopy(fix.fix_content)}
+                onDelete={() => handleDelete(fix.id)}
+                onUse={() => handleUse(fix.id)}
               />
             ))}
           </div>
         )}
-
       </div>
     </DashboardLayout>
   );
