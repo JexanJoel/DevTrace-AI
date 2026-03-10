@@ -1,8 +1,7 @@
 // src/lib/powersync.ts
 import { PowerSyncDatabase } from '@powersync/web';
+import { WASQLiteOpenFactory } from '@powersync/web';
 import { column, Schema, Table } from '@powersync/web';
-
-// ─── Schema ───────────────────────────────────────────────────────────────────
 
 const profiles = new Table({
   name: column.text,
@@ -62,9 +61,12 @@ export const AppSchema = new Schema({
 
 export type Database = (typeof AppSchema)['types'];
 
-// ─── PowerSync instance ───────────────────────────────────────────────────────
-
 export const powerSync = new PowerSyncDatabase({
   schema: AppSchema,
-  database: { dbFilename: 'devtrace.db' },
+  database: new WASQLiteOpenFactory({
+    dbFilename: 'devtrace.db',
+    flags: {
+      disableSSRWarning: true,
+    },
+  }),
 });
