@@ -16,6 +16,7 @@ import ProjectDetailPage from './pages/ProjectDetailPage';
 import SessionsPage from './pages/SessionsPage';
 import SessionDetailPage from './pages/SessionDetailPage';
 import FixLibraryPage from './pages/FixLibraryPage';
+import AnalyticsPage from './pages/AnalyticsPage';
 
 const App = () => {
   const { setUser, setSession, setLoading } = useAuthStore();
@@ -26,33 +27,20 @@ const App = () => {
       setUser(session?.user as any ?? null);
       setLoading(false);
     });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user as any ?? null);
-        setLoading(false);
-      }
-    );
-
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user as any ?? null);
+      setLoading(false);
+    });
     return () => subscription.unsubscribe();
   }, []);
 
   return (
     <BrowserRouter>
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          duration: 3000,
-          style: {
-            background: '#fff',
-            color: '#111827',
-            border: '1px solid #e5e7eb',
-            borderRadius: '12px',
-            fontSize: '14px',
-          },
-        }}
-      />
+      <Toaster position="top-right" toastOptions={{
+        duration: 3000,
+        style: { background: '#fff', color: '#111827', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' },
+      }} />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -65,6 +53,7 @@ const App = () => {
         <Route path="/sessions" element={<ProtectedRoute><SessionsPage /></ProtectedRoute>} />
         <Route path="/sessions/:id" element={<ProtectedRoute><SessionDetailPage /></ProtectedRoute>} />
         <Route path="/fixes" element={<ProtectedRoute><FixLibraryPage /></ProtectedRoute>} />
+        <Route path="/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

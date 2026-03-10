@@ -1,24 +1,40 @@
-// DashboardPage.tsx — real stats from Supabase
+// DashboardPage.tsx — real stats + onboarding
 
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Plus, FolderOpen, Bug, BookOpen,
-  CheckCircle, BarChart2, Clock, Loader2,
-  ArrowRight, Sparkles, TrendingUp
+  CheckCircle, BarChart2, Clock,
+  ArrowRight, TrendingUp
 } from 'lucide-react';
 import DashboardLayout from '../components/dashboard/DashboardLayout';
-import { StatusBadge, SeverityBadge } from '../components/sessions/StatusBadge';
+import { StatusBadge } from '../components/sessions/StatusBadge';
+import OnboardingModal from '../components/onboarding/OnboardingModal';
 import { useAuthStore } from '../store/authStore';
 import useDashboardStats from '../hooks/useDashboardStats';
+import { supabase } from '../lib/supabaseClient';
 
 const DashboardPage = () => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const { stats, loading } = useDashboardStats();
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
   const name = user?.user_metadata?.full_name?.split(' ')[0] ?? user?.email?.split('@')[0] ?? 'Developer';
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from('profiles')
+      .select('onboarded')
+      .eq('id', user.id)
+      .single()
+      .then(({ data }) => {
+        if (data && !data.onboarded) setShowOnboarding(true);
+      });
+  }, [user]);
 
   const timeAgo = (date: string) => {
     const diff = Date.now() - new Date(date).getTime();
@@ -75,44 +91,13 @@ const DashboardPage = () => {
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              {
-                label: 'Total Projects',
-                value: stats?.totalProjects ?? 0,
-                icon: <FolderOpen size={20} />,
-                color: 'text-indigo-600',
-                bg: 'bg-indigo-50',
-                onClick: () => navigate('/projects'),
-              },
-              {
-                label: 'Debug Sessions',
-                value: stats?.totalSessions ?? 0,
-                icon: <Bug size={20} />,
-                color: 'text-blue-600',
-                bg: 'bg-blue-50',
-                onClick: () => navigate('/sessions'),
-              },
-              {
-                label: 'Errors Logged',
-                value: stats?.totalErrors ?? 0,
-                icon: <BarChart2 size={20} />,
-                color: 'text-orange-600',
-                bg: 'bg-orange-50',
-                onClick: () => navigate('/sessions'),
-              },
-              {
-                label: 'Resolved',
-                value: `${stats?.resolvedPercent ?? 0}%`,
-                icon: <CheckCircle size={20} />,
-                color: 'text-green-600',
-                bg: 'bg-green-50',
-                onClick: () => navigate('/sessions'),
-              },
+              { label: 'Total Projects', value: stats?.totalProjects ?? 0, icon: <FolderOpen size={20} />, color: 'text-indigo-600', bg: 'bg-indigo-50', onClick: () => navigate('/projects') },
+              { label: 'Debug Sessions', value: stats?.totalSessions ?? 0, icon: <Bug size={20} />, color: 'text-blue-600', bg: 'bg-blue-50', onClick: () => navigate('/sessions') },
+              { label: 'Errors Logged', value: stats?.totalErrors ?? 0, icon: <BarChart2 size={20} />, color: 'text-orange-600', bg: 'bg-orange-50', onClick: () => navigate('/analytics') },
+              { label: 'Resolved', value: `${stats?.resolvedPercent ?? 0}%`, icon: <CheckCircle size={20} />, color: 'text-green-600', bg: 'bg-green-50', onClick: () => navigate('/sessions') },
             ].map((card, i) => (
-              <button
-                key={i}
-                onClick={card.onClick}
-                className="bg-white rounded-2xl border border-gray-100 p-5 text-left hover:border-indigo-200 hover:shadow-sm transition group"
-              >
+              <button key={i} onClick={card.onClick}
+                className="bg-white rounded-2xl border border-gray-100 p-5 text-left hover:border-indigo-200 hover:shadow-sm transition group">
                 <div className={`w-10 h-10 ${card.bg} rounded-xl flex items-center justify-center ${card.color} mb-3`}>
                   {card.icon}
                 </div>
@@ -123,7 +108,7 @@ const DashboardPage = () => {
           </div>
         )}
 
-        {/* Two column layout */}
+        {/* Two column */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
           {/* Recent sessions */}
@@ -132,10 +117,8 @@ const DashboardPage = () => {
               <h3 className="font-bold text-gray-900 flex items-center gap-2">
                 <Bug size={16} className="text-blue-500" /> Recent Sessions
               </h3>
-              <button
-                onClick={() => navigate('/sessions')}
-                className="text-xs text-indigo-500 hover:text-indigo-700 font-medium flex items-center gap-1 transition"
-              >
+              <button onClick={() => navigate('/sessions')}
+                className="text-xs text-indigo-500 hover:text-indigo-700 font-medium flex items-center gap-1 transition">
                 View all <ArrowRight size={12} />
               </button>
             </div>
@@ -156,21 +139,15 @@ const DashboardPage = () => {
               <div className="flex flex-col items-center justify-center py-10 text-center">
                 <Bug size={24} className="text-gray-300 mb-2" />
                 <p className="text-gray-400 text-sm mb-3">No sessions yet</p>
-                <button
-                  onClick={() => navigate('/sessions')}
-                  className="text-xs text-indigo-500 font-medium hover:underline"
-                >
+                <button onClick={() => navigate('/sessions')} className="text-xs text-indigo-500 font-medium hover:underline">
                   Log your first session →
                 </button>
               </div>
             ) : (
               <div className="space-y-1">
                 {stats?.recentSessions.map((session) => (
-                  <div
-                    key={session.id}
-                    onClick={() => navigate(`/sessions/${session.id}`)}
-                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 cursor-pointer transition group"
-                  >
+                  <div key={session.id} onClick={() => navigate(`/sessions/${session.id}`)}
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 cursor-pointer transition group">
                     <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
                       session.status === 'open' ? 'bg-red-500' :
                       session.status === 'in_progress' ? 'bg-yellow-500' : 'bg-green-500'
@@ -179,11 +156,9 @@ const DashboardPage = () => {
                       <p className="text-sm font-medium text-gray-800 truncate group-hover:text-indigo-600 transition">
                         {session.title}
                       </p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-xs text-gray-400 flex items-center gap-1">
-                          <Clock size={10} /> {timeAgo(session.created_at)}
-                        </span>
-                      </div>
+                      <span className="text-xs text-gray-400 flex items-center gap-1">
+                        <Clock size={10} /> {timeAgo(session.created_at)}
+                      </span>
                     </div>
                     <StatusBadge status={session.status} />
                   </div>
@@ -198,10 +173,8 @@ const DashboardPage = () => {
               <h3 className="font-bold text-gray-900 flex items-center gap-2">
                 <FolderOpen size={16} className="text-indigo-500" /> Recent Projects
               </h3>
-              <button
-                onClick={() => navigate('/projects')}
-                className="text-xs text-indigo-500 hover:text-indigo-700 font-medium flex items-center gap-1 transition"
-              >
+              <button onClick={() => navigate('/projects')}
+                className="text-xs text-indigo-500 hover:text-indigo-700 font-medium flex items-center gap-1 transition">
                 View all <ArrowRight size={12} />
               </button>
             </div>
@@ -222,31 +195,21 @@ const DashboardPage = () => {
               <div className="flex flex-col items-center justify-center py-10 text-center">
                 <FolderOpen size={24} className="text-gray-300 mb-2" />
                 <p className="text-gray-400 text-sm mb-3">No projects yet</p>
-                <button
-                  onClick={() => navigate('/projects')}
-                  className="text-xs text-indigo-500 font-medium hover:underline"
-                >
+                <button onClick={() => navigate('/projects')} className="text-xs text-indigo-500 font-medium hover:underline">
                   Create your first project →
                 </button>
               </div>
             ) : (
               <div className="space-y-1">
                 {stats?.recentProjects.map((project) => (
-                  <div
-                    key={project.id}
-                    onClick={() => navigate(`/projects/${project.id}`)}
-                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 cursor-pointer transition group"
-                  >
-                    <div className="w-9 h-9 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 font-bold text-sm flex-shrink-0">
+                  <div key={project.id} onClick={() => navigate(`/projects/${project.id}`)}
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 cursor-pointer transition group">
+                    <div className="w-9 h-9 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 font-bold text-xs flex-shrink-0">
                       {project.language ? LANGUAGE_LABELS[project.language] ?? '?' : <FolderOpen size={16} />}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-800 truncate group-hover:text-indigo-600 transition">
-                        {project.name}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {project.session_count} session{project.session_count !== 1 ? 's' : ''} · {timeAgo(project.updated_at)}
-                      </p>
+                      <p className="text-sm font-medium text-gray-800 truncate group-hover:text-indigo-600 transition">{project.name}</p>
+                      <p className="text-xs text-gray-400">{project.session_count} sessions · {timeAgo(project.updated_at)}</p>
                     </div>
                     <ArrowRight size={14} className="text-gray-300 group-hover:text-indigo-400 transition" />
                   </div>
@@ -254,7 +217,6 @@ const DashboardPage = () => {
               </div>
             )}
           </div>
-
         </div>
 
         {/* Quick actions */}
@@ -263,13 +225,10 @@ const DashboardPage = () => {
             { label: 'New Session', icon: <Bug size={18} />, color: 'text-blue-600 bg-blue-50 hover:bg-blue-100', onClick: () => navigate('/sessions') },
             { label: 'New Project', icon: <Plus size={18} />, color: 'text-indigo-600 bg-indigo-50 hover:bg-indigo-100', onClick: () => navigate('/projects') },
             { label: 'Fix Library', icon: <BookOpen size={18} />, color: 'text-green-600 bg-green-50 hover:bg-green-100', onClick: () => navigate('/fixes') },
-            { label: 'View Stats', icon: <TrendingUp size={18} />, color: 'text-orange-600 bg-orange-50 hover:bg-orange-100', onClick: () => navigate('/sessions') },
+            { label: 'Analytics', icon: <TrendingUp size={18} />, color: 'text-orange-600 bg-orange-50 hover:bg-orange-100', onClick: () => navigate('/analytics') },
           ].map((action, i) => (
-            <button
-              key={i}
-              onClick={action.onClick}
-              className={`flex flex-col items-center gap-2 p-4 rounded-2xl border border-transparent hover:border-gray-200 transition font-medium text-sm ${action.color}`}
-            >
+            <button key={i} onClick={action.onClick}
+              className={`flex flex-col items-center gap-2 p-4 rounded-2xl border border-transparent hover:border-gray-200 transition font-medium text-sm ${action.color}`}>
               {action.icon}
               {action.label}
             </button>
@@ -277,6 +236,8 @@ const DashboardPage = () => {
         </div>
 
       </div>
+
+      {showOnboarding && <OnboardingModal onClose={() => setShowOnboarding(false)} />}
     </DashboardLayout>
   );
 };
