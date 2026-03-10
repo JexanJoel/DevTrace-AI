@@ -1,18 +1,14 @@
 <div align="center">
 
-<img src="https://img.shields.io/badge/DevTrace_AI-Open_Source-6366f1?style=for-the-badge&logo=terminal&logoColor=white" alt="DevTrace AI" />
-
-<br/><br/>
-
 # 🐛 DevTrace AI
 
-> AI-powered debugging assistant · Track sessions · Get AI fixes · Ship faster
+**AI-powered debugging assistant for developers**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 [![PowerSync Hackathon](https://img.shields.io/badge/PowerSync_Hackathon-2026-6366f1?style=flat-square)](https://www.powersync.com/)
 
-**[🚀 Live Demo](https://devtrace-ai.vercel.app)** &nbsp;·&nbsp; **[🐛 Report Bug](https://github.com/yourusername/DevTrace-AI/issues)** &nbsp;·&nbsp; **[✨ Request Feature](https://github.com/yourusername/DevTrace-AI/issues)**
+[🚀 Live Demo](https://devtrace-ai.vercel.app) · [🐛 Report Bug](https://github.com/JexanJoel/DevTrace-AI/issues) · [✨ Request Feature](https://github.com/JexanJoel/DevTrace-AI/issues)
 
 </div>
 
@@ -85,67 +81,29 @@
 
 ## ✨ Features
 
-<div align="center">
-
-<table>
-  <tr>
-    <td width="33%" align="center">
-      <h3>🐛 Session Tracking</h3>
-      <sub>Log errors with stack traces, severity & status</sub>
-    </td>
-    <td width="33%" align="center">
-      <h3>⚡ AI Fix Suggestions</h3>
-      <sub>Groq + Llama 3.3 70B returns fixes with confidence scores</sub>
-    </td>
-    <td width="33%" align="center">
-      <h3>📚 Fix Library</h3>
-      <sub>Save & reuse AI fixes across all your projects</sub>
-    </td>
-  </tr>
-  <tr>
-    <td width="33%" align="center">
-      <h3>📁 Project Management</h3>
-      <sub>Organize sessions by project, track error counts</sub>
-    </td>
-    <td width="33%" align="center">
-      <h3>📊 Error Analytics</h3>
-      <sub>Charts for resolution rates, trends & severity</sub>
-    </td>
-    <td width="33%" align="center">
-      <h3>🐙 GitHub Integration</h3>
-      <sub>Stars, forks, open issues & last push per project</sub>
-    </td>
-  </tr>
-  <tr>
-    <td width="33%" align="center">
-      <h3>🎨 Dark Mode</h3>
-      <sub>Full dark theme, synced to your profile</sub>
-    </td>
-    <td width="33%" align="center">
-      <h3>📱 Mobile Responsive</h3>
-      <sub>Slide-in sidebar, works on all screen sizes</sub>
-    </td>
-    <td width="33%" align="center">
-      <h3>🔐 Auth</h3>
-      <sub>GitHub OAuth, Google OAuth, Email + Password</sub>
-    </td>
-  </tr>
-</table>
-
-</div>
+| | Feature | Description |
+|---|---|---|
+| 🐛 | **Session Tracking** | Log errors with stack traces, severity levels and status |
+| ⚡ | **AI Fix Suggestions** | Groq + Llama 3.3 70B returns fixes with confidence scores |
+| 📚 | **Fix Library** | Save and reuse AI fixes across all your projects |
+| 📁 | **Project Management** | Organize sessions by project, link GitHub repos |
+| 📊 | **Error Analytics** | Charts for resolution rates, trends and severity breakdowns |
+| 🐙 | **GitHub Integration** | Stars, forks, open issues and last push per project |
+| 🎨 | **Dark Mode** | Full dark theme, synced to your profile in the database |
+| 📱 | **Mobile Responsive** | Slide-in sidebar drawer, works on all screen sizes |
+| 🔐 | **Auth** | GitHub OAuth, Google OAuth and Email + Password |
+| 🧭 | **Onboarding** | 3-step walkthrough for new users |
 
 ---
 
-## 🏆 Hackathon Context — PowerSync AI Hackathon 2026
+## 🏆 Hackathon — PowerSync AI Hackathon 2026
 
-DevTrace AI is submitted to the **PowerSync AI Hackathon 2026** targeting the following prize categories:
+DevTrace AI is submitted to the **[PowerSync AI Hackathon 2026](https://www.powersync.com/)** targeting:
 
 - 🥇 **Core Prize** — AI-powered developer tool built during the hackathon window
-- 💚 **Best Submission Using Supabase** — Supabase powers auth, database (RLS), and storage throughout the entire stack
+- 💚 **Best Submission Using Supabase** — Supabase powers auth, database (RLS), and storage throughout
 
-**Why DevTrace fits the hackathon theme:**
-
-DevTrace AI is exactly the kind of developer tool the hackathon calls for — an AI-assisted workflow for debugging and incident response. PowerSync could extend this project into a truly local-first experience where debug sessions are available offline and sync when connectivity is restored — a natural next step for the product.
+PowerSync could extend DevTrace into a local-first experience where debug sessions are available offline and sync when connectivity is restored — a natural next step for the product.
 
 ---
 
@@ -155,27 +113,18 @@ DevTrace AI is exactly the kind of developer tool the hackathon calls for — an
 DevTrace-AI/
 └── DevTrace/
     ├── client/                  # React + Vite frontend
-    │   ├── src/
-    │   │   ├── components/      # Reusable UI components
-    │   │   │   ├── auth/        # Login / Register forms
-    │   │   │   ├── dashboard/   # Layout, Sidebar, Topbar
-    │   │   │   ├── sessions/    # Debug session components
-    │   │   │   ├── fixes/       # Fix library components
-    │   │   │   ├── projects/    # Project cards + modals
-    │   │   │   ├── github/      # GitHub stats card
-    │   │   │   └── onboarding/  # Onboarding modal
-    │   │   ├── hooks/           # Custom React hooks (data fetching)
-    │   │   ├── pages/           # Route-level page components
-    │   │   ├── store/           # Zustand stores (auth, theme)
-    │   │   ├── lib/             # Supabase + Groq clients
-    │   │   └── types/           # TypeScript types
-    │   └── package.json
+    │   └── src/
+    │       ├── components/      # auth, dashboard, sessions, fixes, projects
+    │       ├── hooks/           # Custom React hooks (data fetching)
+    │       ├── pages/           # Route-level page components
+    │       ├── store/           # Zustand stores (auth, theme)
+    │       ├── lib/             # Supabase + Groq clients
+    │       └── types/           # TypeScript types
     └── server/                  # Express backend
-        ├── src/
-        │   ├── routes/          # Auth routes
-        │   ├── middleware/      # JWT verification
-        │   └── lib/             # Supabase admin client
-        └── package.json
+        └── src/
+            ├── routes/          # Auth routes
+            ├── middleware/      # JWT verification
+            └── lib/             # Supabase admin client
 ```
 
 ---
@@ -185,23 +134,23 @@ DevTrace-AI/
 ### Prerequisites
 
 - Node.js 18+
-- A [Supabase](https://supabase.com) account (free)
-- A [Groq](https://groq.com) API key (free)
+- [Supabase](https://supabase.com) account (free)
+- [Groq](https://groq.com) API key (free)
 
-### 1. Clone the repo
+### 1. Clone
 
 ```bash
-git clone https://github.com/yourusername/DevTrace-AI.git
+git clone https://github.com/JexanJoel/DevTrace-AI.git
 cd DevTrace-AI/DevTrace
 ```
 
-### 2. Set up Supabase
+### 2. Supabase setup
 
-1. Create a new project at [supabase.com](https://supabase.com)
-2. Run the SQL setup in your Supabase SQL editor:
+1. Create a project at [supabase.com](https://supabase.com)
+2. Run the SQL:
 
 <details>
-<summary>📋 Click to expand full SQL setup</summary>
+<summary>📋 Click to expand SQL setup</summary>
 
 ```sql
 -- Profiles
@@ -291,36 +240,30 @@ returns void as $$ update fixes set use_count = use_count + 1 where id = fix_id;
 
 </details>
 
-3. Go to **Authentication → Settings** and:
-   - Disable **"Confirm email"**
-   - Set Site URL to `http://localhost:5173`
-   - Enable GitHub and Google OAuth providers
-4. Create a storage bucket called `avatars` set to **public**
+3. **Auth → Settings**: disable **Confirm email**, set Site URL to `http://localhost:5173`
+4. Enable GitHub + Google OAuth providers
+5. Create a storage bucket called `avatars` set to **public**
 
-### 3. Frontend setup
+### 3. Frontend
 
 ```bash
-cd client
-npm install
+cd client && npm install
 ```
 
-Create `client/.env`:
-
+`client/.env`:
 ```env
 VITE_SUPABASE_URL=your_supabase_project_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 VITE_GROQ_API_KEY=your_groq_api_key
 ```
 
-### 4. Backend setup
+### 4. Backend
 
 ```bash
-cd ../server
-npm install
+cd ../server && npm install
 ```
 
-Create `server/.env`:
-
+`server/.env`:
 ```env
 PORT=4000
 SUPABASE_URL=your_supabase_project_url
@@ -330,18 +273,13 @@ SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 ### 5. Run
 
 ```bash
-# Terminal 1 — Frontend (http://localhost:5173)
-cd client && npm run dev
-
-# Terminal 2 — Backend (http://localhost:4000)
-cd server && npm run dev
+cd client && npm run dev   # → http://localhost:5173
+cd server && npm run dev   # → http://localhost:4000
 ```
 
 ---
 
 ## 🤝 Contributing
-
-Contributions are welcome! Please open an issue first to discuss what you'd like to change.
 
 1. Fork the repo
 2. Create your branch: `git checkout -b feature/amazing-feature`
