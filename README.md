@@ -1,132 +1,84 @@
 <div align="center">
 
-# DevTrace AI
+# 🐛 DevTrace AI
 
-**AI-powered debugging assistant for developers**
+### AI-powered debugging assistant for developers
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-4f46e5?style=for-the-badge&logo=vercel&logoColor=white)](https://devtrace-ai.vercel.app)
+**Log errors → Get AI fixes → Ship faster**
+
+<br/>
+
+[![Live Demo](https://img.shields.io/badge/Live_Demo-4f46e5?style=for-the-badge&logo=vercel&logoColor=white)](https://dev-trace-ai.vercel.app)
 [![Report Bug](https://img.shields.io/badge/Report_Bug-dc2626?style=for-the-badge&logo=github&logoColor=white)](https://github.com/JexanJoel/DevTrace-AI/issues)
 [![Request Feature](https://img.shields.io/badge/Request_Feature-16a34a?style=for-the-badge&logo=github&logoColor=white)](https://github.com/JexanJoel/DevTrace-AI/issues)
 
-</div>
+<br/>
 
----
-
-## Tech Stack
-
-<div align="center">
-
-<table>
-  <tr>
-    <td align="center" width="130">
-      <img src="https://img.shields.io/badge/React_18-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" /><br/>
-      <sub>Frontend</sub>
-    </td>
-    <td align="center" width="130">
-      <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" /><br/>
-      <sub>Language</sub>
-    </td>
-    <td align="center" width="130">
-      <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" /><br/>
-      <sub>Build Tool</sub>
-    </td>
-    <td align="center" width="130">
-      <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" /><br/>
-      <sub>Styling</sub>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="130">
-      <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" /><br/>
-      <sub>Database & Auth</sub>
-    </td>
-    <td align="center" width="130">
-      <img src="https://img.shields.io/badge/Groq_AI-F55036?style=for-the-badge&logo=lightning&logoColor=white" /><br/>
-      <sub>AI Engine</sub>
-    </td>
-    <td align="center" width="130">
-      <img src="https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white" /><br/>
-      <sub>Backend</sub>
-    </td>
-    <td align="center" width="130">
-      <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" /><br/>
-      <sub>Deployment</sub>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="130">
-      <img src="https://img.shields.io/badge/Zustand-FF6B35?style=for-the-badge&logo=react&logoColor=white" /><br/>
-      <sub>State</sub>
-    </td>
-    <td align="center" width="130">
-      <img src="https://img.shields.io/badge/Recharts-22C55E?style=for-the-badge&logo=chartdotjs&logoColor=white" /><br/>
-      <sub>Charts</sub>
-    </td>
-    <td align="center" width="130">
-      <img src="https://img.shields.io/badge/Lucide-F97316?style=for-the-badge&logo=lucide&logoColor=white" /><br/>
-      <sub>Icons</sub>
-    </td>
-    <td align="center" width="130">
-      <img src="https://img.shields.io/badge/Llama_3.3_70B-FF0000?style=for-the-badge&logo=meta&logoColor=white" /><br/>
-      <sub>AI Model</sub>
-    </td>
-  </tr>
-</table>
+![GitHub Stars](https://img.shields.io/github/stars/JexanJoel/DevTrace-AI?style=flat-square&color=f59e0b)
+![GitHub Forks](https://img.shields.io/github/forks/JexanJoel/DevTrace-AI?style=flat-square&color=4f46e5)
+![GitHub Issues](https://img.shields.io/github/issues/JexanJoel/DevTrace-AI?style=flat-square&color=dc2626)
+![Last Commit](https://img.shields.io/github/last-commit/JexanJoel/DevTrace-AI?style=flat-square&color=22d3a5)
+![License](https://img.shields.io/github/license/JexanJoel/DevTrace-AI?style=flat-square&color=6b7280)
 
 </div>
 
 ---
 
-## Features
+## 📸 Preview
+
+> **[→ Try the live demo](https://dev-trace-ai.vercel.app)**
+
+<!-- Replace with actual screenshot -->
+<!-- ![DevTrace AI Dashboard](https://your-screenshot-url.png) -->
+
+> 💡 Drop a screenshot of your dashboard here to massively boost first impressions.
+
+---
+
+## ✨ Features
 
 | Feature | Description |
 |:---|:---|
-|🐛 **Session Tracking** | Log errors with full stack traces, severity levels and status |
-|⚡**AI Fix Suggestions** | Groq + Llama 3.3 70B analyzes errors and returns fixes |
-|📚 **Fix Library** | Save AI-generated fixes and reuse them across all your projects |
-|📁 **Project Management** | Organize debug sessions by project and link GitHub repos |
-|📊 **Error Analytics** | Visualize resolution rates, error trends and severity breakdowns |
-|🐙 **GitHub Integration** | View stars, forks, open issues and last push date per project |
-|🎨 **Dark Mode** | Full dark theme toggled from settings and saved to your profile |
-|📱 **Mobile Responsive** | Collapsible slide-in sidebar that works on all screen sizes |
-|🔐 **Auth** | GitHub OAuth, Google OAuth and Email + Password via Supabase |
+| 🐛 **Session Tracking** | Log errors with full stack traces, severity levels and status |
+| ⚡ **AI Fix Suggestions** | Groq + Llama 3.3 70B analyzes errors and returns fixes instantly |
+| 📚 **Fix Library** | Save AI-generated fixes and reuse them across all your projects |
+| 📁 **Project Management** | Organize debug sessions by project and link GitHub repos |
+| 📊 **Error Analytics** | Visualize resolution rates, error trends and severity breakdowns |
+| 🐙 **GitHub Integration** | View stars, forks, open issues and last push date per project |
+| 🎨 **Dark Mode** | Full dark theme toggled from settings and saved to your profile |
+| 📱 **Mobile Responsive** | Collapsible slide-in sidebar that works on all screen sizes |
+| 🔐 **Auth** | GitHub OAuth, Google OAuth and Email + Password via Supabase |
 
 ---
 
-## Hackathon — PowerSync AI Hackathon 2026
+## 🏗️ Tech Stack
+
+<div align="center">
+
+| Layer | Technology |
+|:---:|:---:|
+| Frontend | ![React](https://img.shields.io/badge/React_18-20232A?style=flat-square&logo=react&logoColor=61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white) ![Tailwind](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white) |
+| Backend | ![Express](https://img.shields.io/badge/Express-000000?style=flat-square&logo=express&logoColor=white) ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white) |
+| AI | ![Groq](https://img.shields.io/badge/Groq_AI-F55036?style=flat-square&logo=lightning&logoColor=white) ![Llama](https://img.shields.io/badge/Llama_3.3_70B-FF0000?style=flat-square&logo=meta&logoColor=white) |
+| State & UI | ![Zustand](https://img.shields.io/badge/Zustand-FF6B35?style=flat-square&logo=react&logoColor=white) ![Recharts](https://img.shields.io/badge/Recharts-22C55E?style=flat-square&logo=chartdotjs&logoColor=white) ![Lucide](https://img.shields.io/badge/Lucide-F97316?style=flat-square&logo=lucide&logoColor=white) |
+| Deploy | ![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat-square&logo=vercel&logoColor=white) |
+
+</div>
+
+---
+
+## 🏆 Hackathon — PowerSync AI Hackathon 2026
 
 DevTrace AI is submitted to the **[PowerSync AI Hackathon 2026](https://www.powersync.com/)** targeting:
 
-- **Core Prize** -> AI powered developer tool built during the hackathon window
-- **Best Submission Using Supabase** -> Supabase powers auth, database (RLS), and storage throughout
+- **🥇 Core Prize** — AI-powered developer tool built during the hackathon window
+- **🏅 Best Submission Using Supabase** — Supabase powers auth, database (RLS), and storage throughout
 
-PowerSync could extend DevTrace into a local-first experience where debug sessions are available offline and sync when connectivity is restored — a natural next step for the product.
-
----
-
-## Project Structure
-
-```
-DevTrace-AI/
-└── DevTrace/
-    ├── client/                  # React + Vite frontend
-    │   └── src/
-    │       ├── components/      # auth, dashboard, sessions, fixes, projects
-    │       ├── hooks/           # Custom React hooks (data fetching)
-    │       ├── pages/           # Route-level page components
-    │       ├── store/           # Zustand stores (auth, theme)
-    │       ├── lib/             # Supabase + Groq clients
-    │       └── types/           # TypeScript types
-    └── server/                  # Express backend
-        └── src/
-            ├── routes/          # Auth routes
-            ├── middleware/      # JWT verification
-            └── lib/             # Supabase admin client
-```
+PowerSync could naturally extend DevTrace into a **local-first experience** — debug sessions available offline and synced when connectivity is restored.
 
 ---
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
@@ -144,10 +96,10 @@ cd DevTrace-AI/DevTrace
 ### 2. Supabase Setup
 
 1. Create a project at [supabase.com](https://supabase.com)
-2. Run the SQL:
+2. Run the SQL schema:
 
 <details>
-<summary>Click to expand SQL setup</summary>
+<summary>📋 Click to expand SQL setup</summary>
 
 ```sql
 -- Profiles
@@ -218,7 +170,7 @@ create policy "Users can create fixes" on fixes for insert with check (auth.uid(
 create policy "Users can update own fixes" on fixes for update using (auth.uid() = user_id);
 create policy "Users can delete own fixes" on fixes for delete using (auth.uid() = user_id);
 
--- Triggers + helpers
+-- Triggers
 create or replace function update_updated_at() returns trigger as $$
 begin new.updated_at = timezone('utc', now()); return new; end;
 $$ language plpgsql;
@@ -237,8 +189,8 @@ returns void as $$ update fixes set use_count = use_count + 1 where id = fix_id;
 
 </details>
 
-3. **Auth → Settings**: disable **Confirm email**, set Site URL to `http://localhost:5173`
-4. Enable GitHub + Google OAuth providers
+3. In **Auth → Settings**: disable **Confirm email**, set Site URL to `http://localhost:5173`
+4. Enable **GitHub + Google** OAuth providers
 5. Create a storage bucket called `avatars` set to **public**
 
 ### 3. Frontend
@@ -247,7 +199,8 @@ returns void as $$ update fixes set use_count = use_count + 1 where id = fix_id;
 cd client && npm install
 ```
 
-`client/.env`:
+Create `client/.env`:
+
 ```env
 VITE_SUPABASE_URL=your_supabase_project_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
@@ -260,7 +213,8 @@ VITE_GROQ_API_KEY=your_groq_api_key
 cd ../server && npm install
 ```
 
-`server/.env`:
+Create `server/.env`:
+
 ```env
 PORT=4000
 SUPABASE_URL=your_supabase_project_url
@@ -270,13 +224,54 @@ SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 ### 5. Run
 
 ```bash
-cd client && npm run dev   # http://localhost:5173
-cd server && npm run dev   # http://localhost:4000
+# Terminal 1 — Frontend
+cd client && npm run dev     # http://localhost:5173
+
+# Terminal 2 — Backend
+cd server && npm run dev     # http://localhost:4000
 ```
 
 ---
 
-## Contributing
+## 📁 Project Structure
+
+```
+DevTrace-AI/
+└── DevTrace/
+    ├── client/                  # React + Vite frontend
+    │   └── src/
+    │       ├── components/      # auth, dashboard, sessions, fixes, projects
+    │       ├── hooks/           # Custom React hooks (data fetching)
+    │       ├── pages/           # Route-level page components
+    │       ├── store/           # Zustand stores (auth, theme)
+    │       ├── lib/             # Supabase + Groq clients
+    │       └── types/           # TypeScript types
+    └── server/                  # Express backend
+        └── src/
+            ├── routes/          # Auth routes
+            ├── middleware/       # JWT verification
+            └── lib/             # Supabase admin client
+```
+
+---
+
+## 🗺️ Roadmap
+
+> What's planned beyond the hackathon window:
+
+- [ ] **PowerSync integration** — offline-first debug sessions with background sync
+- [ ] **VS Code extension** — log errors directly from your editor
+- [ ] **Team workspaces** — shared projects and fix libraries across orgs
+- [ ] **Webhook support** — auto-ingest errors from Sentry, Datadog, or custom sources
+- [ ] **AI pattern detection** — surface recurring error patterns across sessions
+- [ ] **Fix confidence score** — rank AI suggestions by reliability
+- [ ] **Export to Notion / Linear** — push resolved sessions to your PM tool
+
+---
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome!
 
 1. Fork the repo
 2. Create your branch: `git checkout -b feature/amazing-feature`
@@ -284,14 +279,53 @@ cd server && npm run dev   # http://localhost:4000
 4. Push: `git push origin feature/amazing-feature`
 5. Open a Pull Request
 
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) if available, and check open [issues](https://github.com/JexanJoel/DevTrace-AI/issues) before starting.
+
 ---
 
-## License
+## 🙋 FAQ
 
-MIT License - see [LICENSE](LICENSE) for details.
+<details>
+<summary><b>Is DevTrace AI free to use?</b></summary>
+<br/>
+Yes — fully open source under MIT. Groq API and Supabase both have generous free tiers, so you can self-host at zero cost.
+</details>
+
+<details>
+<summary><b>Is my error data private?</b></summary>
+<br/>
+Yes. All data is stored in your own Supabase project with Row Level Security (RLS) enabled. Only you can access your sessions, projects, and fixes.
+</details>
+
+<details>
+<summary><b>Which AI model is used?</b></summary>
+<br/>
+Llama 3.3 70B served via Groq's ultra-fast inference API. You can swap the model in <code>client/src/lib/groq.ts</code>.
+</details>
+
+<details>
+<summary><b>Can I use this without the Express backend?</b></summary>
+<br/>
+The Express server handles OAuth token exchange. If you only use email/password auth you can skip it, but GitHub and Google OAuth require the backend.
+</details>
+
+---
+
+## 📄 License
+
+Distributed under the **MIT License** — see [`LICENSE`](LICENSE) for details.
+
+Free to use, fork, modify, and build upon. A ⭐ star is always appreciated!
 
 ---
 
 <div align="center">
-Built with ❤️ for the <strong>PowerSync AI Hackathon 2026</strong>
+
+Built with ❤️ by **[JexanJoel](https://github.com/JexanJoel)** for the **PowerSync AI Hackathon 2026**
+
+<br/>
+
+[![GitHub](https://img.shields.io/badge/GitHub-JexanJoel-181717?style=flat-square&logo=github)](https://github.com/JexanJoel)
+[![Live](https://img.shields.io/badge/Live_Demo-dev--trace--ai.vercel.app-4f46e5?style=flat-square&logo=vercel&logoColor=white)](https://dev-trace-ai.vercel.app)
+
 </div>
