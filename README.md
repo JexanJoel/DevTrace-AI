@@ -11,14 +11,7 @@
 [![Live Demo](https://img.shields.io/badge/Live_Demo-4f46e5?style=for-the-badge&logo=vercel&logoColor=white)](https://dev-trace-ai.vercel.app)
 [![Report Bug](https://img.shields.io/badge/Report_Bug-dc2626?style=for-the-badge&logo=github&logoColor=white)](https://github.com/JexanJoel/DevTrace-AI/issues)
 [![Request Feature](https://img.shields.io/badge/Request_Feature-16a34a?style=for-the-badge&logo=github&logoColor=white)](https://github.com/JexanJoel/DevTrace-AI/issues)
-
-<br/>
-
-![GitHub Stars](https://img.shields.io/github/stars/JexanJoel/DevTrace-AI?style=flat-square&color=f59e0b)
-![GitHub Forks](https://img.shields.io/github/forks/JexanJoel/DevTrace-AI?style=flat-square&color=4f46e5)
-![GitHub Issues](https://img.shields.io/github/issues/JexanJoel/DevTrace-AI?style=flat-square&color=dc2626)
-![Last Commit](https://img.shields.io/github/last-commit/JexanJoel/DevTrace-AI?style=flat-square&color=22d3a5)
-![License](https://img.shields.io/github/license/JexanJoel/DevTrace-AI?style=flat-square&color=6b7280)
+[![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
 </div>
 
@@ -28,16 +21,14 @@
 
 > **[→ Try the live demo](https://dev-trace-ai.vercel.app)**
 
-<!-- Replace with actual screenshot -->
-<!-- ![DevTrace AI Dashboard](https://your-screenshot-url.png) -->
-
-> 💡 Drop a screenshot of your dashboard here to massively boost first impressions.
+<!-- Add your dashboard screenshot below — see instructions at bottom of this file -->
+<!-- ![DevTrace AI Dashboard](assets/dashboard.png) -->
 
 ---
 
 ## ✨ Features
 
-| Feature | Description |
+| <div align="center">Feature</div> | <div align="center">Description</div> |
 |:---|:---|
 | 🐛 **Session Tracking** | Log errors with full stack traces, severity levels and status |
 | ⚡ **AI Fix Suggestions** | Groq + Llama 3.3 70B analyzes errors and returns fixes instantly |
@@ -55,13 +46,62 @@
 
 <div align="center">
 
-| Layer | Technology |
-|:---:|:---:|
-| Frontend | ![React](https://img.shields.io/badge/React_18-20232A?style=flat-square&logo=react&logoColor=61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white) ![Tailwind](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white) |
-| Backend | ![Express](https://img.shields.io/badge/Express-000000?style=flat-square&logo=express&logoColor=white) ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white) |
-| AI | ![Groq](https://img.shields.io/badge/Groq_AI-F55036?style=flat-square&logo=lightning&logoColor=white) ![Llama](https://img.shields.io/badge/Llama_3.3_70B-FF0000?style=flat-square&logo=meta&logoColor=white) |
-| State & UI | ![Zustand](https://img.shields.io/badge/Zustand-FF6B35?style=flat-square&logo=react&logoColor=white) ![Recharts](https://img.shields.io/badge/Recharts-22C55E?style=flat-square&logo=chartdotjs&logoColor=white) ![Lucide](https://img.shields.io/badge/Lucide-F97316?style=flat-square&logo=lucide&logoColor=white) |
-| Deploy | ![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat-square&logo=vercel&logoColor=white) |
+<table>
+  <tr>
+    <td align="center" width="130">
+      <img src="https://img.shields.io/badge/React_18-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" /><br/>
+      <sub>Frontend</sub>
+    </td>
+    <td align="center" width="130">
+      <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" /><br/>
+      <sub>Language</sub>
+    </td>
+    <td align="center" width="130">
+      <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" /><br/>
+      <sub>Build Tool</sub>
+    </td>
+    <td align="center" width="130">
+      <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" /><br/>
+      <sub>Styling</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="130">
+      <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" /><br/>
+      <sub>Database & Auth</sub>
+    </td>
+    <td align="center" width="130">
+      <img src="https://img.shields.io/badge/Groq_AI-F55036?style=for-the-badge&logo=lightning&logoColor=white" /><br/>
+      <sub>AI Engine</sub>
+    </td>
+    <td align="center" width="130">
+      <img src="https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white" /><br/>
+      <sub>Backend</sub>
+    </td>
+    <td align="center" width="130">
+      <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" /><br/>
+      <sub>Deployment</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="130">
+      <img src="https://img.shields.io/badge/Zustand-FF6B35?style=for-the-badge&logo=react&logoColor=white" /><br/>
+      <sub>State</sub>
+    </td>
+    <td align="center" width="130">
+      <img src="https://img.shields.io/badge/Recharts-22C55E?style=for-the-badge&logo=chartdotjs&logoColor=white" /><br/>
+      <sub>Charts</sub>
+    </td>
+    <td align="center" width="130">
+      <img src="https://img.shields.io/badge/Lucide-F97316?style=for-the-badge&logo=lucide&logoColor=white" /><br/>
+      <sub>Icons</sub>
+    </td>
+    <td align="center" width="130">
+      <img src="https://img.shields.io/badge/Llama_3.3_70B-FF0000?style=for-the-badge&logo=meta&logoColor=white" /><br/>
+      <sub>AI Model</sub>
+    </td>
+  </tr>
+</table>
 
 </div>
 
@@ -170,7 +210,7 @@ create policy "Users can create fixes" on fixes for insert with check (auth.uid(
 create policy "Users can update own fixes" on fixes for update using (auth.uid() = user_id);
 create policy "Users can delete own fixes" on fixes for delete using (auth.uid() = user_id);
 
--- Triggers
+-- Triggers + helpers
 create or replace function update_updated_at() returns trigger as $$
 begin new.updated_at = timezone('utc', now()); return new; end;
 $$ language plpgsql;
@@ -255,20 +295,6 @@ DevTrace-AI/
 
 ---
 
-## 🗺️ Roadmap
-
-> What's planned beyond the hackathon window:
-
-- [ ] **PowerSync integration** — offline-first debug sessions with background sync
-- [ ] **VS Code extension** — log errors directly from your editor
-- [ ] **Team workspaces** — shared projects and fix libraries across orgs
-- [ ] **Webhook support** — auto-ingest errors from Sentry, Datadog, or custom sources
-- [ ] **AI pattern detection** — surface recurring error patterns across sessions
-- [ ] **Fix confidence score** — rank AI suggestions by reliability
-- [ ] **Export to Notion / Linear** — push resolved sessions to your PM tool
-
----
-
 ## 🤝 Contributing
 
 Contributions, issues, and feature requests are welcome!
@@ -278,8 +304,6 @@ Contributions, issues, and feature requests are welcome!
 3. Commit: `git commit -m 'Add amazing feature'`
 4. Push: `git push origin feature/amazing-feature`
 5. Open a Pull Request
-
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) if available, and check open [issues](https://github.com/JexanJoel/DevTrace-AI/issues) before starting.
 
 ---
 
@@ -321,11 +345,6 @@ Free to use, fork, modify, and build upon. A ⭐ star is always appreciated!
 
 <div align="center">
 
-Built with ❤️ by **[JexanJoel](https://github.com/JexanJoel)** for the **PowerSync AI Hackathon 2026**
-
-<br/>
-
-[![GitHub](https://img.shields.io/badge/GitHub-JexanJoel-181717?style=flat-square&logo=github)](https://github.com/JexanJoel)
-[![Live](https://img.shields.io/badge/Live_Demo-dev--trace--ai.vercel.app-4f46e5?style=flat-square&logo=vercel&logoColor=white)](https://dev-trace-ai.vercel.app)
+Built with ❤️ for the **PowerSync AI Hackathon 2026**
 
 </div>
