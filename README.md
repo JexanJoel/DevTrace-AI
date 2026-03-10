@@ -2,15 +2,11 @@
 
 # 🔍 DevTrace AI
 
-Log errors with full stack traces and severity levels. <br/>
-Get instant AI-powered fix suggestions via Groq + Llama 3.3 70B. <br/>
-Save what works — build a fix library you'll actually reuse.
-
-> Debugging is already painful. Finding, storing, and revisiting fixes shouldn't be.
+[![Live Demo](https://img.shields.io/badge/Live_Demo-4f46e5?style=flat-square&logo=vercel&logoColor=white)](https://dev-trace-ai.vercel.app) [![MIT License](https://img.shields.io/badge/License-MIT-f59e0b?style=flat-square)](LICENSE) [![Report Bug](https://img.shields.io/badge/Report_Bug-dc2626?style=flat-square&logo=github&logoColor=white)](https://github.com/JexanJoel/DevTrace-AI/issues) [![Request Feature](https://img.shields.io/badge/Request_Feature-16a34a?style=flat-square&logo=github&logoColor=white)](https://github.com/JexanJoel/DevTrace-AI/issues)
 
 <br/>
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-4f46e5?style=flat-square&logo=vercel&logoColor=white)](https://dev-trace-ai.vercel.app) [![MIT License](https://img.shields.io/badge/License-MIT-f59e0b?style=flat-square)](LICENSE) [![Report Bug](https://img.shields.io/badge/Report_Bug-dc2626?style=flat-square&logo=github&logoColor=white)](https://github.com/JexanJoel/DevTrace-AI/issues) [![Request Feature](https://img.shields.io/badge/Request_Feature-16a34a?style=flat-square&logo=github&logoColor=white)](https://github.com/JexanJoel/DevTrace-AI/issues)
+🐛 &nbsp;**Log errors** with full stack traces and severity levels &nbsp;•&nbsp; ⚡ &nbsp;**Get AI fixes** instantly via Groq + Llama 3.3 70B &nbsp;•&nbsp; 📚 &nbsp;**Save what works** to a fix library you'll actually reuse
 
 </div>
 
