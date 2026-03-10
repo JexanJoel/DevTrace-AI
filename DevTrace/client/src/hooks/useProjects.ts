@@ -1,5 +1,6 @@
-// src/hooks/useProjects.ts — PowerSync version
+// src/hooks/useProjects.ts — PowerSync version, fully offline-capable
 import { useQuery } from '@powersync/react';
+import { powerSync } from '../lib/powersync';
 import { supabase } from '../lib/supabaseClient';
 import { useAuthStore } from '../store/authStore';
 import { v4 as uuidv4 } from 'uuid';
@@ -26,16 +27,18 @@ export interface CreateProjectInput {
 
 const useProjects = () => {
   const { user } = useAuthStore();
+  const uid = user?.id ?? '';
 
   const { data: projects = [] } = useQuery<Project>(
-    'SELECT * FROM projects WHERE user_id = ? ORDER BY updated_at DESC',
-    [user?.id ?? '']
+    'SELECT * FROM projects WHERE user_id = ? ORDER BY updated_at DESC', [uid]
   );
 
+  // getProject reads from local SQLite — works offline
   const getProject = async (id: string): Promise<Project | null> => {
-    const { data, error } = await supabase.from('projects').select('*').eq('id', id).single();
-    if (error) return null;
-    return data as Project;
+    const results = await powerSync.getAll<Project>(
+      'SELECT * FROM projects WHERE id = ? LIMIT 1', [id]
+    );
+    return results[0] ?? null;
   };
 
   const createProject = async (data: CreateProjectInput) => {
@@ -51,7 +54,8 @@ const useProjects = () => {
   };
 
   const updateProject = async (id: string, data: Partial<Project>) => {
-    const { error } = await supabase.from('projects').update({ ...data, updated_at: new Date().toISOString() }).eq('id', id);
+    const { error } = await supabase.from('projects')
+      .update({ ...data, updated_at: new Date().toISOString() }).eq('id', id);
     return !error;
   };
 

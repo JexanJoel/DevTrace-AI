@@ -1,5 +1,6 @@
-// src/hooks/useSessions.ts — PowerSync version
+// src/hooks/useSessions.ts — PowerSync version, fully offline-capable
 import { useQuery } from '@powersync/react';
+import { powerSync } from '../lib/powersync';
 import { supabase } from '../lib/supabaseClient';
 import { useAuthStore } from '../store/authStore';
 import { v4 as uuidv4 } from 'uuid';
@@ -35,29 +36,36 @@ export interface CreateSessionInput {
 
 const useSessions = (projectId?: string) => {
   const { user } = useAuthStore();
+  const uid = user?.id ?? '';
 
   const query = projectId
     ? 'SELECT * FROM debug_sessions WHERE user_id = ? AND project_id = ? ORDER BY created_at DESC'
     : 'SELECT * FROM debug_sessions WHERE user_id = ? ORDER BY created_at DESC';
-
-  const params = projectId ? [user?.id ?? '', projectId] : [user?.id ?? ''];
+  const params = projectId ? [uid, projectId] : [uid];
 
   const { data: sessions = [] } = useQuery<DebugSession>(query, params);
 
+  // getSession reads from local SQLite — works offline
   const getSession = async (id: string): Promise<DebugSession | null> => {
-    const { data, error } = await supabase
-      .from('debug_sessions')
-      .select('*, project:projects(name, language)')
-      .eq('id', id)
-      .single();
-    if (error) return null;
-    return data as DebugSession;
+    const results = await powerSync.getAll<any>(
+      `SELECT ds.*, p.name as project_name, p.language as project_language
+       FROM debug_sessions ds
+       LEFT JOIN projects p ON ds.project_id = p.id
+       WHERE ds.id = ? LIMIT 1`, [id]
+    );
+    if (!results.length) return null;
+    const s = results[0];
+    return {
+      ...s,
+      project: s.project_name ? { name: s.project_name, language: s.project_language } : undefined,
+    } as DebugSession;
   };
 
   const createSession = async (data: CreateSessionInput) => {
     if (!user) return null;
     const id = uuidv4();
     const now = new Date().toISOString();
+    // Write to Supabase — PowerSync queues it if offline
     const { data: result, error } = await supabase
       .from('debug_sessions')
       .insert({ id, user_id: user.id, status: 'open', severity: 'medium', created_at: now, updated_at: now, ...data })

@@ -1,7 +1,5 @@
-// useProfile — fetches and updates the current user's profile
-// Used across dashboard, profile page, and topbar
-
-import { useState, useEffect } from 'react';
+// useProfile.ts — reads from local PowerSync SQLite, writes to Supabase
+import { useQuery } from '@powersync/react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
@@ -17,87 +15,44 @@ export interface Profile {
 
 const useProfile = () => {
   const { user } = useAuthStore();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const uid = user?.id ?? '';
 
-  // Fetch profile from Supabase on mount
-  useEffect(() => {
-    if (!user) return;
-    fetchProfile();
-  }, [user]);
+  // Read from local SQLite — works offline
+  const { data: rows = [] } = useQuery<Profile>(
+    'SELECT * FROM profiles WHERE id = ? LIMIT 1', [uid]
+  );
 
-  const fetchProfile = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user!.id)
-      .single();
+  const profile: Profile | null = rows[0] ?? null;
+  const loading = false;
 
-    if (error) console.error('Error fetching profile:', error);
-    else setProfile(data);
-    setLoading(false);
-  };
-
-  // Update profile fields
   const updateProfile = async (updates: Partial<Profile>) => {
-    if (!user) return;
-    const { error } = await supabase
-      .from('profiles')
-      .update(updates)
-      .eq('id', user.id);
-
-    if (error) {
-      toast.error('Failed to update profile');
-      return false;
-    }
-
-    // Update local state immediately
-    setProfile((prev) => prev ? { ...prev, ...updates } : null);
+    if (!user) return false;
+    const { error } = await supabase.from('profiles').update(updates).eq('id', user.id);
+    if (error) { toast.error('Failed to update profile'); return false; }
     toast.success('Profile updated!');
     return true;
   };
 
-  // Upload avatar to Supabase Storage
   const uploadAvatar = async (file: File) => {
     if (!user) return null;
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please upload an image file');
-      return null;
-    }
-
-    // Validate file size (max 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error('Image must be under 2MB');
-      return null;
-    }
+    if (!file.type.startsWith('image/')) { toast.error('Please upload an image file'); return null; }
+    if (file.size > 2 * 1024 * 1024) { toast.error('Image must be under 2MB'); return null; }
 
     const fileExt = file.name.split('.').pop();
     const filePath = `${user.id}/avatar.${fileExt}`;
 
-    // Upload to avatars bucket
     const { error: uploadError } = await supabase.storage
-      .from('avatars')
-      .upload(filePath, file, { upsert: true });
+      .from('avatars').upload(filePath, file, { upsert: true });
+    if (uploadError) { toast.error('Failed to upload avatar'); return null; }
 
-    if (uploadError) {
-      toast.error('Failed to upload avatar');
-      return null;
-    }
-
-    // Get public URL
-    const { data } = supabase.storage
-      .from('avatars')
-      .getPublicUrl(filePath);
-
+    const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
     const avatarUrl = `${data.publicUrl}?t=${Date.now()}`;
-
-    // Save URL to profile
     await updateProfile({ avatar_url: avatarUrl });
     return avatarUrl;
   };
+
+  // fetchProfile kept for compatibility but is a no-op (PowerSync auto-syncs)
+  const fetchProfile = () => {};
 
   return { profile, loading, updateProfile, uploadAvatar, fetchProfile };
 };
