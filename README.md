@@ -149,7 +149,9 @@ DevTrace AI is submitted to the **[PowerSync AI Hackathon 2026](https://www.powe
 
 ```bash
 git clone https://github.com/JexanJoel/DevTrace-AI.git
-cd DevTrace-AI/DevTrace/client
+cd DevTrace-AI
+npm install
+npm run dev
 ```
 
 ### 2. Supabase Setup

@@ -4,6 +4,7 @@ import Topbar from './Topbar';
 import { useAuthStore } from '../../store/authStore';
 import { useThemeStore } from '../../store/themeStore';
 import DevTraceChatbot from '../shared/DevTraceChatbot';
+import OfflineModeBar from '../shared/OfflineModeBar';
 
 interface Props {
   children: React.ReactNode;
@@ -28,7 +29,7 @@ const DashboardLayout = ({ children, title }: Props) => {
           onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* Sidebar — fixed, always w-60 */}
+      {/* Sidebar */}
       <div className={`fixed top-0 left-0 h-full z-50 transition-transform duration-300 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <Sidebar onClose={() => setSidebarOpen(false)} />
@@ -37,9 +38,10 @@ const DashboardLayout = ({ children, title }: Props) => {
       {/* Right side */}
       <div className="flex flex-col flex-1 lg:ml-60 min-w-0 min-h-screen">
 
-        {/* Topbar — sticky, sits naturally below the banner */}
+        {/* Topbar + OfflineModeBar sticky together */}
         <div className="sticky top-0 z-30">
           <Topbar title={title} onMenuClick={() => setSidebarOpen(true)} />
+          <OfflineModeBar />
         </div>
 
         {/* Page content */}
@@ -49,7 +51,7 @@ const DashboardLayout = ({ children, title }: Props) => {
 
       </div>
 
-      {/* Floating chatbot — bottom right */}
+      {/* Floating chatbot */}
       <DevTraceChatbot />
 
     </div>
