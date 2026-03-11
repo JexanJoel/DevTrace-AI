@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Bot, Minimize2 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
-import { useProfile } from '../../hooks/useProfile';
+import useProfile from '../../hooks/useProfile';
 
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
