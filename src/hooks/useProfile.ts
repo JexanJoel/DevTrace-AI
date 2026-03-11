@@ -1,113 +1,58 @@
+// src/hooks/useProfile.ts — reads from local PowerSync SQLite, writes to Supabase
 import { useQuery } from '@powersync/react';
-import { powerSync } from '../lib/powersync';
 import { supabase } from '../lib/supabaseClient';
 import { useAuthStore } from '../store/authStore';
-import { usePendingQueue } from './usePendingQueue';
-import { useSyncQueue } from '../store/useSyncQueue';
-import { v4 as uuidv4 } from 'uuid';
+import toast from 'react-hot-toast';
 
-export interface Project {
+export interface Profile {
   id: string;
-  user_id: string;
-  name: string;
-  description?: string;
-  language?: string;
-  github_url?: string;
-  error_count: number;
-  session_count: number;
-  created_at: string;
-  updated_at: string;
-  _pending?: boolean;
+  name: string | null;
+  email: string | null;
+  github_username: string | null;
+  avatar_url: string | null;
+  created_at: string | null;
 }
 
-export interface CreateProjectInput {
-  name: string;
-  description?: string;
-  language?: string;
-  github_url?: string;
-}
-
-const useProjects = () => {
+const useProfile = () => {
   const { user } = useAuthStore();
   const uid = user?.id ?? '';
-  const { pending, addPending, removePending } = usePendingQueue<Project>('projects');
-  const { addItem, updateItem } = useSyncQueue();
 
-  const { data: syncedProjects = [] } = useQuery<Project>(
-    'SELECT * FROM projects WHERE user_id = ? ORDER BY updated_at DESC', [uid]
+  const { data: rows = [] } = useQuery<Profile>(
+    'SELECT * FROM profiles WHERE id = ? LIMIT 1', [uid]
   );
 
-  const syncedIds = new Set(syncedProjects.map(p => p.id));
-  const pendingOnly = pending.filter(p => !syncedIds.has(p.id));
+  const profile: Profile | null = rows[0] ?? null;
+  const loading = false;
 
-  const projects = [
-    ...pendingOnly,
-    ...syncedProjects,
-  ].filter((p, i, arr) => arr.findIndex(x => x.id === p.id) === i)
-   .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
-
-  const getProject = async (id: string): Promise<Project | null> => {
-    const p = pending.find(p => p.id === id);
-    if (p) return p;
-    const results = await powerSync.getAll<Project>(
-      'SELECT * FROM projects WHERE id = ? LIMIT 1', [id]
-    );
-    return results[0] ?? null;
+  const updateProfile = async (updates: Partial<Profile>) => {
+    if (!user) return false;
+    const { error } = await supabase.from('profiles').update(updates).eq('id', user.id);
+    if (error) { toast.error('Failed to update profile'); return false; }
+    toast.success('Profile updated!');
+    return true;
   };
 
-  const createProject = async (data: CreateProjectInput) => {
+  const uploadAvatar = async (file: File) => {
     if (!user) return null;
-    const id = uuidv4();
-    const qid = `create_project_${id}`;
-    const now = new Date().toISOString();
-    const row: Project = {
-      id, user_id: user.id, error_count: 0, session_count: 0,
-      created_at: now, updated_at: now, _pending: true, ...data,
-    };
+    if (!file.type.startsWith('image/')) { toast.error('Please upload an image file'); return null; }
+    if (file.size > 2 * 1024 * 1024) { toast.error('Image must be under 2MB'); return null; }
 
-    addPending(row);
-    addItem({ id: qid, action: 'create_project', label: `Create project "${data.name}"`, status: 'pending' });
+    const fileExt = file.name.split('.').pop();
+    const filePath = `${user.id}/avatar.${fileExt}`;
 
-    updateItem(qid, { status: 'syncing' });
-    const { error } = await supabase.from('projects').insert({
-      id, user_id: user.id, error_count: 0, session_count: 0,
-      created_at: now, updated_at: now, ...data,
-    });
+    const { error: uploadError } = await supabase.storage
+      .from('avatars').upload(filePath, file, { upsert: true });
+    if (uploadError) { toast.error('Failed to upload avatar'); return null; }
 
-    if (!error) {
-      removePending(id);
-      updateItem(qid, { status: 'done' });
-    } else {
-      updateItem(qid, { status: 'error' });
-    }
-
-    return row;
+    const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+    const avatarUrl = `${data.publicUrl}?t=${Date.now()}`;
+    await updateProfile({ avatar_url: avatarUrl });
+    return avatarUrl;
   };
 
-  const updateProject = async (id: string, data: Partial<Project>) => {
-    const qid = `rename_project_${id}_${Date.now()}`;
-    const label = data.name ? `Rename project to "${data.name}"` : 'Update project';
+  const fetchProfile = () => {};
 
-    addItem({ id: qid, action: 'rename_project', label, status: 'syncing' });
-    const { error } = await supabase.from('projects')
-      .update({ ...data, updated_at: new Date().toISOString() }).eq('id', id);
-
-    updateItem(qid, { status: error ? 'error' : 'done' });
-    return !error;
-  };
-
-  const deleteProject = async (id: string) => {
-    const qid = `delete_project_${id}`;
-    const project = projects.find(p => p.id === id);
-    addItem({ id: qid, action: 'delete_project', label: `Delete project "${project?.name ?? id}"`, status: 'syncing' });
-
-    removePending(id);
-    const { error } = await supabase.from('projects').delete().eq('id', id);
-    updateItem(qid, { status: error ? 'error' : 'done' });
-    return !error;
-  };
-
-  return { projects, loading: false, getProject, createProject, updateProject, deleteProject };
+  return { profile, loading, updateProfile, uploadAvatar, fetchProfile };
 };
 
-export default useProjects;
+export default useProfile;
