@@ -82,7 +82,7 @@ const Topbar = ({ title, onMenuClick }: Props) => {
                          'text-gray-400';
 
   return (
-    <header className="h-16 w-full bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 flex items-center px-4 sm:px-6 gap-3">
+    <header className="h-16 w-full bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 flex items-center px-4 sm:px-6 gap-2">
 
       <button onClick={onMenuClick}
         className="lg:hidden w-9 h-9 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 transition flex-shrink-0">

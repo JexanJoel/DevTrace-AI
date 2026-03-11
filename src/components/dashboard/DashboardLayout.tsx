@@ -5,6 +5,7 @@ import { useAuthStore } from '../../store/authStore';
 import { useThemeStore } from '../../store/themeStore';
 import DevTraceChatbot from '../shared/DevTraceChatbot';
 import { useSyncOnReconnect } from '../../hooks/useSyncOnReconnect';
+import { useSyncQueue } from '../../store/useSyncQueue';
 
 interface Props {
   children: React.ReactNode;
@@ -14,13 +15,16 @@ interface Props {
 const DashboardLayout = ({ children, title }: Props) => {
   const { user } = useAuthStore();
   const { loadTheme } = useThemeStore();
+  const { loadFromDB } = useSyncQueue();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Auto-sync pending items when internet reconnects
   useSyncOnReconnect();
 
   useEffect(() => {
-    if (user) loadTheme(user.id);
+    if (!user) return;
+    loadTheme(user.id);
+    // Restore queue from DB so it survives refresh
+    loadFromDB(user.id);
   }, [user]);
 
   return (
