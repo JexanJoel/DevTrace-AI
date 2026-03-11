@@ -2,7 +2,7 @@ import { useQuery } from '@powersync/react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuthStore } from '../store/authStore';
 import { usePendingQueue } from './usePendingQueue';
-import { useSyncQueue } from '../store/useSyncQueue';
+import { syncQueueAddItem, syncQueueUpdateItem } from '../store/useSyncQueue';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface Fix {
@@ -24,7 +24,6 @@ const useFixes = () => {
   const { user } = useAuthStore();
   const uid = user?.id ?? '';
   const { pending, addPending, removePending } = usePendingQueue<Fix>('fixes');
-  const { addItem, updateItem } = useSyncQueue();
 
   const { data: syncedFixes = [] } = useQuery<Fix>(
     'SELECT * FROM fixes WHERE user_id = ? ORDER BY created_at DESC', [uid]
@@ -47,18 +46,20 @@ const useFixes = () => {
     const row: Fix = { id, user_id: user.id, use_count: 0, created_at: now, _pending: true, ...data } as Fix;
 
     addPending(row);
-    addItem({ id: qid, action: 'save_fix', label: `Save fix "${data.title ?? 'fix'}"`, status: 'pending' });
+    syncQueueAddItem({ id: qid, action: 'save_fix', label: `Save fix "${data.title ?? 'fix'}"`, status: 'pending' });
 
-    updateItem(qid, { status: 'syncing' });
+    await new Promise(r => setTimeout(r, 80));
+    syncQueueUpdateItem(qid, { status: 'syncing' });
+
     const { error } = await supabase.from('fixes').insert({
       id, user_id: user.id, use_count: 0, created_at: now, ...data,
     });
 
     if (!error) {
       removePending(id);
-      updateItem(qid, { status: 'done' });
+      syncQueueUpdateItem(qid, { status: 'done' });
     } else {
-      updateItem(qid, { status: 'error' });
+      syncQueueUpdateItem(qid, { status: 'error' });
     }
 
     return row;
@@ -67,11 +68,10 @@ const useFixes = () => {
   const deleteFix = async (id: string) => {
     const qid = `delete_fix_${id}`;
     const fix = fixes.find(f => f.id === id);
-    addItem({ id: qid, action: 'delete_fix', label: `Delete fix "${fix?.title ?? 'fix'}"`, status: 'syncing' });
-
+    syncQueueAddItem({ id: qid, action: 'delete_fix', label: `Delete fix "${fix?.title ?? 'fix'}"`, status: 'syncing' });
     removePending(id);
     const { error } = await supabase.from('fixes').delete().eq('id', id);
-    updateItem(qid, { status: error ? 'error' : 'done' });
+    syncQueueUpdateItem(qid, { status: error ? 'error' : 'done' });
     return !error;
   };
 

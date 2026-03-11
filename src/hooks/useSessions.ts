@@ -3,7 +3,7 @@ import { powerSync } from '../lib/powersync';
 import { supabase } from '../lib/supabaseClient';
 import { useAuthStore } from '../store/authStore';
 import { usePendingQueue } from './usePendingQueue';
-import { useSyncQueue } from '../store/useSyncQueue';
+import { syncQueueAddItem, syncQueueUpdateItem } from '../store/useSyncQueue';
 import { v4 as uuidv4 } from 'uuid';
 
 export type Status = 'open' | 'in_progress' | 'resolved';
@@ -40,7 +40,6 @@ const useSessions = (projectId?: string) => {
   const { user } = useAuthStore();
   const uid = user?.id ?? '';
   const { pending, addPending, removePending } = usePendingQueue<DebugSession>('sessions');
-  const { addItem, updateItem } = useSyncQueue();
 
   const query = projectId
     ? 'SELECT * FROM debug_sessions WHERE user_id = ? AND project_id = ? ORDER BY created_at DESC'
@@ -51,8 +50,7 @@ const useSessions = (projectId?: string) => {
 
   const syncedIds = new Set(syncedSessions.map(s => s.id));
   const pendingOnly = pending.filter(s =>
-    !syncedIds.has(s.id) &&
-    (!projectId || s.project_id === projectId)
+    !syncedIds.has(s.id) && (!projectId || s.project_id === projectId)
   );
 
   const sessions = [
@@ -72,10 +70,7 @@ const useSessions = (projectId?: string) => {
     );
     if (!results.length) return null;
     const s = results[0];
-    return {
-      ...s,
-      project: s.project_name ? { name: s.project_name, language: s.project_language } : undefined,
-    } as DebugSession;
+    return { ...s, project: s.project_name ? { name: s.project_name, language: s.project_language } : undefined } as DebugSession;
   };
 
   const createSession = async (data: CreateSessionInput) => {
@@ -92,14 +87,15 @@ const useSessions = (projectId?: string) => {
       error_message: data.error_message,
       stack_trace: data.stack_trace,
       notes: data.notes,
-      created_at: now, updated_at: now,
-      _pending: true,
+      created_at: now, updated_at: now, _pending: true,
     };
 
     addPending(row);
-    addItem({ id: qid, action: 'create_session', label: `Create session "${data.title}"`, status: 'pending' });
+    syncQueueAddItem({ id: qid, action: 'create_session', label: `Create session "${data.title}"`, status: 'pending' });
 
-    updateItem(qid, { status: 'syncing' });
+    await new Promise(r => setTimeout(r, 80));
+    syncQueueUpdateItem(qid, { status: 'syncing' });
+
     const { error } = await supabase.from('debug_sessions').insert({
       id, user_id: user.id, status: row.status, severity: row.severity,
       created_at: now, updated_at: now, ...data,
@@ -107,9 +103,9 @@ const useSessions = (projectId?: string) => {
 
     if (!error) {
       removePending(id);
-      updateItem(qid, { status: 'done' });
+      syncQueueUpdateItem(qid, { status: 'done' });
     } else {
-      updateItem(qid, { status: 'error' });
+      syncQueueUpdateItem(qid, { status: 'error' });
     }
 
     return row;
@@ -118,8 +114,6 @@ const useSessions = (projectId?: string) => {
   const updateSession = async (id: string, data: Partial<DebugSession>) => {
     const qid = `update_session_${id}_${Date.now()}`;
     const session = sessions.find(s => s.id === id);
-
-    // Human-readable label based on what changed
     const label = data.status
       ? `Mark "${session?.title ?? 'session'}" as ${data.status.replace('_', ' ')}`
       : data.notes !== undefined
@@ -128,22 +122,20 @@ const useSessions = (projectId?: string) => {
           ? `Save AI fix for "${session?.title ?? 'session'}"`
           : `Update "${session?.title ?? 'session'}"`;
 
-    addItem({ id: qid, action: 'update_session', label, status: 'syncing' });
+    syncQueueAddItem({ id: qid, action: 'update_session', label, status: 'syncing' });
     const { error } = await supabase.from('debug_sessions')
       .update({ ...data, updated_at: new Date().toISOString() }).eq('id', id);
-
-    updateItem(qid, { status: error ? 'error' : 'done' });
+    syncQueueUpdateItem(qid, { status: error ? 'error' : 'done' });
     return !error;
   };
 
   const deleteSession = async (id: string) => {
     const qid = `delete_session_${id}`;
     const session = sessions.find(s => s.id === id);
-    addItem({ id: qid, action: 'delete_session', label: `Delete "${session?.title ?? 'session'}"`, status: 'syncing' });
-
+    syncQueueAddItem({ id: qid, action: 'delete_session', label: `Delete "${session?.title ?? 'session'}"`, status: 'syncing' });
     removePending(id);
     const { error } = await supabase.from('debug_sessions').delete().eq('id', id);
-    updateItem(qid, { status: error ? 'error' : 'done' });
+    syncQueueUpdateItem(qid, { status: error ? 'error' : 'done' });
     return !error;
   };
 

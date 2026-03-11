@@ -1,21 +1,15 @@
 // src/store/useSyncQueue.ts
-// Global queue store — tracks all pending actions across hooks
 import { create } from 'zustand';
 
 export type QueueAction =
-  | 'create_project'
-  | 'rename_project'
-  | 'delete_project'
-  | 'create_session'
-  | 'update_session'
-  | 'delete_session'
-  | 'save_fix'
-  | 'delete_fix';
+  | 'create_project' | 'rename_project' | 'delete_project'
+  | 'create_session' | 'update_session' | 'delete_session'
+  | 'save_fix' | 'delete_fix';
 
 export interface QueueItem {
-  id: string;         // unique action id
+  id: string;
   action: QueueAction;
-  label: string;      // human readable e.g. "Create project"
+  label: string;
   status: 'pending' | 'syncing' | 'done' | 'error';
   createdAt: number;
 }
@@ -30,20 +24,20 @@ interface SyncQueueState {
 
 export const useSyncQueue = create<SyncQueueState>((set) => ({
   items: [],
-
   addItem: (item) =>
-    set((state) => ({
-      items: [{ ...item, createdAt: Date.now() }, ...state.items],
-    })),
-
+    set((state) => ({ items: [{ ...item, createdAt: Date.now() }, ...state.items] })),
   updateItem: (id, updates) =>
-    set((state) => ({
-      items: state.items.map((i) => (i.id === id ? { ...i, ...updates } : i)),
-    })),
-
+    set((state) => ({ items: state.items.map((i) => i.id === id ? { ...i, ...updates } : i) })),
   removeItem: (id) =>
     set((state) => ({ items: state.items.filter((i) => i.id !== id) })),
-
   clearDone: () =>
     set((state) => ({ items: state.items.filter((i) => i.status !== 'done') })),
 }));
+
+// ✅ Module-level helpers — safe to call outside React components
+// This ensures ALL callers share the exact same Zustand store instance
+export const syncQueueAddItem = (item: Omit<QueueItem, 'createdAt'>) =>
+  useSyncQueue.getState().addItem(item);
+
+export const syncQueueUpdateItem = (id: string, updates: Partial<QueueItem>) =>
+  useSyncQueue.getState().updateItem(id, updates);

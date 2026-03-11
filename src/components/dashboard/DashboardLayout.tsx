@@ -5,7 +5,6 @@ import { useAuthStore } from '../../store/authStore';
 import { useThemeStore } from '../../store/themeStore';
 import DevTraceChatbot from '../shared/DevTraceChatbot';
 import SyncQueueIndicator from '../shared/SyncQueueIndicator';
-import { useSyncQueue } from '../../store/useSyncQueue';
 
 interface Props {
   children: React.ReactNode;
@@ -15,7 +14,6 @@ interface Props {
 const DashboardLayout = ({ children, title }: Props) => {
   const { user } = useAuthStore();
   const { loadTheme } = useThemeStore();
-  const { addItem } = useSyncQueue();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -49,13 +47,6 @@ const DashboardLayout = ({ children, title }: Props) => {
         </main>
 
       </div>
-
-      {/* DEBUG — remove after testing */}
-      <button
-        onClick={() => addItem({ id: `test_${Date.now()}`, action: 'create_project', label: 'Test action', status: 'pending' })}
-        className="fixed bottom-24 left-5 z-[100] bg-gray-900 text-white px-3 py-2 text-xs rounded-lg shadow">
-        Test Queue
-      </button>
 
       {/* Bottom-left: sync queue */}
       <SyncQueueIndicator />

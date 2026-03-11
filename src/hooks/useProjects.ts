@@ -3,7 +3,7 @@ import { powerSync } from '../lib/powersync';
 import { supabase } from '../lib/supabaseClient';
 import { useAuthStore } from '../store/authStore';
 import { usePendingQueue } from './usePendingQueue';
-import { useSyncQueue } from '../store/useSyncQueue';
+import { syncQueueAddItem, syncQueueUpdateItem } from '../store/useSyncQueue';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface Project {
@@ -31,7 +31,6 @@ const useProjects = () => {
   const { user } = useAuthStore();
   const uid = user?.id ?? '';
   const { pending, addPending, removePending } = usePendingQueue<Project>('projects');
-  const { addItem, updateItem } = useSyncQueue();
 
   const { data: syncedProjects = [] } = useQuery<Project>(
     'SELECT * FROM projects WHERE user_id = ? ORDER BY updated_at DESC', [uid]
@@ -66,9 +65,11 @@ const useProjects = () => {
     };
 
     addPending(row);
-    addItem({ id: qid, action: 'create_project', label: `Create project "${data.name}"`, status: 'pending' });
+    syncQueueAddItem({ id: qid, action: 'create_project', label: `Create project "${data.name}"`, status: 'pending' });
+
     await new Promise(r => setTimeout(r, 80));
-    updateItem(qid, { status: 'syncing' });
+    syncQueueUpdateItem(qid, { status: 'syncing' });
+
     const { error } = await supabase.from('projects').insert({
       id, user_id: user.id, error_count: 0, session_count: 0,
       created_at: now, updated_at: now, ...data,
@@ -76,9 +77,9 @@ const useProjects = () => {
 
     if (!error) {
       removePending(id);
-      updateItem(qid, { status: 'done' });
+      syncQueueUpdateItem(qid, { status: 'done' });
     } else {
-      updateItem(qid, { status: 'error' });
+      syncQueueUpdateItem(qid, { status: 'error' });
     }
 
     return row;
@@ -87,23 +88,20 @@ const useProjects = () => {
   const updateProject = async (id: string, data: Partial<Project>) => {
     const qid = `rename_project_${id}_${Date.now()}`;
     const label = data.name ? `Rename project to "${data.name}"` : 'Update project';
-
-    addItem({ id: qid, action: 'rename_project', label, status: 'syncing' });
+    syncQueueAddItem({ id: qid, action: 'rename_project', label, status: 'syncing' });
     const { error } = await supabase.from('projects')
       .update({ ...data, updated_at: new Date().toISOString() }).eq('id', id);
-
-    updateItem(qid, { status: error ? 'error' : 'done' });
+    syncQueueUpdateItem(qid, { status: error ? 'error' : 'done' });
     return !error;
   };
 
   const deleteProject = async (id: string) => {
     const qid = `delete_project_${id}`;
     const project = projects.find(p => p.id === id);
-    addItem({ id: qid, action: 'delete_project', label: `Delete project "${project?.name ?? id}"`, status: 'syncing' });
-
+    syncQueueAddItem({ id: qid, action: 'delete_project', label: `Delete project "${project?.name ?? id}"`, status: 'syncing' });
     removePending(id);
     const { error } = await supabase.from('projects').delete().eq('id', id);
-    updateItem(qid, { status: error ? 'error' : 'done' });
+    syncQueueUpdateItem(qid, { status: error ? 'error' : 'done' });
     return !error;
   };
 
