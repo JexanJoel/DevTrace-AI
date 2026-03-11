@@ -76,7 +76,7 @@ const LandingPage = () => {
         {/* Mobile menu */}
         {menuOpen && (
           <div className="md:hidden bg-white border-t border-gray-100 px-4 py-4 space-y-2">
-            <a href="https://github.com" target="_blank" rel="noopener noreferrer"
+            <a href="https://github.com/JexanJoel/DevTrace-AI" target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 px-3 py-2.5 rounded-xl hover:bg-gray-50">
               <Github size={16} /> GitHub
             </a>
@@ -239,7 +239,7 @@ const LandingPage = () => {
                 className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-indigo-600 font-bold px-8 py-3.5 rounded-xl transition shadow-lg">
                 Get started free <ArrowRight size={18} />
               </button>
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer"
+              <a href="https://github.com/JexanJoel/DevTrace-AI" target="_blank" rel="noopener noreferrer"
                 className="w-full sm:w-auto flex items-center justify-center gap-2 border-2 border-white/30 hover:border-white/60 text-white font-semibold px-8 py-3.5 rounded-xl transition">
                 <Github size={18} /> View on GitHub
               </a>
