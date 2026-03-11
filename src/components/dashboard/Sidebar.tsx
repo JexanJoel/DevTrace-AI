@@ -39,7 +39,9 @@ const Sidebar = ({ onClose }: Props) => {
 
   return (
     <aside className="w-60 h-screen bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 flex flex-col">
-      <div className="p-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+
+      {/* Logo */}
+      <div className="p-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center">
             <Terminal size={15} className="text-white" />
@@ -57,7 +59,8 @@ const Sidebar = ({ onClose }: Props) => {
         )}
       </div>
 
-      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+      {/* Main nav — scrollable */}
+      <nav className="flex-1 p-3 space-y-1 overflow-y-auto min-h-0">
         {NAV.map((item) => (
           <NavLink key={item.to} to={item.to} className={linkClass} onClick={onClose}>
             {item.icon} {item.label}
@@ -65,7 +68,8 @@ const Sidebar = ({ onClose }: Props) => {
         ))}
       </nav>
 
-      <div className="p-3 border-t border-gray-100 dark:border-gray-800 space-y-1">
+      {/* Bottom nav — fixed, never hidden */}
+      <div className="flex-shrink-0 p-3 pb-6 border-t border-gray-100 dark:border-gray-800 space-y-1">
         {BOTTOM_NAV.map((item) => (
           <NavLink key={item.to} to={item.to} className={linkClass} onClick={onClose}>
             {item.icon} {item.label}
@@ -76,6 +80,7 @@ const Sidebar = ({ onClose }: Props) => {
           <LogOut size={18} /> Sign Out
         </button>
       </div>
+
     </aside>
   );
 };
