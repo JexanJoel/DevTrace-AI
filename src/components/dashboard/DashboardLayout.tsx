@@ -4,6 +4,7 @@ import Topbar from './Topbar';
 import { useAuthStore } from '../../store/authStore';
 import { useThemeStore } from '../../store/themeStore';
 import DevTraceChatbot from '../shared/DevTraceChatbot';
+import { useSyncOnReconnect } from '../../hooks/useSyncOnReconnect';
 
 interface Props {
   children: React.ReactNode;
@@ -15,6 +16,9 @@ const DashboardLayout = ({ children, title }: Props) => {
   const { loadTheme } = useThemeStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Auto-sync pending items when internet reconnects
+  useSyncOnReconnect();
+
   useEffect(() => {
     if (user) loadTheme(user.id);
   }, [user]);
@@ -22,19 +26,16 @@ const DashboardLayout = ({ children, title }: Props) => {
   return (
     <div className="bg-gray-50 dark:bg-gray-950 flex flex-1">
 
-      {/* Mobile overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* Sidebar */}
       <div className={`fixed top-0 left-0 h-full z-50 transition-transform duration-300 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <Sidebar onClose={() => setSidebarOpen(false)} />
       </div>
 
-      {/* Main content */}
       <div className="flex flex-col flex-1 lg:ml-60 min-w-0 min-h-screen">
         <div className="sticky top-0 z-30">
           <Topbar title={title} onMenuClick={() => setSidebarOpen(true)} />
@@ -44,9 +45,7 @@ const DashboardLayout = ({ children, title }: Props) => {
         </main>
       </div>
 
-      {/* Bottom-right: chatbot */}
       <DevTraceChatbot />
-
     </div>
   );
 };
