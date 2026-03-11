@@ -5,6 +5,7 @@ import { useAuthStore } from '../store/authStore';
 import { usePendingQueue } from './usePendingQueue';
 import { syncQueueAddItem, syncQueueUpdateItem } from '../store/useSyncQueue';
 import { v4 as uuidv4 } from 'uuid';
+import { useOnlineStatus } from './useOnlineStatus';
 
 export interface Project {
   id: string;
@@ -31,6 +32,7 @@ const useProjects = () => {
   const { user } = useAuthStore();
   const uid = user?.id ?? '';
   const { pending, addPending, removePending } = usePendingQueue<Project>('projects');
+  const isOnline = useOnlineStatus();
 
   const { data: syncedProjects = [] } = useQuery<Project>(
     'SELECT * FROM projects WHERE user_id = ? ORDER BY updated_at DESC', [uid]
@@ -79,7 +81,8 @@ const useProjects = () => {
       removePending(id);
       syncQueueUpdateItem(qid, { status: 'done' });
     } else {
-      syncQueueUpdateItem(qid, { status: 'error' });
+      // Keep as pending if offline — will sync on reconnect
+      syncQueueUpdateItem(qid, { status: isOnline ? 'error' : 'pending' });
     }
 
     return row;

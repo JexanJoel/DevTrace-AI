@@ -5,6 +5,7 @@ import { useAuthStore } from '../store/authStore';
 import { usePendingQueue } from './usePendingQueue';
 import { syncQueueAddItem, syncQueueUpdateItem } from '../store/useSyncQueue';
 import { v4 as uuidv4 } from 'uuid';
+import { useOnlineStatus } from './useOnlineStatus';
 
 export type Status = 'open' | 'in_progress' | 'resolved';
 export type Severity = 'low' | 'medium' | 'high' | 'critical';
@@ -40,6 +41,7 @@ const useSessions = (projectId?: string) => {
   const { user } = useAuthStore();
   const uid = user?.id ?? '';
   const { pending, addPending, removePending } = usePendingQueue<DebugSession>('sessions');
+  const isOnline = useOnlineStatus();
 
   const query = projectId
     ? 'SELECT * FROM debug_sessions WHERE user_id = ? AND project_id = ? ORDER BY created_at DESC'
@@ -105,7 +107,7 @@ const useSessions = (projectId?: string) => {
       removePending(id);
       syncQueueUpdateItem(qid, { status: 'done' });
     } else {
-      syncQueueUpdateItem(qid, { status: 'error' });
+      syncQueueUpdateItem(qid, { status: isOnline ? 'error' : 'pending' });
     }
 
     return row;

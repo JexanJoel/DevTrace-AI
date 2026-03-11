@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/authStore';
 import { usePendingQueue } from './usePendingQueue';
 import { syncQueueAddItem, syncQueueUpdateItem } from '../store/useSyncQueue';
 import { v4 as uuidv4 } from 'uuid';
+import { useOnlineStatus } from './useOnlineStatus';
 
 export interface Fix {
   id: string;
@@ -24,6 +25,7 @@ const useFixes = () => {
   const { user } = useAuthStore();
   const uid = user?.id ?? '';
   const { pending, addPending, removePending } = usePendingQueue<Fix>('fixes');
+  const isOnline = useOnlineStatus();
 
   const { data: syncedFixes = [] } = useQuery<Fix>(
     'SELECT * FROM fixes WHERE user_id = ? ORDER BY created_at DESC', [uid]
@@ -59,7 +61,7 @@ const useFixes = () => {
       removePending(id);
       syncQueueUpdateItem(qid, { status: 'done' });
     } else {
-      syncQueueUpdateItem(qid, { status: 'error' });
+      syncQueueUpdateItem(qid, { status: isOnline ? 'error' : 'pending' });
     }
 
     return row;
