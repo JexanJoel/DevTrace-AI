@@ -4,7 +4,6 @@ import Topbar from './Topbar';
 import { useAuthStore } from '../../store/authStore';
 import { useThemeStore } from '../../store/themeStore';
 import DevTraceChatbot from '../shared/DevTraceChatbot';
-import OfflineModeBar from '../shared/OfflineModeBar';
 
 interface Props {
   children: React.ReactNode;
@@ -38,10 +37,9 @@ const DashboardLayout = ({ children, title }: Props) => {
       {/* Right side */}
       <div className="flex flex-col flex-1 lg:ml-60 min-w-0 min-h-screen">
 
-        {/* Topbar + OfflineModeBar sticky together */}
+        {/* Topbar sticky */}
         <div className="sticky top-0 z-30">
           <Topbar title={title} onMenuClick={() => setSidebarOpen(true)} />
-          <OfflineModeBar />
         </div>
 
         {/* Page content */}
