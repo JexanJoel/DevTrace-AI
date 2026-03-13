@@ -4,7 +4,7 @@
 
 <img src="https://img.shields.io/badge/⌨️-DevTrace_AI-4f46e5?style=for-the-badge&labelColor=1e1b4b&color=4f46e5" height="36"/>
 
-<h2>AI-powered debugging assistant for developers</h2>
+<h2>AI powered debugging assistant for developers</h2>
 
 <p>Log errors → get full AI analysis → save fixes → ship faster.<br/>Works completely offline. Powered by Groq + Supabase + PowerSync.</p>
 
@@ -26,13 +26,7 @@
 
 ## What is DevTrace AI?
 
-DevTrace AI is a **local-first debugging assistant** built for React, TypeScript, and Supabase developers.
-
-Instead of Googling your error or copy-pasting it into ChatGPT and losing the context forever, DevTrace AI gives every bug a **permanent, structured record** with full AI analysis attached — root cause, 3 fix options with code, a crash timeline, an interactive checklist, follow-up chat, test cases, and more.
-
-Everything is saved. Everything is searchable. Everything works **even when you're offline.**
-
-**The core problem it solves:** Debugging is slow and scattered. You repeat the same mistakes, forget what fixed what, and lose context every time you close a tab. DevTrace AI is your permanent debugging memory.
+DevTrace AI is a **local first debugging assistant** built for React, TypeScript, and Supabase developers. Instead of Googling your error or copy-pasting it into ChatGPT and losing the context forever, DevTrace AI gives every bug a **permanent, structured record** with full AI analysis attached - root cause, 3 fix options with code, a crash timeline, an interactive checklist, follow-up chat, test cases, and more. Everything is saved. Everything is searchable. Everything works **even when you're offline.****The core problem it solves:** Debugging is slow and scattered. You repeat the same mistakes, forget what fixed what, and lose context every time you close a tab. DevTrace AI is your permanent debugging memory.
 
 <br/>
 
@@ -41,10 +35,10 @@ Everything is saved. Everything is searchable. Everything works **even when you'
 | | |
 |:--|:--|
 | 🐛 | **Log bugs** with stack traces, code snippets, severity, and environment |
-| 🤖 | **Full AI analysis** — root cause, 3 fixes, timeline, checklist, and more |
-| 💬 | **Follow-up chat** — ask the AI questions about your exact bug |
-| 📚 | **Fix Library** — save what works, reuse it across projects |
-| 📶 | **Offline-first** — create, browse, and debug without internet |
+| 🤖 | **Full AI analysis** - root cause, 3 fixes, timeline, checklist, and more |
+| 💬 | **Follow-up chat** - ask the AI questions about your exact bug |
+| 📚 | **Fix Library** - save what works, reuse it across projects |
+| 📶 | **Offline-first** - create, browse, and debug without internet |
 
 </div>
 
@@ -57,13 +51,13 @@ The flow is simple:
 ```
 1. You paste an error          →  Log a debug session (error, stack trace, code, severity)
 2. Click "Analyze Bug"         →  Groq + Llama 3.3 70B returns a full structured analysis
-3. Read the 8-tab breakdown    →  Overview, Fixes, Timeline, Checklist, Chat, Tests, Logs, Structure
+3. Read the 8 tab breakdown    →  Overview, Fixes, Timeline, Checklist, Chat, Tests, Logs, Structure
 4. Save what worked            →  Fix goes to your Fix Library, tagged and searchable forever
 ```
 
-### Read vs Write — the data flow
+### Read vs Write - the data flow
 
-All **reads** come from a local SQLite database (PowerSync). Zero network latency — instant.
+All **reads** come from a local SQLite database (PowerSync). Zero network latency - instant.
 
 All **writes** go directly to Supabase Postgres. PowerSync detects the change and syncs it back down.
 
@@ -79,20 +73,20 @@ Offline? Writes go into a queue in `localStorage`. The moment you reconnect, the
 
 ---
 
-## The AI Debug Panel — 8 Tabs Per Bug
+## The AI Debug Panel - 8 Tabs Per Bug
 
-Every session gets a full structured breakdown powered by **Groq + Llama 3.3 70B**. The complete analysis is saved as JSONB in Supabase — persists across reloads, no re-analyzing needed.
+Every session gets a full structured breakdown powered by **Groq + Llama 3.3 70B**. The complete analysis is saved as JSONB in Supabase - persists across reloads, no re-analyzing needed.
 
 | Tab | What you get |
 |:---|:---|
-| 🔍 **Overview** | Plain English explanation, root cause, symptom vs cause, category badge, confidence score, files to check |
-| ⚡ **Fixes** | 3 options — quick patch, proper fix, workaround — each with full code, pros/cons, and a recommended pick |
+| 🔍 **Overview** | Plain English explanation, root cause, symptom vs cause, category badge, files to check |
+| ⚡ **Fixes** | 3 options - quick patch, proper fix, workaround - each with full code & pros/cons |
 | 🕐 **Timeline** | Visual step-by-step of how the crash happened from component mount to error throw |
 | ✅ **Checklist** | Interactive priority-ranked action list — check items off as you debug |
-| 💬 **Follow-up** | Context-aware AI chat — click suggested questions or type your own |
+| 💬 **Followup** | Context-aware AI chat - click suggested questions or type your own |
 | 🧪 **Tests** | AI-generated reproduction steps and test cases to verify the fix works |
-| 📋 **Logs** | Paste raw console or server logs — AI strips noise and surfaces what matters |
-| 🏗️ **Structure** | Paste your file tree — AI reviews architecture and flags problems |
+| 📋 **Logs** | Paste raw console or server logs - AI strips noise and surfaces what matters |
+| 🏗️ **Structure** | Paste your file tree - AI reviews architecture and flags problems |
 
 ---
 
@@ -115,7 +109,7 @@ Supabase is the **source of truth and auth backbone** for the entire app. All da
 
 ---
 
-### 🗄️ Database — Postgres + RLS
+### 🗄️ Database - Postgres + RLS
 
 Every table has Row Level Security enabled. Users can only ever read and write **their own rows** — enforced at the database level, not in application code.
 
@@ -161,7 +155,7 @@ PowerSync listens to this WAL stream and streams every change down to connected 
 
 PowerSync is the **offline engine**. It maintains a local SQLite database in the browser that the React app reads from directly — no network request, no loading spinner, no internet required.
 
-### 📖 Read path — always instant
+### 📖 Read path - always instant
 
 Every list, detail page, dashboard, and analytics view reads from local SQLite:
 
@@ -177,7 +171,7 @@ This pattern is used in every data hook: `useSessions.ts`, `useProjects.ts`, `us
 
 ---
 
-### ✍️ Write path — Supabase first, PowerSync syncs back
+### ✍️ Write path - Supabase first, PowerSync syncs back
 
 ```typescript
 // Write goes to Supabase — PowerSync detects via WAL and syncs down automatically
@@ -201,9 +195,9 @@ supabase.insert()  →  Supabase Postgres  →  WAL publication
 | State | What happens |
 |:---|:---|
 | 🟢 App opens online | PowerSync connects and streams latest changes from Supabase |
-| 🟢 User reads data | `useQuery()` returns from local SQLite — instant, 0ms |
+| 🟢 User reads data | `useQuery()` returns from local SQLite - instant, 0ms |
 | 🟢 User creates a session | `supabase.insert()` → WAL → PowerSync → SQLite updated |
-| 🟠 Internet drops | Orange banner appears — all existing data still fully readable |
+| 🟠 Internet drops | Orange banner appears - all existing data still fully readable |
 | 🟠 User creates offline | Saved to SQLite + queued in `localStorage` |
 | 🟢 Internet returns | Queue flushes to Supabase, PowerSync syncs delta back down |
 
