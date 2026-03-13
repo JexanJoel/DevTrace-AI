@@ -327,8 +327,6 @@ VITE_POWERSYNC_URL=your_powersync_instance_url
 npm run dev   # http://localhost:5173
 ```
 
-That's it — no backend required. 🎉
-
 ---
 
 ## 📁 Project Structure
@@ -388,7 +386,7 @@ Contributions, issues, and feature requests are welcome!
 <details>
 <summary><b>Is DevTrace AI free to use?</b></summary>
 <br/>
-Yes — fully open source under MIT. Groq, Supabase, and PowerSync all have generous free tiers, so you can self-host at zero cost.
+Yes - fully open source under MIT. Groq, Supabase, and PowerSync all have generous free tiers, so you can self-host at zero cost.
 </details>
 
 <details>
@@ -425,7 +423,7 @@ No. DevTrace AI is a fully client-side app. Supabase handles auth (including Git
 
 ## 📄 License
 
-Distributed under the **MIT License** — see [`LICENSE`](LICENSE) for details.
+Distributed under the **MIT License** - see [`LICENSE`](LICENSE) for details.
 
 Free to use, fork, modify, and build upon. A ⭐ star is always appreciated!
 
