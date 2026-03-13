@@ -43,14 +43,15 @@ const ProfilePage = () => {
 
   return (
     <DashboardLayout title="Profile">
-      <div className="max-w-5xl space-y-6">
+      <div className="space-y-6">
 
-        {/* Top hero card */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6">
-          <div className="flex items-center gap-5 justify-between flex-wrap">
+        {/* Hero card */}
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
 
-            {/* Left — avatar + name */}
-            <div className="flex items-center gap-5">
+          {/* Avatar + name — stacks on mobile, row on desktop */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+
+            <div className="flex flex-col sm:flex-row items-center sm:items-center gap-4 sm:gap-5">
               <div className="flex-shrink-0">
                 <AvatarUpload
                   currentUrl={profile?.avatar_url ?? null}
@@ -58,11 +59,13 @@ const ProfilePage = () => {
                   onUpload={uploadAvatar}
                 />
               </div>
-              <div className="w-px h-16 bg-gray-100 dark:bg-gray-800 flex-shrink-0" />
-              <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">{name || 'Your Name'}</h2>
-                <p className="text-sm text-gray-400 mt-1">{user?.email}</p>
-                <div className="flex items-center gap-2 mt-2.5 flex-wrap">
+              <div className="hidden sm:block w-px h-16 bg-gray-100 dark:bg-gray-800 flex-shrink-0" />
+              <div className="text-center sm:text-left">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">
+                  {name || 'Your Name'}
+                </h2>
+                <p className="text-sm text-gray-400 mt-1 break-all">{user?.email}</p>
+                <div className="flex items-center gap-2 mt-2.5 flex-wrap justify-center sm:justify-start">
                   <span className="text-xs bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800 px-2.5 py-1 rounded-full font-semibold capitalize">
                     {authProvider}
                   </span>
@@ -73,25 +76,29 @@ const ProfilePage = () => {
               </div>
             </div>
 
-            {/* Right — quick stats pushed to end */}
-            <div className="flex items-center gap-6 text-center flex-shrink-0">
-              <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {profile?.created_at ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / 86400000) : 0}
+            {/* Quick stats — horizontal scroll on mobile, row on desktop */}
+            <div className="flex items-center justify-center sm:justify-end gap-4 sm:gap-6 overflow-x-auto pb-1 sm:pb-0 flex-shrink-0">
+              <div className="text-center flex-shrink-0">
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                  {profile?.created_at
+                    ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / 86400000)
+                    : 0}
                 </p>
-                <p className="text-xs text-gray-400 mt-0.5">Days active</p>
+                <p className="text-xs text-gray-400 mt-0.5 whitespace-nowrap">Days active</p>
               </div>
-              <div className="w-px h-10 bg-gray-100 dark:bg-gray-800" />
-              <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white capitalize">{authProvider}</p>
-                <p className="text-xs text-gray-400 mt-0.5">Auth provider</p>
+              <div className="w-px h-10 bg-gray-100 dark:bg-gray-800 flex-shrink-0" />
+              <div className="text-center flex-shrink-0">
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white capitalize">{authProvider}</p>
+                <p className="text-xs text-gray-400 mt-0.5 whitespace-nowrap">Auth provider</p>
               </div>
-              <div className="w-px h-10 bg-gray-100 dark:bg-gray-800" />
-              <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {profile?.created_at ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '—'}
+              <div className="w-px h-10 bg-gray-100 dark:bg-gray-800 flex-shrink-0" />
+              <div className="text-center flex-shrink-0">
+                <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white whitespace-nowrap">
+                  {profile?.created_at
+                    ? new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+                    : '—'}
                 </p>
-                <p className="text-xs text-gray-400 mt-0.5">Member since</p>
+                <p className="text-xs text-gray-400 mt-0.5 whitespace-nowrap">Member since</p>
               </div>
             </div>
 
@@ -101,9 +108,9 @@ const ProfilePage = () => {
         {/* Two column layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-          {/* Left col — Personal Info (wider) */}
+          {/* Personal Info */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
               <h3 className="font-bold text-gray-900 dark:text-white mb-5 flex items-center gap-2">
                 <User size={16} className="text-indigo-500" /> Personal Info
               </h3>
@@ -136,7 +143,7 @@ const ProfilePage = () => {
                   </div>
                 </div>
                 <button onClick={handleSave} disabled={saving}
-                  className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2.5 rounded-xl transition disabled:opacity-50 text-sm">
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2.5 rounded-xl transition disabled:opacity-50 text-sm">
                   {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
                   {saving ? 'Saving...' : 'Save Changes'}
                 </button>
@@ -144,9 +151,9 @@ const ProfilePage = () => {
             </div>
           </div>
 
-          {/* Right col — Account Info */}
+          {/* Account Info */}
           <div className="space-y-6">
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
               <h3 className="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                 <Key size={16} className="text-indigo-500" /> Account Info
               </h3>
@@ -156,9 +163,9 @@ const ProfilePage = () => {
                   { label: 'Member since', value: profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : '—' },
                   { label: 'Auth provider', value: authProvider },
                 ].map((item, i) => (
-                  <div key={i} className="flex flex-col gap-0.5 py-2 border-b border-gray-50 dark:border-gray-800 last:border-0">
-                    <span className="text-xs text-gray-400">{item.label}</span>
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white capitalize">{item.value}</span>
+                  <div key={i} className="flex items-center justify-between py-2 border-b border-gray-50 dark:border-gray-800 last:border-0 gap-3">
+                    <span className="text-xs text-gray-400 flex-shrink-0">{item.label}</span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white capitalize text-right truncate">{item.value}</span>
                   </div>
                 ))}
               </div>

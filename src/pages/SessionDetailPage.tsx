@@ -67,7 +67,6 @@ const SessionDetailPage = () => {
 
   const handleSaveAnalysis = async (analysis: AIAnalysis) => {
     if (!session) return;
-    // Also save a legacy ai_fix string for backward compatibility
     const bestFix = analysis.fixes[analysis.best_fix_index] ?? analysis.fixes[0];
     const ai_fix = bestFix
       ? `**Fix (${analysis.confidence}% confidence)**\n\n${bestFix.code}\n\n**Why this happens:**\n${analysis.root_cause}`
@@ -133,23 +132,26 @@ const SessionDetailPage = () => {
     <DashboardLayout title={session.title}>
       <div className="space-y-5">
 
-        {/* Top bar */}
-        <div className="flex items-center justify-between">
+        {/* Top bar — back + export */}
+        <div className="flex items-center justify-between gap-3">
           <button onClick={() => navigate('/sessions')}
-            className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition">
-            <ArrowLeft size={14} /> All Sessions
+            className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition flex-shrink-0">
+            <ArrowLeft size={14} />
+            <span className="hidden xs:inline">All Sessions</span>
           </button>
           <button onClick={handleExport}
-            className="flex items-center gap-2 border border-gray-200 dark:border-gray-700 hover:border-gray-300 text-gray-600 dark:text-gray-400 px-3 py-2 rounded-xl text-sm font-medium transition">
-            <Download size={14} /> Export .md
+            className="flex items-center gap-1.5 border border-gray-200 dark:border-gray-700 hover:border-gray-300 text-gray-600 dark:text-gray-400 px-3 py-2 rounded-xl text-sm font-medium transition flex-shrink-0">
+            <Download size={14} />
+            <span className="hidden sm:inline">Export .md</span>
           </button>
         </div>
 
         {/* Session header card */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6">
-          <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
+          {/* Title + status button — stacks on mobile */}
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
             <div className="flex-1 min-w-0">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2 leading-snug">
                 {session.title}
                 {session._pending && (
                   <span className="ml-2 text-xs font-normal text-orange-400 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-lg">
@@ -157,6 +159,7 @@ const SessionDetailPage = () => {
                   </span>
                 )}
               </h2>
+              {/* Badges — wraps naturally on mobile */}
               <div className="flex items-center gap-2 flex-wrap">
                 <StatusBadge status={effectiveStatus} />
                 <SeverityBadge severity={session.severity} />
@@ -167,19 +170,27 @@ const SessionDetailPage = () => {
                 )}
                 {session.project && (
                   <div className="flex items-center gap-1 text-xs text-gray-400 bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded-lg border border-gray-200 dark:border-gray-700">
-                    <FolderOpen size={11} /> {session.project.name}
+                    <FolderOpen size={11} />
+                    <span className="max-w-[120px] truncate">{session.project.name}</span>
                   </div>
                 )}
                 <div className="flex items-center gap-1 text-xs text-gray-400">
                   <Clock size={11} />
-                  {new Date(session.created_at).toLocaleDateString()} at{' '}
-                  {new Date(session.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  <span className="hidden sm:inline">
+                    {new Date(session.created_at).toLocaleDateString()} at{' '}
+                    {new Date(session.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                  <span className="sm:hidden">
+                    {new Date(session.created_at).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
             </div>
-            <div className="relative">
+
+            {/* Status dropdown */}
+            <div className="relative flex-shrink-0 self-start">
               <button onClick={() => setShowStatusMenu(!showStatusMenu)}
-                className="flex items-center gap-2 border border-gray-200 dark:border-gray-700 hover:border-indigo-300 text-gray-600 dark:text-gray-400 px-3 py-2 rounded-xl text-sm font-medium transition">
+                className="flex items-center gap-2 border border-gray-200 dark:border-gray-700 hover:border-indigo-300 text-gray-600 dark:text-gray-400 px-3 py-2 rounded-xl text-sm font-medium transition whitespace-nowrap">
                 Change Status <ChevronDown size={14} />
               </button>
               {showStatusMenu && (
@@ -187,7 +198,9 @@ const SessionDetailPage = () => {
                   {STATUS_OPTIONS.map((opt) => (
                     <button key={opt.value} onClick={() => handleStatusChange(opt.value)}
                       className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition flex items-center gap-2 ${
-                        effectiveStatus === opt.value ? 'text-indigo-600 font-medium bg-indigo-50 dark:bg-indigo-950' : 'text-gray-700 dark:text-gray-300'
+                        effectiveStatus === opt.value
+                          ? 'text-indigo-600 font-medium bg-indigo-50 dark:bg-indigo-950'
+                          : 'text-gray-700 dark:text-gray-300'
                       }`}>
                       {effectiveStatus === opt.value && <CheckCircle size={13} />}
                       {opt.label}
@@ -199,25 +212,23 @@ const SessionDetailPage = () => {
           </div>
         </div>
 
-        {/* Two-column body */}
+        {/* Body — single column on mobile, 3-col on desktop */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-          {/* Left col — Error details + AI Debug Panel */}
+          {/* Main content — full width on mobile, 2/3 on desktop */}
           <div className="lg:col-span-2 space-y-5">
 
-            {/* Error Message */}
             {session.error_message && (
-              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6">
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Error Message</p>
-                <div className="bg-red-50 dark:bg-red-950 border border-red-100 dark:border-red-900 rounded-xl p-4 font-mono text-sm text-red-800 dark:text-red-300 whitespace-pre-wrap">
+                <div className="bg-red-50 dark:bg-red-950 border border-red-100 dark:border-red-900 rounded-xl p-4 font-mono text-xs sm:text-sm text-red-800 dark:text-red-300 whitespace-pre-wrap break-all">
                   {session.error_message}
                 </div>
               </div>
             )}
 
-            {/* Stack Trace */}
             {session.stack_trace && (
-              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6">
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Stack Trace</p>
                 <div className="bg-gray-900 rounded-xl p-4 font-mono text-xs text-gray-300 whitespace-pre-wrap overflow-x-auto max-h-48 overflow-y-auto">
                   {session.stack_trace}
@@ -225,9 +236,8 @@ const SessionDetailPage = () => {
               </div>
             )}
 
-            {/* Code Snippet */}
             {session.code_snippet && (
-              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6">
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Related Code</p>
                 <div className="bg-gray-900 rounded-xl p-4 font-mono text-xs text-gray-300 whitespace-pre-wrap overflow-x-auto max-h-48 overflow-y-auto">
                   {session.code_snippet}
@@ -235,7 +245,6 @@ const SessionDetailPage = () => {
               </div>
             )}
 
-            {/* Expected Behavior */}
             {session.expected_behavior && (
               <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Expected Behavior</p>
@@ -243,25 +252,23 @@ const SessionDetailPage = () => {
               </div>
             )}
 
-            {/* AI Debug Panel */}
             <AIDebugPanel
               session={session}
               onSaveAnalysis={handleSaveAnalysis}
               onSaveToLibrary={handleSaveToLibrary}
               savingToLib={savingToLib}
             />
-
           </div>
 
-          {/* Right col — Notes + Session Info + Danger Zone */}
+          {/* Sidebar — after main content on mobile, right column on desktop */}
           <div className="space-y-5">
 
             {/* Notes */}
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
               <h3 className="font-bold text-gray-900 dark:text-white text-sm mb-3">Notes</h3>
               <textarea value={notes} onChange={(e) => setNotes(e.target.value)}
                 placeholder="Add your debugging notes, observations, or next steps..."
-                rows={6}
+                rows={5}
                 className="w-full border-2 border-gray-100 dark:border-gray-700 focus:border-indigo-400 text-gray-900 dark:text-white dark:bg-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-4 focus:ring-indigo-50 transition placeholder-gray-300 resize-none" />
               <button onClick={handleSaveNotes} disabled={savingNotes || notes === (session.notes ?? '')}
                 className="mt-3 w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition disabled:opacity-40">
@@ -271,26 +278,30 @@ const SessionDetailPage = () => {
             </div>
 
             {/* Session Info */}
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
               <h3 className="font-bold text-gray-900 dark:text-white text-sm mb-4">Session Info</h3>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {[
-                  { label: 'Status', value: <StatusBadge status={effectiveStatus} /> },
-                  { label: 'Severity', value: <SeverityBadge severity={session.severity} /> },
-                  { label: 'Environment', value: <span className={`text-xs px-2 py-0.5 rounded-lg border font-medium capitalize ${ENV_COLORS[session.environment ?? 'development'] ?? ''}`}>{session.environment ?? 'development'}</span> },
-                  { label: 'Project', value: <span className="text-sm text-gray-700 dark:text-gray-300">{session.project?.name ?? '—'}</span> },
-                  { label: 'Created', value: <span className="text-sm text-gray-700 dark:text-gray-300">{new Date(session.created_at).toLocaleDateString()}</span> },
+                  { label: 'Status',      value: <StatusBadge status={effectiveStatus} /> },
+                  { label: 'Severity',    value: <SeverityBadge severity={session.severity} /> },
+                  { label: 'Environment', value: (
+                    <span className={`text-xs px-2 py-0.5 rounded-lg border font-medium capitalize ${ENV_COLORS[session.environment ?? 'development'] ?? ''}`}>
+                      {session.environment ?? 'development'}
+                    </span>
+                  )},
+                  { label: 'Project',     value: <span className="text-sm text-gray-700 dark:text-gray-300 truncate max-w-[120px] text-right">{session.project?.name ?? '—'}</span> },
+                  { label: 'Created',     value: <span className="text-sm text-gray-700 dark:text-gray-300">{new Date(session.created_at).toLocaleDateString()}</span> },
                 ].map((item, i) => (
-                  <div key={i} className="flex items-center justify-between py-1.5 border-b border-gray-50 dark:border-gray-800 last:border-0">
-                    <span className="text-xs text-gray-400">{item.label}</span>
-                    {item.value}
+                  <div key={i} className="flex items-center justify-between py-1.5 border-b border-gray-50 dark:border-gray-800 last:border-0 gap-2">
+                    <span className="text-xs text-gray-400 flex-shrink-0">{item.label}</span>
+                    <div className="flex-shrink-0">{item.value}</div>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Danger Zone */}
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-red-100 dark:border-red-900 p-6">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-red-100 dark:border-red-900 p-5 sm:p-6">
               <h3 className="font-bold text-red-600 mb-4">Danger Zone</h3>
               <div className="p-4 bg-red-50 dark:bg-red-950 rounded-xl space-y-3">
                 <div>
