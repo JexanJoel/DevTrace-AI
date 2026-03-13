@@ -1,4 +1,3 @@
-// src/lib/powersync.ts
 import { PowerSyncDatabase } from '@powersync/web';
 import { WASQLiteOpenFactory } from '@powersync/web';
 import { column, Schema, Table } from '@powersync/web';
@@ -31,9 +30,13 @@ const debug_sessions = new Table({
   title: column.text,
   error_message: column.text,
   stack_trace: column.text,
+  code_snippet: column.text,       // ✅ new
+  expected_behavior: column.text,  // ✅ new
+  environment: column.text,        // ✅ new
   severity: column.text,
   status: column.text,
   ai_fix: column.text,
+  ai_analysis: column.text,        // ✅ new — JSONB stored as text in SQLite
   notes: column.text,
   created_at: column.text,
   updated_at: column.text,
