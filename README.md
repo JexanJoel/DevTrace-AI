@@ -6,12 +6,18 @@
 
 <br/>
 
+**AI-powered debugging assistant for React + TypeScript + Supabase developers.**
+Log errors, get full AI analysis, save fixes, and debug faster — even offline.
+
+<br/>
+
 | | |
 |:--|:--|
-| 🐛 | **Log errors** with full stack traces and severity levels |
-| ⚡ | **Get AI fixes** instantly via Groq + Llama 3.3 70B |
-| 📚 | **Save what works** to a fix library you'll actually reuse |
-| 📶 | **Works offline** - browse, create, and debug without internet |
+| 🐛 | **Log errors** with stack traces, code snippets, and severity levels |
+| 🤖 | **Full AI analysis** — root cause, 3 fix options, timeline, checklist, and more |
+| 💬 | **Follow-up chat** — ask the AI questions about your specific bug |
+| 📚 | **Fix Library** — save what works and reuse it across all your projects |
+| 📶 | **Works offline** — browse, create, and debug without internet |
 
 </div>
 
@@ -29,17 +35,41 @@
 
 | Feature | Description |
 |:---|:---|
-| 🐛 Session Tracking | Log errors with full stack traces, severity levels and status |
-| ⚡ AI Fix Suggestions | Groq + Llama 3.3 70B analyzes errors and returns fixes instantly |
-| 📚 Fix Library | Save AI-generated fixes and reuse them across all your projects |
+| 🐛 Session Tracking | Log errors with stack traces, code snippets, expected behavior, environment, and severity |
+| 🤖 AI Debug Panel | Groq + Llama 3.3 70B gives a full 8-tab breakdown of every bug |
+| 🔍 Root Cause Analysis | Plain English explanation, root cause, symptom vs cause, and category detection |
+| ⚡ 3 Fix Options | Quick patch, proper fix, and workaround — each with code, pros, and cons |
+| 🗂️ Timeline View | Step-by-step visual of how the crash happened |
+| ✅ Interactive Checklist | Priority-ranked action items you can check off as you go |
+| 💬 Follow-up Chat | Context-aware AI chat for asking follow-up questions about your bug |
+| 🧪 Test Cases | AI-generated reproduction steps and test cases |
+| 📋 Log Analyzer | Paste raw console/server logs — AI filters noise and finds the signal |
+| 🏗️ Structure Analyzer | Paste your file tree — AI reviews your architecture and suggests improvements |
+| 📚 Fix Library | Save AI fixes, expand full content, copy, filter by language, mark as used |
 | 📁 Projects | Organize debug sessions by project and link GitHub repos |
-| 📊 Error Analytics | Visualize resolution rates, error trends and severity breakdowns |
-| 🐙 Github Sync | View stars, forks, open issues and last push date per project |
-| 📶 Offline-First | Offline first with PowerSync - work offline, sync on reconnect |
-| 🔄 Real Time Sync | PowerSync streams Supabase changes to a local SQLite database |
-| 📱 Mobile Responsive | Collapsible slide-in sidebar that works on all screen sizes |
-| 🔐 Auth | GitHub OAuth, Google OAuth and Email + Password via Supabase |
-| 🎨 Dark Mode | Full dark theme toggled from settings and saved to your profile |
+| 📊 Analytics | Visualize resolution rates, error trends, and severity breakdowns |
+| 📶 Offline-First | Full offline support via PowerSync — work offline, sync on reconnect |
+| 🔄 Real-Time Sync | PowerSync streams Supabase changes to local SQLite instantly |
+| 📱 Mobile Responsive | Collapsible sidebar that works on all screen sizes |
+| 🔐 Auth | GitHub OAuth, Google OAuth, and Email + Password via Supabase |
+| 🎨 Dark Mode | Full dark theme saved to your profile |
+
+---
+
+## 🤖 AI Debug Panel — 8 Tabs
+
+The core feature of DevTrace AI. Every debug session gets a full AI breakdown powered by Groq:
+
+| Tab | What it shows |
+|:---|:---|
+| **Overview** | Plain English explanation, root cause, symptom vs cause, framework category badge, confidence score, files to check |
+| **Fixes** | 3 fix options (quick patch / proper fix / workaround) with code blocks, pros, cons, and best fix highlighted |
+| **Timeline** | Visual step-by-step of how the crash happened from mount to error |
+| **Checklist** | Interactive priority-ranked checklist you can check off as you debug |
+| **Follow-up** | Chat with the AI about your specific bug — click suggested questions or type your own |
+| **Tests** | Reproduction steps and test cases to verify the fix works |
+| **Logs** | Paste raw logs — AI separates signal from noise and identifies the root cause |
+| **Structure** | Paste your file tree — AI reviews your architecture and suggests improvements |
 
 ---
 
@@ -110,7 +140,7 @@
 
 ## 📶 Offline-First Architecture (PowerSync)
 
-DevTrace AI is fully **local-first** powered by [PowerSync](https://www.powersync.com/). Your data is always available - even without internet.
+DevTrace AI is fully **local-first** powered by [PowerSync](https://www.powersync.com/). Your data is always available — even without internet.
 
 ```
 Online:   Supabase ──► PowerSync ──► Local SQLite ──► UI (instant reads)
@@ -120,19 +150,19 @@ Offline:  Create/browse locally ──► queued in localStorage ──► auto-
 | Scenario | Behavior |
 |:---|:---|
 | ✅ Online | Data syncs in real-time from Supabase via PowerSync streams |
-| 🟠 Offline | Orange banner shown - all existing data available from local SQLite |
-| ✏️ Create offline | Projects/sessions saved locally and queued - synced to Supabase on reconnect |
+| 🟠 Offline | Orange banner shown — all existing data available from local SQLite |
+| ✏️ Create offline | Projects/sessions saved locally and queued — synced to Supabase on reconnect |
 | 🔄 Reconnect | Pending items automatically uploaded, duplicates safely handled |
 
 ---
 
-## 🏆 Hackathon - PowerSync AI Hackathon 2026
+## 🏆 Hackathon — PowerSync AI Hackathon 2026
 
 DevTrace AI is submitted to the **[PowerSync AI Hackathon 2026](https://www.powersync.com/)** targeting:
 
-- **🥇 Core Prize** - AI-powered developer tool built during the hackathon window
-- **🏅 Best Submission Using Supabase** - Supabase powers auth, database (RLS), and storage throughout
-- **🏅 Best Local-First App** - Full offline-first experience powered by PowerSync with real-time sync, local SQLite reads, and offline write queuing
+- **🥇 Core Prize** — AI-powered developer tool built during the hackathon window
+- **🏅 Best Submission Using Supabase** — Supabase powers auth, database (RLS), and storage throughout
+- **🏅 Best Local-First App** — Full offline-first experience powered by PowerSync with real-time sync, local SQLite reads, and offline write queuing
 
 ---
 
@@ -203,9 +233,17 @@ create table debug_sessions (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references auth.users on delete cascade,
   project_id uuid references projects on delete cascade,
-  title text not null, error_message text, stack_trace text,
-  severity text default 'medium', status text default 'open',
-  ai_fix text, notes text,
+  title text not null,
+  error_message text,
+  stack_trace text,
+  code_snippet text,
+  expected_behavior text,
+  environment text default 'development',
+  severity text default 'medium',
+  status text default 'open',
+  ai_fix text,
+  ai_analysis jsonb,
+  notes text,
   created_at timestamp with time zone default timezone('utc', now()),
   updated_at timestamp with time zone default timezone('utc', now())
 );
@@ -252,7 +290,7 @@ create publication powersync for table profiles, projects, debug_sessions, fixes
 
 1. Create a free account at [powersync.com](https://www.powersync.com)
 2. Create a new project and connect it to your Supabase instance via the direct Postgres URI
-3. Add the sync rules:
+3. Deploy these sync rules in the **Sync Rules** editor:
 
 ```json
 {
@@ -272,13 +310,9 @@ create publication powersync for table profiles, projects, debug_sessions, fixes
 
 4. Copy your **PowerSync instance URL**
 
-### 4. Install & Run
+### 4. Environment Variables
 
-```bash
-npm install
-```
-
-Create `.env`:
+Create `.env` in the project root:
 
 ```env
 VITE_SUPABASE_URL=your_supabase_project_url
@@ -286,6 +320,8 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 VITE_GROQ_API_KEY=your_groq_api_key
 VITE_POWERSYNC_URL=your_powersync_instance_url
 ```
+
+### 5. Run
 
 ```bash
 npm run dev   # http://localhost:5173
@@ -300,14 +336,37 @@ That's it — no backend required. 🎉
 ```
 DevTrace-AI/
 └── DevTrace/
-    └── client/                  # React + Vite frontend
+    └── client/
         └── src/
-            ├── components/      # auth, dashboard, sessions, fixes, projects
-            ├── hooks/           # Custom React hooks (PowerSync + data)
-            ├── lib/             # Supabase, Groq, PowerSync clients
-            ├── pages/           # Route-level page components
-            ├── store/           # Zustand stores (auth, theme)
-            └── types/           # TypeScript types
+            ├── components/
+            │   ├── auth/            # Login, Register, OAuth buttons
+            │   ├── dashboard/       # Layout, sidebar, top bar
+            │   ├── sessions/        # AIDebugPanel, CreateSessionModal, StatusBadge
+            │   ├── fixes/           # FixCard
+            │   └── projects/        # ProjectCard, CreateProjectModal
+            ├── hooks/
+            │   ├── useSessions.ts   # PowerSync + Supabase sessions CRUD
+            │   ├── useProjects.ts   # PowerSync + Supabase projects CRUD
+            │   ├── useFixes.ts      # PowerSync + Supabase fixes CRUD
+            │   ├── usePendingQueue.ts  # Offline write queue
+            │   └── useOnlineStatus.ts  # Network detection
+            ├── lib/
+            │   ├── groqClient.ts    # analyzeSession, sendFollowUp, analyzeLogs, analyzeStructure
+            │   ├── supabaseClient.ts
+            │   └── powersync.ts     # Schema + PowerSyncDatabase instance
+            ├── pages/
+            │   ├── DashboardPage.tsx
+            │   ├── ProjectsPage.tsx
+            │   ├── ProjectDetailPage.tsx
+            │   ├── DebugSessionsPage.tsx
+            │   ├── SessionDetailPage.tsx   # AI Debug Panel lives here
+            │   ├── FixLibraryPage.tsx
+            │   ├── AnalyticsPage.tsx
+            │   ├── ProfilePage.tsx
+            │   └── SettingsPage.tsx
+            └── store/
+                ├── authStore.ts
+                └── useSyncQueue.ts  # Sync status indicator
 ```
 
 ---
@@ -329,7 +388,7 @@ Contributions, issues, and feature requests are welcome!
 <details>
 <summary><b>Is DevTrace AI free to use?</b></summary>
 <br/>
-Yes - fully open source under MIT. Groq, Supabase, and PowerSync all have generous free tiers, so you can self-host at zero cost.
+Yes — fully open source under MIT. Groq, Supabase, and PowerSync all have generous free tiers, so you can self-host at zero cost.
 </details>
 
 <details>
@@ -351,6 +410,12 @@ Llama 3.3 70B served via Groq's ultra-fast inference API. You can swap the model
 </details>
 
 <details>
+<summary><b>What does the AI Debug Panel actually return?</b></summary>
+<br/>
+A full structured JSON analysis including: plain English explanation, root cause, symptom vs cause, issue category (React State / Supabase RLS / PowerSync / TypeScript etc.), 3 fix options with code blocks, a visual crash timeline, an interactive checklist, follow-up questions, reproduction steps, test cases, and a confidence score. The result is saved to your session so it persists across page reloads.
+</details>
+
+<details>
 <summary><b>Do I need a backend server?</b></summary>
 <br/>
 No. DevTrace AI is a fully client-side app. Supabase handles auth (including GitHub and Google OAuth), database, and storage. No Express server or Node.js backend needed.
@@ -360,7 +425,7 @@ No. DevTrace AI is a fully client-side app. Supabase handles auth (including Git
 
 ## 📄 License
 
-Distributed under the **MIT License** - see [`LICENSE`](LICENSE) for details.
+Distributed under the **MIT License** — see [`LICENSE`](LICENSE) for details.
 
 Free to use, fork, modify, and build upon. A ⭐ star is always appreciated!
 
