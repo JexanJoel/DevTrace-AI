@@ -45,12 +45,10 @@ const PowerSyncStatus = ({ sessionCount, analyzedCount }: { sessionCount: number
   const isOnline = useOnlineStatus();
   const [lastSync, setLastSync] = useState<string>(new Date().toISOString());
   const [localReads, setLocalReads] = useState(0);
-  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     // Simulate live local reads counter (PowerSync reads from SQLite)
     const interval = setInterval(() => {
-      setTick(t => t + 1);
       if (isOnline) {
         setLastSync(new Date().toISOString());
         setLocalReads(r => r + Math.floor(Math.random() * 3));
