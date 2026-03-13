@@ -148,49 +148,53 @@ const SessionDetailPage = () => {
 
         {/* Session header card */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
-          {/* Title + status button — stacks on mobile */}
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
-            <div className="flex-1 min-w-0">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2 leading-snug">
-                {session.title}
-                {session._pending && (
-                  <span className="ml-2 text-xs font-normal text-orange-400 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-lg">
-                    Pending sync
-                  </span>
-                )}
-              </h2>
-              {/* Badges — wraps naturally on mobile */}
-              <div className="flex items-center gap-2 flex-wrap">
-                <StatusBadge status={effectiveStatus} />
-                <SeverityBadge severity={session.severity} />
-                {session.environment && (
-                  <span className={`text-xs px-2.5 py-1 rounded-lg border font-medium capitalize ${ENV_COLORS[session.environment] ?? 'bg-gray-50 text-gray-600 border-gray-200'}`}>
-                    {session.environment}
-                  </span>
-                )}
-                {session.project && (
-                  <div className="flex items-center gap-1 text-xs text-gray-400 bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded-lg border border-gray-200 dark:border-gray-700">
-                    <FolderOpen size={11} />
-                    <span className="max-w-[120px] truncate">{session.project.name}</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-1 text-xs text-gray-400">
-                  <Clock size={11} />
-                  <span className="hidden sm:inline">
-                    {new Date(session.created_at).toLocaleDateString()} at{' '}
-                    {new Date(session.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
-                  <span className="sm:hidden">
-                    {new Date(session.created_at).toLocaleDateString()}
-                  </span>
+
+          {/* Title row — always full width, truncated safely */}
+          <div className="flex items-start gap-3 mb-3">
+            <h2 className="flex-1 min-w-0 text-lg sm:text-xl font-bold text-gray-900 dark:text-white leading-snug break-words">
+              {session.title}
+            </h2>
+            {session._pending && (
+              <span className="flex-shrink-0 text-xs font-medium text-orange-500 bg-orange-50 border border-orange-200 px-2 py-1 rounded-lg whitespace-nowrap">
+                Pending sync
+              </span>
+            )}
+          </div>
+
+          {/* Badges + status button — badges wrap, button stays right on sm+ */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+
+            {/* Badges — wrap freely on all widths */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <StatusBadge status={effectiveStatus} />
+              <SeverityBadge severity={session.severity} />
+              {session.environment && (
+                <span className={`text-xs px-2.5 py-1 rounded-lg border font-medium capitalize ${ENV_COLORS[session.environment] ?? 'bg-gray-50 text-gray-600 border-gray-200'}`}>
+                  {session.environment}
+                </span>
+              )}
+              {session.project && (
+                <div className="flex items-center gap-1 text-xs text-gray-400 bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded-lg border border-gray-200 dark:border-gray-700 max-w-[140px]">
+                  <FolderOpen size={11} className="flex-shrink-0" />
+                  <span className="truncate">{session.project.name}</span>
                 </div>
+              )}
+              <div className="flex items-center gap-1 text-xs text-gray-400">
+                <Clock size={11} />
+                <span className="hidden sm:inline">
+                  {new Date(session.created_at).toLocaleDateString()} at{' '}
+                  {new Date(session.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
+                <span className="sm:hidden">
+                  {new Date(session.created_at).toLocaleDateString()}
+                </span>
               </div>
             </div>
 
-            {/* Status dropdown */}
-            <div className="relative flex-shrink-0 self-start">
+            {/* Status dropdown — full width on mobile, auto on sm+ */}
+            <div className="relative flex-shrink-0">
               <button onClick={() => setShowStatusMenu(!showStatusMenu)}
-                className="flex items-center gap-2 border border-gray-200 dark:border-gray-700 hover:border-indigo-300 text-gray-600 dark:text-gray-400 px-3 py-2 rounded-xl text-sm font-medium transition whitespace-nowrap">
+                className="w-full sm:w-auto flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700 hover:border-indigo-300 text-gray-600 dark:text-gray-400 px-3 py-2 rounded-xl text-sm font-medium transition whitespace-nowrap">
                 Change Status <ChevronDown size={14} />
               </button>
               {showStatusMenu && (
