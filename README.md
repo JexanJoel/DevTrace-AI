@@ -6,18 +6,18 @@
 
 <br/>
 
-**AI-powered debugging assistant for React + TypeScript + Supabase developers.**
-Log errors, get full AI analysis, save fixes, and debug faster — even offline.
+**AI-powered debugging assistant for developers.**
+Log errors, get full AI analysis, save fixes, and debug faster - even offline.
 
 <br/>
 
 | | |
 |:--|:--|
 | 🐛 | **Log errors** with stack traces, code snippets, and severity levels |
-| 🤖 | **Full AI analysis** — root cause, 3 fix options, timeline, checklist, and more |
-| 💬 | **Follow-up chat** — ask the AI questions about your specific bug |
-| 📚 | **Fix Library** — save what works and reuse it across all your projects |
-| 📶 | **Works offline** — browse, create, and debug without internet |
+| 🤖 | **Full AI analysis** - root cause, 3 fix options, timeline, checklist, and more |
+| 💬 | **Follow-up chat** - ask the AI questions about your specific bug |
+| 📚 | **Fix Library** - save what works and reuse it across all your projects |
+| 📶 | **Works offline** - browse, create, and debug without internet |
 
 </div>
 
@@ -35,20 +35,20 @@ Log errors, get full AI analysis, save fixes, and debug faster — even offline.
 
 | Feature | Description |
 |:---|:---|
-| 🐛 Session Tracking | Log errors with stack traces, code snippets, expected behavior, environment, and severity |
+| 🐛 Session Tracking | Log errors with stack traces, codes, expected behavior, env, and severity |
 | 🤖 AI Debug Panel | Groq + Llama 3.3 70B gives a full 8-tab breakdown of every bug |
-| 🔍 Root Cause Analysis | Plain English explanation, root cause, symptom vs cause, and category detection |
-| ⚡ 3 Fix Options | Quick patch, proper fix, and workaround — each with code, pros, and cons |
+| 🔍 Cause Analysis | Plain English explanation, root cause, symptom vs cause, and category detection |
+| ⚡ 3 Fix Options | Quick patch, proper fix, and workaround - each with code, pros, and cons |
 | 🗂️ Timeline View | Step-by-step visual of how the crash happened |
-| ✅ Interactive Checklist | Priority-ranked action items you can check off as you go |
+| ✅ Checklist | Priority-ranked action items you can check off as you go |
 | 💬 Follow-up Chat | Context-aware AI chat for asking follow-up questions about your bug |
 | 🧪 Test Cases | AI-generated reproduction steps and test cases |
-| 📋 Log Analyzer | Paste raw console/server logs — AI filters noise and finds the signal |
-| 🏗️ Structure Analyzer | Paste your file tree — AI reviews your architecture and suggests improvements |
+| 📋 Log Analyzer | Paste raw console/server logs - AI filters noise and finds the signal |
+| 🏗️ Structure Analyzer | Paste your file tree - AI reviews your architecture and suggests improvements |
 | 📚 Fix Library | Save AI fixes, expand full content, copy, filter by language, mark as used |
 | 📁 Projects | Organize debug sessions by project and link GitHub repos |
 | 📊 Analytics | Visualize resolution rates, error trends, and severity breakdowns |
-| 📶 Offline-First | Full offline support via PowerSync — work offline, sync on reconnect |
+| 📶 Offline-First | Full offline support via PowerSync - work offline, sync on reconnect |
 | 🔄 Real-Time Sync | PowerSync streams Supabase changes to local SQLite instantly |
 | 📱 Mobile Responsive | Collapsible sidebar that works on all screen sizes |
 | 🔐 Auth | GitHub OAuth, Google OAuth, and Email + Password via Supabase |
@@ -56,7 +56,7 @@ Log errors, get full AI analysis, save fixes, and debug faster — even offline.
 
 ---
 
-## 🤖 AI Debug Panel — 8 Tabs
+## 🤖 AI Debug Panel - 8 Tabs
 
 The core feature of DevTrace AI. Every debug session gets a full AI breakdown powered by Groq:
 
@@ -66,10 +66,10 @@ The core feature of DevTrace AI. Every debug session gets a full AI breakdown po
 | **Fixes** | 3 fix options (quick patch / proper fix / workaround) with code blocks, pros, cons, and best fix highlighted |
 | **Timeline** | Visual step-by-step of how the crash happened from mount to error |
 | **Checklist** | Interactive priority-ranked checklist you can check off as you debug |
-| **Follow-up** | Chat with the AI about your specific bug — click suggested questions or type your own |
+| **Follow-up** | Chat with the AI about your specific bug - click suggested questions or type your own |
 | **Tests** | Reproduction steps and test cases to verify the fix works |
-| **Logs** | Paste raw logs — AI separates signal from noise and identifies the root cause |
-| **Structure** | Paste your file tree — AI reviews your architecture and suggests improvements |
+| **Logs** | Paste raw logs - AI separates signal from noise and identifies the root cause |
+| **Structure** | Paste your file tree - AI reviews your architecture and suggests improvements |
 
 ---
 
@@ -150,8 +150,8 @@ Offline:  Create/browse locally ──► queued in localStorage ──► auto-
 | Scenario | Behavior |
 |:---|:---|
 | ✅ Online | Data syncs in real-time from Supabase via PowerSync streams |
-| 🟠 Offline | Orange banner shown — all existing data available from local SQLite |
-| ✏️ Create offline | Projects/sessions saved locally and queued — synced to Supabase on reconnect |
+| 🟠 Offline | Orange banner shown - all existing data available from local SQLite |
+| ✏️ Create offline | Projects/sessions saved locally and queued - synced to Supabase on reconnect |
 | 🔄 Reconnect | Pending items automatically uploaded, duplicates safely handled |
 
 ---
@@ -160,9 +160,9 @@ Offline:  Create/browse locally ──► queued in localStorage ──► auto-
 
 DevTrace AI is submitted to the **[PowerSync AI Hackathon 2026](https://www.powersync.com/)** targeting:
 
-- **🥇 Core Prize** — AI-powered developer tool built during the hackathon window
-- **🏅 Best Submission Using Supabase** — Supabase powers auth, database (RLS), and storage throughout
-- **🏅 Best Local-First App** — Full offline-first experience powered by PowerSync with real-time sync, local SQLite reads, and offline write queuing
+- **🥇 Core Prize** - AI-powered developer tool built during the hackathon window
+- **🏅 Best Submission Using Supabase** - Supabase powers auth, database (RLS), and storage throughout
+- **🏅 Best Local-First App** - Full offline-first experience powered by PowerSync with real-time sync, local SQLite reads, and offline write queuing
 
 ---
 
