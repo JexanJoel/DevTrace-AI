@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, BookOpen, X, Copy, Check, Trash2, RotateCcw, Tag, Sparkles, Clock } from 'lucide-react';
+import { Search, BookOpen, X, Copy, Check, Trash2, RotateCcw, Tag, Clock } from 'lucide-react';
 import DashboardLayout from '../components/dashboard/DashboardLayout';
 import FixCard from '../components/fixes/FixCard';
 import useFixes from '../hooks/useFixes';
