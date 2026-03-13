@@ -5,10 +5,10 @@ import { Terminal, Github, Loader2, Bug, Sparkles, GitBranch, Shield } from 'luc
 import toast from 'react-hot-toast';
 
 const features = [
-  { icon: <Bug size={15} />, text: 'AI-powered debug sessions' },
-  { icon: <Sparkles size={15} />, text: 'Groq + Llama 3 fix suggestions' },
+  { icon: <Bug size={15} />,       text: 'AI-powered debug sessions' },
+  { icon: <Sparkles size={15} />,  text: 'Groq + Llama 3 fix suggestions' },
   { icon: <GitBranch size={15} />, text: 'GitHub repo integration' },
-  { icon: <Shield size={15} />, text: 'Secure by Supabase Auth' },
+  { icon: <Shield size={15} />,    text: 'Secure by Supabase Auth' },
 ];
 
 const LoginPage = () => {
@@ -63,13 +63,9 @@ const LoginPage = () => {
 
         <div className="relative z-10 flex-1 flex items-center justify-center px-10">
           <div className="w-full max-w-xs space-y-6 text-center">
-            <div className="space-y-3">
-              <h2 className="text-4xl font-bold text-white leading-tight">
-                Debug smarter,
-                <br />
-                ship faster.
-                </h2>
-            </div>
+            <h2 className="text-4xl font-bold text-white leading-tight">
+              Debug smarter,<br />ship faster.
+            </h2>
             <div className="flex flex-col gap-2">
               {features.map((f, i) => (
                 <div key={i} className="flex items-center gap-3 bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm">
@@ -86,8 +82,7 @@ const LoginPage = () => {
                 </div>
               ))}
             </div>
-            {/* Floating code card */}
-            <div className="bg-black/20 border border-white/15 rounded-xl p-4 animate-float">
+            <div className="bg-black/20 border border-white/15 rounded-xl p-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-white/60 text-xs font-mono">TypeError · login.js:45</span>
                 <span className="bg-green-500/20 text-green-300 text-xs px-2 py-0.5 rounded-full border border-green-500/20">Fixed</span>
@@ -144,11 +139,23 @@ const LoginPage = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full border-2 border-gray-100 focus:border-indigo-400 text-gray-900 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-4 focus:ring-indigo-50 transition placeholder-gray-300"
               />
-              <input type="password" placeholder="Password" value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
-                className="w-full border-2 border-gray-100 focus:border-indigo-400 text-gray-900 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-4 focus:ring-indigo-50 transition placeholder-gray-300"
-              />
+
+              <div className="space-y-1">
+                <input type="password" placeholder="Password" value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                  className="w-full border-2 border-gray-100 focus:border-indigo-400 text-gray-900 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-4 focus:ring-indigo-50 transition placeholder-gray-300"
+                />
+                {/* Forgot password link — right aligned under password field */}
+                <div className="flex justify-end">
+                  <Link
+                    to="/forgot-password"
+                    className="text-xs text-indigo-500 hover:text-indigo-700 font-medium transition"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+              </div>
 
               <button onClick={handleLogin} disabled={loading || !email || !password}
                 className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white rounded-xl py-3 font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed">
