@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Plus, FolderOpen, Bug, BookOpen, CheckCircle, BarChart2,
-  Clock, ArrowRight, TrendingUp, Sparkles, Database
+  Clock, ArrowRight, TrendingUp, Sparkles, Database, Flame
 } from 'lucide-react';
 import DashboardLayout from '../components/dashboard/DashboardLayout';
 import { StatusBadge } from '../components/sessions/StatusBadge';
@@ -23,6 +23,47 @@ const timeAgo = (date: string) => {
   return 'Just now';
 };
 
+// ── Streak calculator ────────────────────────────────────────────────────────
+// Returns how many consecutive calendar days (ending today or yesterday)
+// the user has at least one session created_at.
+const calcStreak = (sessions: { created_at: string }[]): number => {
+  if (sessions.length === 0) return 0;
+
+  // Get unique calendar dates (YYYY-MM-DD) in local time, sorted descending
+  const days = Array.from(
+    new Set(sessions.map(s => new Date(s.created_at).toLocaleDateString('en-CA')))
+  ).sort((a, b) => (a > b ? -1 : 1)); // descending
+
+  const today = new Date().toLocaleDateString('en-CA');
+  const yesterday = new Date(Date.now() - 86400000).toLocaleDateString('en-CA');
+
+  // Streak must start from today or yesterday (otherwise it's broken)
+  if (days[0] !== today && days[0] !== yesterday) return 0;
+
+  let streak = 1;
+  for (let i = 1; i < days.length; i++) {
+    const prev = new Date(days[i - 1]);
+    const curr = new Date(days[i]);
+    const diffDays = Math.round((prev.getTime() - curr.getTime()) / 86400000);
+    if (diffDays === 1) {
+      streak++;
+    } else {
+      break;
+    }
+  }
+  return streak;
+};
+
+const streakMessage = (streak: number): string => {
+  if (streak === 0) return 'Start your streak today!';
+  if (streak === 1) return '1 day streak — keep it up!';
+  if (streak < 4)  return `${streak} day streak — you're on a roll!`;
+  if (streak < 7)  return `${streak} day streak — impressive!`;
+  if (streak < 14) return `${streak} day streak — unstoppable! 🔥`;
+  return `${streak} day streak — absolute legend 🏆`;
+};
+// ─────────────────────────────────────────────────────────────────────────────
+
 const DashboardPage = () => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
@@ -38,6 +79,8 @@ const DashboardPage = () => {
   const avgConf = analyzedCount > 0
     ? Math.round(sessions.filter(s => s.ai_analysis).reduce((sum, s) => sum + (s.ai_analysis?.confidence ?? 0), 0) / analyzedCount)
     : 0;
+
+  const streak = calcStreak(sessions);
 
   useEffect(() => {
     if (!user) return;
@@ -65,6 +108,28 @@ const DashboardPage = () => {
                 ? 'Log your first session!'
                 : `${stats?.totalSessions} sessions · ${analyzedCount} AI analyses · ${avgConf > 0 ? avgConf + '% avg confidence' : 'no analyses yet'}`}
             </p>
+
+            {/* Streak badge — only shows if sessions exist */}
+            {!loading && sessions.length > 0 && (
+              <div className="flex items-center gap-2 mt-3">
+                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border ${
+                  streak >= 7
+                    ? 'bg-orange-400/20 border-orange-300/30 text-orange-200'
+                    : streak >= 3
+                    ? 'bg-yellow-400/20 border-yellow-300/30 text-yellow-200'
+                    : streak >= 1
+                    ? 'bg-white/15 border-white/20 text-white/90'
+                    : 'bg-white/10 border-white/15 text-indigo-300'
+                }`}>
+                  <Flame
+                    size={13}
+                    className={streak >= 1 ? 'text-orange-300' : 'text-indigo-400'}
+                    fill={streak >= 1 ? 'currentColor' : 'none'}
+                  />
+                  {streakMessage(streak)}
+                </div>
+              </div>
+            )}
           </div>
           <button onClick={() => navigate('/projects')}
             className="flex items-center gap-2 bg-white/20 hover:bg-white/30 border border-white/20 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition">
@@ -165,7 +230,7 @@ const DashboardPage = () => {
           </div>
         </div>
 
-        {/* Shortcut cards to new pages */}
+        {/* Shortcut cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <button onClick={() => navigate('/ai-insights')}
             className="flex items-center gap-4 bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-950 dark:to-violet-950 border border-indigo-100 dark:border-indigo-900 rounded-2xl p-5 hover:shadow-sm hover:border-indigo-300 transition text-left group">
@@ -195,10 +260,10 @@ const DashboardPage = () => {
         {/* Quick actions */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { label: 'New Session', icon: <Bug size={18} />,       color: 'text-blue-600 bg-blue-50 dark:bg-blue-950 hover:bg-blue-100',         route: '/sessions' },
-            { label: 'New Project', icon: <Plus size={16} />,      color: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-950 hover:bg-indigo-100',   route: '/projects' },
-            { label: 'Fix Library', icon: <BookOpen size={18} />,  color: 'text-green-600 bg-green-50 dark:bg-green-950 hover:bg-green-100',       route: '/fixes' },
-            { label: 'Analytics',   icon: <TrendingUp size={18} />,color: 'text-orange-600 bg-orange-50 dark:bg-orange-950 hover:bg-orange-100',   route: '/analytics' },
+            { label: 'New Session', icon: <Bug size={18} />,        color: 'text-blue-600 bg-blue-50 dark:bg-blue-950 hover:bg-blue-100',        route: '/sessions' },
+            { label: 'New Project', icon: <Plus size={16} />,       color: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-950 hover:bg-indigo-100', route: '/projects' },
+            { label: 'Fix Library', icon: <BookOpen size={18} />,   color: 'text-green-600 bg-green-50 dark:bg-green-950 hover:bg-green-100',     route: '/fixes' },
+            { label: 'Analytics',   icon: <TrendingUp size={18} />, color: 'text-orange-600 bg-orange-50 dark:bg-orange-950 hover:bg-orange-100', route: '/analytics' },
           ].map((a, i) => (
             <button key={i} onClick={() => navigate(a.route)}
               className={`flex flex-col items-center gap-2 p-4 rounded-2xl border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition font-medium text-sm ${a.color}`}>
