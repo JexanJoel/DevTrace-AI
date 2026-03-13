@@ -9,7 +9,7 @@ import useSessions from '../hooks/useSessions';
 import useProjects from '../hooks/useProjects';
 import useFixes from '../hooks/useFixes';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
-import { useSyncQueue } from '../store/useSyncQueue';
+import { useSyncQueue, type QueueItem } from '../store/useSyncQueue';
 
 const TABLE_META = [
   { key: 'profiles',       label: 'Profiles',       icon: <User size={14} />,       color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-950' },
@@ -50,16 +50,16 @@ const SyncStatusPage = () => {
   const { sessions } = useSessions();
   const { projects } = useProjects();
   const { fixes } = useFixes();
-  const { queue } = useSyncQueue();
+  const { items: queue } = useSyncQueue();
 
   const [localReads, setLocalReads] = useState(0);
   const [syncEvents, setSyncEvents] = useState<{ time: string; event: string; type: 'success' | 'info' | 'warning' }[]>([]);
   const [uptime, setUptime] = useState(0);
 
-  const pendingCount = queue.filter(q => q.status === 'pending').length;
-  const syncingCount = queue.filter(q => q.status === 'syncing').length;
-  const errorCount   = queue.filter(q => q.status === 'error').length;
-  const doneCount    = queue.filter(q => q.status === 'done').length;
+  const pendingCount = queue.filter((q: QueueItem) => q.status === 'pending').length;
+  const syncingCount = queue.filter((q: QueueItem) => q.status === 'syncing').length;
+  const errorCount   = queue.filter((q: QueueItem) => q.status === 'error').length;
+  const doneCount    = queue.filter((q: QueueItem) => q.status === 'done').length;
 
   useEffect(() => {
     const base = sessions.length * 4 + projects.length * 3 + fixes.length * 2 + 20;
@@ -273,7 +273,7 @@ const SyncStatusPage = () => {
               <div className="mt-4 pt-4 border-t border-gray-50 dark:border-gray-800">
                 <p className="text-xs font-semibold text-gray-500 mb-2">Write Queue ({queue.length})</p>
                 <div className="space-y-1.5 max-h-32 overflow-y-auto">
-                  {queue.slice(0, 5).map(item => (
+                  {queue.slice(0, 5).map((item: QueueItem) => (
                     <div key={item.id} className="flex items-center justify-between text-xs gap-2">
                       <span className="text-gray-600 dark:text-gray-400 truncate flex-1">{item.label}</span>
                       <span className={`px-1.5 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${
