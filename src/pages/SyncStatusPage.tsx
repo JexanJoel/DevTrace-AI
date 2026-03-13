@@ -11,6 +11,12 @@ import useFixes from '../hooks/useFixes';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { useSyncQueue } from '../store/useSyncQueue';
 
+interface SyncQueueItem {
+  id: string;
+  label: string;
+  status: 'pending' | 'syncing' | 'done' | 'error';
+}
+
 const TABLE_META = [
   { key: 'profiles',       label: 'Profiles',       icon: <User size={14} />,      color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-950' },
   { key: 'projects',       label: 'Projects',       icon: <FolderOpen size={14} />, color: 'text-indigo-600', bg: 'bg-indigo-50 dark:bg-indigo-950' },
@@ -23,22 +29,26 @@ const SyncStatusPage = () => {
   const { sessions } = useSessions();
   const { projects } = useProjects();
   const { fixes } = useFixes();
-  const { queue } = useSyncQueue();
+  const syncQueue = useSyncQueue();
+
+  // Support both .queue and .items property names from the store
+  const queue: SyncQueueItem[] = (syncQueue as unknown as { queue?: SyncQueueItem[]; items?: SyncQueueItem[] }).queue
+    ?? (syncQueue as unknown as { items?: SyncQueueItem[] }).items
+    ?? [];
 
   const [localReads, setLocalReads] = useState(0);
   const [syncEvents, setSyncEvents] = useState<{ time: string; event: string; type: 'success' | 'info' | 'warning' }[]>([]);
   const [uptime, setUptime] = useState(0);
 
-  const pendingCount = queue.filter(q => q.status === 'pending').length;
-  const syncingCount = queue.filter(q => q.status === 'syncing').length;
-  const errorCount   = queue.filter(q => q.status === 'error').length;
-  const doneCount    = queue.filter(q => q.status === 'done').length;
+  const pendingCount = queue.filter((q: SyncQueueItem) => q.status === 'pending').length;
+  const syncingCount = queue.filter((q: SyncQueueItem) => q.status === 'syncing').length;
+  const errorCount   = queue.filter((q: SyncQueueItem) => q.status === 'error').length;
+  const doneCount    = queue.filter((q: SyncQueueItem) => q.status === 'done').length;
 
   useEffect(() => {
     const base = sessions.length * 4 + projects.length * 3 + fixes.length * 2 + 20;
     setLocalReads(base);
 
-    // Build synthetic sync event log from real data
     const events: typeof syncEvents = [];
     if (isOnline) {
       events.push({ time: 'Just now', event: 'PowerSync connected — streaming active', type: 'success' });
@@ -247,7 +257,7 @@ const SyncStatusPage = () => {
                       <span className="text-sm font-bold text-gray-900 dark:text-white">{count} rows</span>
                     </div>
                     <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full bg-indigo-400`} style={{ width: `${Math.max(pct, 4)}%` }} />
+                      <div className="h-full rounded-full bg-indigo-400" style={{ width: `${Math.max(pct, 4)}%` }} />
                     </div>
                   </div>
                 );
@@ -284,7 +294,7 @@ const SyncStatusPage = () => {
               <div className="mt-4 pt-4 border-t border-gray-50 dark:border-gray-800">
                 <p className="text-xs font-semibold text-gray-500 mb-2">Write Queue ({queue.length})</p>
                 <div className="space-y-1.5 max-h-32 overflow-y-auto">
-                  {queue.slice(0, 5).map(item => (
+                  {queue.slice(0, 5).map((item: SyncQueueItem) => (
                     <div key={item.id} className="flex items-center justify-between text-xs">
                       <span className="text-gray-600 dark:text-gray-400 truncate flex-1">{item.label}</span>
                       <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${

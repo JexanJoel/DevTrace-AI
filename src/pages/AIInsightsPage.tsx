@@ -46,9 +46,6 @@ const AIInsightsPage = () => {
   const aiResolvedCount = analyzedSessions.filter(s => s.status === 'resolved').length;
   const aiResolutionRate = totalAnalyses > 0 ? Math.round((aiResolvedCount / totalAnalyses) * 100) : 0;
 
-  const openCount     = analyzedSessions.filter(s => s.status === 'open').length;
-  const inProgressCount = analyzedSessions.filter(s => s.status === 'in_progress').length;
-
   // Category counts
   const categoryCounts: Record<string, number> = {};
   analyzedSessions.forEach(s => {
