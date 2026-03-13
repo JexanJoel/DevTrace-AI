@@ -85,181 +85,290 @@ Offline? Writes go into a queue in `localStorage`. The moment you reconnect, the
 
 ## The AI Debug Panel — 8 Tabs Per Bug
 
-This is the heart of DevTrace AI. Every session gets a full structured breakdown powered by **Groq + Llama 3.3 70B**:
+> Every session gets a full structured breakdown powered by **Groq + Llama 3.3 70B**. The complete analysis is saved as **JSONB** in Supabase — persists across reloads, no re-analyzing needed.
 
-| Tab | What you get |
-|:---|:---|
-| 🔍 **Overview** | Plain English explanation · root cause · symptom vs cause · category badge (React State / Supabase RLS / TypeScript / Network etc.) · confidence score · files to check |
-| ⚡ **Fixes** | 3 options — quick patch, proper fix, workaround — each with full code, pros/cons, and a recommended pick |
-| 🕐 **Timeline** | Visual step-by-step of how the crash happened from component mount to error throw |
-| ✅ **Checklist** | Interactive priority-ranked action list you check off as you go |
-| 💬 **Follow-up** | Context-aware AI chat — click suggested questions or type your own |
-| 🧪 **Tests** | AI-generated reproduction steps and test cases to verify the fix |
-| 📋 **Logs** | Paste raw console or server logs — AI separates signal from noise |
-| 🏗️ **Structure** | Paste your file tree — AI reviews your architecture and flags problems |
+<br/>
 
-The full analysis is saved as **JSONB** in Supabase and persists across reloads — no re-analyzing needed.
+<div align="center">
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+**🔍 Overview**
+Plain English explanation of the bug, root cause, symptom vs cause, category badge (React State / Supabase RLS / TypeScript / Network), confidence score, and files to check.
+
+</td>
+<td width="50%" valign="top">
+
+**⚡ Fixes**
+3 options — quick patch, proper fix, workaround. Each has full code, pros/cons, and a recommended pick highlighted.
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+**🕐 Timeline**
+Visual step-by-step of how the crash happened — from component mount all the way to the error throw.
+
+</td>
+<td width="50%" valign="top">
+
+**✅ Checklist**
+Interactive priority-ranked action list. Check items off as you go — state persists with the session.
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+**💬 Follow-up Chat**
+Context-aware AI chat about your specific bug. Click suggested questions or type your own — full conversation history saved.
+
+</td>
+<td width="50%" valign="top">
+
+**🧪 Tests**
+AI-generated reproduction steps and test cases so you can verify the fix actually works.
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+**📋 Logs**
+Paste raw console or server logs. AI strips the noise and surfaces only what matters.
+
+</td>
+<td width="50%" valign="top">
+
+**🏗️ Structure**
+Paste your file tree. AI reviews your architecture and flags structural problems or anti-patterns.
+
+</td>
+</tr>
+</table>
+
+</div>
 
 ---
 
 ## How DevTrace AI Uses Supabase
 
-Supabase is the **source of truth and the auth backbone** for every part of this app. Nothing is stored anywhere else.
+> Supabase is the **source of truth and auth backbone** for the entire app. All data originates here, all auth flows through here, and PowerSync syncs from here via WAL replication.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        SUPABASE                             │
-│                                                             │
-│   ┌──────────────┐  ┌──────────────┐  ┌────────────────┐   │
-│   │     AUTH     │  │   POSTGRES   │  │    STORAGE     │   │
-│   │              │  │  + RLS on    │  │                │   │
-│   │ Email/Pass   │  │  every table │  │ avatars bucket │   │
-│   │ GitHub OAuth │  │              │  │ per-user paths │   │
-│   │ Google OAuth │  │  profiles    │  │                │   │
-│   │ Magic link   │  │  projects    │  └────────────────┘   │
-│   │ GitHub link  │  │  sessions    │                        │
-│   └──────────────┘  │  fixes       │  ┌────────────────┐   │
-│                     └──────┬───────┘  │   WAL / PUB    │   │
-│                            │          │                │   │
-│                            │          │ CREATE PUBLICA-│   │
-│                            └──────────► TION powersync │   │
-│                                       │ FOR TABLE ...  │   │
-│                                       └───────┬────────┘   │
-└───────────────────────────────────────────────┼────────────┘
-                                                │
-                                         PowerSync reads
-                                         this WAL stream ↓
-```
+<br/>
 
-### 🔐 Authentication — every method covered
+<div align="center">
+<table>
+<tr>
 
-| Method | Implementation |
+<td width="34%" valign="top">
+
+### 🔐 Auth
+![](https://img.shields.io/badge/supabase.auth-3ECF8E?style=flat-square&logo=supabase&logoColor=white)
+
+| Method | How |
 |:---|:---|
-| **Email + Password** | `supabase.auth.signInWithPassword()` — standard login |
-| **GitHub OAuth** | `signInWithOAuth({ provider: 'github' })` — sign in or sign up |
-| **Google OAuth** | `signInWithOAuth({ provider: 'google' })` — one-click |
-| **Password Reset** | `resetPasswordForEmail()` → branded email → `/reset-password` → `updateUser({ password })` |
-| **GitHub Linking** | `linkIdentity({ provider: 'github' })` — connects GitHub to existing email account, username auto-read from identity metadata |
-| **Session Handling** | `onAuthStateChange()` listener keeps Zustand auth store in sync across all tabs |
+| Email + Password | `signInWithPassword()` |
+| GitHub OAuth | `signInWithOAuth('github')` |
+| Google OAuth | `signInWithOAuth('google')` |
+| Password Reset | `resetPasswordForEmail()` → magic link → `/reset-password` |
+| GitHub Linking | `linkIdentity('github')` → `/auth/callback` → saves to profile |
+| Session sync | `onAuthStateChange()` → Zustand store |
 
-> Zero custom auth code. Supabase handles tokens, refresh, and session persistence entirely.
+> Zero custom auth code — Supabase handles all tokens, refresh, and session persistence
 
-### 🗄️ Database — Postgres with RLS on every table
+</td>
 
-Users can **only ever read and write their own rows** — enforced at the database level, not in app code.
+<td width="33%" valign="top">
 
-```
-profiles        →  name, avatar, github_username, dark_mode, github_connected
-projects        →  name, description, language, github_url, session_count, error_count
-debug_sessions  →  error, stack_trace, code_snippet, severity, status, ai_analysis (JSONB), notes
-fixes           →  title, fix_content, language, tags[], use_count, linked to session + project
-```
+### 🗄️ Database
+![](https://img.shields.io/badge/Postgres_+_RLS-4169E1?style=flat-square&logo=postgresql&logoColor=white)
 
-Every table has 4 RLS policies: `SELECT`, `INSERT`, `UPDATE`, `DELETE` — all checking `auth.uid() = user_id`.
+**4 tables, RLS on every one**
 
-The full AI analysis (all 8 tabs worth of data) is stored as **JSONB** in `debug_sessions.ai_analysis` — so it loads instantly on revisit with no re-analysis needed.
-
-### 🗃️ Storage
-
-Profile avatars live in a **public** Supabase Storage bucket called `avatars`, organized by user:
+Users can only ever touch their own rows — enforced at DB level, not app code
 
 ```
-avatars/
+profiles
+  name · avatar · github · dark_mode
+
+projects
+  name · language · github_url · counts
+
+debug_sessions
+  error · stack · code · severity
+  ai_analysis JSONB ← full 8-tab output
+
+fixes
+  content · language · tags[] · use_count
+```
+
+Each table: `SELECT` · `INSERT` · `UPDATE` · `DELETE` policies checking `auth.uid() = user_id`
+
+</td>
+
+<td width="33%" valign="top">
+
+### 🗃️ Storage + WAL
+![](https://img.shields.io/badge/Storage_+_Replication-3ECF8E?style=flat-square&logo=supabase&logoColor=white)
+
+**Storage**
+```
+avatars/ (public bucket)
 └── {user_id}/
-    └── avatar.{ext}      ← cache-busted with ?t={timestamp} on upload
+    └── avatar.ext
+        ?t={ts} ← cache bust
 ```
 
-### 🔗 WAL Replication → PowerSync
+<br/>
 
-A single Postgres publication connects Supabase to PowerSync:
+**WAL Publication**
+
+Connects Supabase → PowerSync:
 
 ```sql
-create publication powersync
-  for table profiles, projects, debug_sessions, fixes;
+CREATE PUBLICATION powersync
+  FOR TABLE
+    profiles,
+    projects,
+    debug_sessions,
+    fixes;
 ```
 
-PowerSync listens to this WAL stream and syncs every change to connected clients in real time.
+PowerSync listens to this stream and pushes every change to connected clients in real time ↓
+
+</td>
+
+</tr>
+</table>
+</div>
+
+<br/>
+
+> 💡 **Why JSONB for AI analysis?** The full 8-tab breakdown is one `ai_analysis` JSONB column in `debug_sessions` — no extra tables, no joins, loads instantly on revisit, syncs through PowerSync like any other column, and is queryable client-side for the AI Insights page.
 
 ---
 
 ## How DevTrace AI Uses PowerSync
 
-PowerSync is the **offline engine**. It sits between Supabase and the browser, maintaining a local SQLite database that the React app reads from directly — no network required.
+> PowerSync is the **offline engine**. It maintains a local SQLite database in the browser that the app reads from directly — zero network latency, works with no internet.
 
-### The complete data flow
+<br/>
 
-```
-╔══════════════════════════════════════════════════════════════════╗
-║  WRITE  (any create / update / delete)                           ║
-║                                                                  ║
-║  React UI  ──►  supabase.from().insert()  ──►  Supabase Postgres ║
-║                                                       │          ║
-║                                               WAL publication    ║
-║                                                       │          ║
-║                                            PowerSync Instance    ║
-║                                                       │          ║
-║                                            streams delta down    ║
-║                                                       ▼          ║
-╠══════════════════════════════════════════════════════════════════╣
-║  READ  (every list, detail, dashboard, analytics view)           ║
-║                                                                  ║
-║  React UI  ◄──  useQuery()  ◄──  Local SQLite  (0ms, no spinner) ║
-╚══════════════════════════════════════════════════════════════════╝
-```
+### The write → sync → read cycle
 
-> Every single read in DevTrace AI hits local SQLite — not the network. This is why the app feels instant and works offline.
+<div align="center">
+<table>
+<tr>
 
-### Online vs Offline — what actually happens
+<td width="50%" valign="top" align="center">
+
+### ✍️ WRITE path
+![](https://img.shields.io/badge/Any_create_/_update_/_delete-ef4444?style=flat-square)
 
 ```
-ONLINE ──────────────────────────────────────────────────────────
-  
-  User opens app
-       │
-       ▼
-  PowerSync connects  ──►  streams latest changes from Supabase
-       │
-       ▼
-  Local SQLite is up to date  ──►  useQuery() returns data instantly
-       │
-       ▼
-  User creates a session  ──►  supabase.insert()  ──►  WAL  ──►  SQLite
-  
-OFFLINE ─────────────────────────────────────────────────────────
-
-  Internet drops
-       │
-       ▼
-  Orange banner appears  ("You're offline — X items pending")
-       │
-       ▼
-  User browses existing data  ──►  reads from SQLite  ──►  works fine
-       │
-       ▼
-  User creates a new session  ──►  saved to SQLite + localStorage queue
-       │
-       ▼
-  Internet returns  ──►  pending writes flush to Supabase  ──►  PowerSync syncs back
+React UI
+   │
+   ▼  supabase.from().insert()
+Supabase Postgres
+   │
+   ▼  WAL publication
+PowerSync Instance
+   │
+   ▼  streams delta to browser
+Local SQLite
+   │
+   ▼  useQuery() auto-updates
+React UI reflects change
 ```
 
-### PowerSync in the codebase
+</td>
 
-Every data hook follows the same pattern — reads from PowerSync, writes to Supabase:
+<td width="50%" valign="top" align="center">
+
+### 👁️ READ path
+![](https://img.shields.io/badge/Every_list_/_detail_/_dashboard-22c55e?style=flat-square)
+
+```
+React UI calls useQuery()
+   │
+   ▼  queries local SQLite
+Instant result — 0ms
+   │
+   ◄  no network request made
+   ◄  no loading spinner shown
+   ◄  works even offline
+```
+
+**Every single read in DevTrace AI hits local SQLite — not the network.**
+
+This is why the app loads instantly and works completely offline.
+
+</td>
+
+</tr>
+</table>
+</div>
+
+<br/>
+
+### 🟢 Online vs 🟠 Offline — what actually happens
+
+<div align="center">
+<table>
+<tr>
+
+<td width="50%" valign="top">
+
+### 🟢 Online
+
+| Step | What happens |
+|:---|:---|
+| App opens | PowerSync connects, streams latest delta from Supabase |
+| Data loads | `useQuery()` returns from SQLite — instant |
+| User creates session | `supabase.insert()` → WAL → PowerSync → SQLite |
+| Another device saves | PowerSync streams it down automatically |
+
+</td>
+
+<td width="50%" valign="top">
+
+### 🟠 Offline
+
+| Step | What happens |
+|:---|:---|
+| Internet drops | Orange banner appears with pending count |
+| User browses | All data still readable from local SQLite |
+| User creates session | Saved to SQLite + queued in `localStorage` |
+| Internet returns | Queue flushes to Supabase, PowerSync syncs delta back |
+
+</td>
+
+</tr>
+</table>
+</div>
+
+<br/>
+
+### PowerSync pattern used in every hook
 
 ```typescript
-// READ  — from local SQLite via PowerSync (instant, works offline)
+// READ — local SQLite via PowerSync (instant, works offline)
 const { data: sessions } = useQuery(
   'SELECT * FROM debug_sessions WHERE user_id = ? ORDER BY created_at DESC',
   [userId]
 );
 
-// WRITE — directly to Supabase (PowerSync syncs it back down automatically)
+// WRITE — directly to Supabase (PowerSync syncs back automatically)
 await supabase.from('debug_sessions').insert({ ...newSession });
 ```
 
-This pattern is used in `useSessions.ts`, `useProjects.ts`, `useFixes.ts`, and `useProfile.ts`.
+> This exact pattern is in `useSessions.ts`, `useProjects.ts`, `useFixes.ts`, and `useProfile.ts` — PowerSync and Supabase work together seamlessly throughout.
 
-### Sync rules
+### Sync rules deployed to PowerSync
 
 ```yaml
 bucket_definitions:
@@ -272,71 +381,128 @@ bucket_definitions:
       - SELECT * FROM fixes          WHERE user_id = bucket.user_id
 ```
 
-Each user only receives their own rows — data isolation enforced at the sync layer.
+Each user only receives their own rows — data isolation enforced at the sync layer, not just RLS.
 
-### Offline scenarios
+### Live `/sync-status` page
 
-| Scenario | Status | Behavior |
-|:---|:---:|:---|
-| App loads — first time | 🟢 | PowerSync syncs all user data to local SQLite |
-| App loads — returning user | 🟢 | SQLite already populated, data shows instantly |
-| User goes offline | 🟠 | Orange banner — all data still readable from SQLite |
-| Create session offline | 🟠 | Saved to SQLite + queued in localStorage |
-| User reconnects | 🟢 | Queue flushed to Supabase, PowerSync syncs delta back |
-| Conflict / duplicate | 🟢 | Handled via upsert — safe, no data loss |
-
-### Live Sync Status page
-
-DevTrace AI ships a dedicated **`/sync-status`** page that shows the full architecture diagram, live SQLite row counts per table, recent sync events, and the pending write queue — updated in real time as you use the app.
+DevTrace AI ships a dedicated Sync Status page showing the full architecture diagram, live SQLite row counts per table, recent sync events, and the pending write queue — all updating in real time as you use the app.
 
 ---
 
 ## Full Feature List
 
-### 🐛 Debugging Core
-| Feature | Details |
-|:---|:---|
-| **Session Tracking** | Log errors with title, message, stack trace, code snippet, expected behavior, environment, and severity |
-| **AI Debug Panel** | 8-tab full breakdown — every bug analyzed by Groq + Llama 3.3 70B and saved permanently as JSONB |
-| **Follow-up Chat** | Context-aware AI chat inside every session — click suggested questions or type your own |
-| **Fix Library** | Save working fixes, filter by language, copy with one click, track use count |
+<div align="center">
+
+<table>
+<tr>
+<td width="33%" valign="top" align="center">
+
+### 🐛 Debugging
+
+**Session Tracking**
+Log errors with stack traces, code snippets, expected behavior, environment, and severity levels
+
+**AI Debug Panel**
+8-tab breakdown — every bug analyzed by Groq + Llama 3.3 70B, saved permanently as JSONB
+
+**Follow-up Chat**
+Ask the AI follow-up questions about your exact bug — full conversation history per session
+
+**Fix Library**
+Save working fixes, filter by language, copy in one click, track use count across projects
+
+</td>
+<td width="33%" valign="top" align="center">
 
 ### 📁 Organization
-| Feature | Details |
-|:---|:---|
-| **Projects** | Group debug sessions by project, link GitHub repos, track session and error counts |
-| **Project Health Score** | 0–100 score per project — deducted for open critical/high severity issues, inactivity, and low resolution rate |
-| **Session Streak** | Tracks consecutive days of debugging — badge upgrades from white → yellow → fiery 🔥 at 7+ days |
 
-### 📊 Insights & Analytics
-| Feature | Details |
-|:---|:---|
-| **Analytics Page** | Resolution rates, error trends, severity breakdowns, time-to-fix visualized with Recharts |
-| **AI Insights Page** | Category breakdown across all sessions, confidence distribution, most flagged files, fix type preferences |
-| **Sync Status Page** | Live architecture diagram, local SQLite row counts, sync event log, write queue — all real-time |
+**Projects**
+Group debug sessions by project, link GitHub repos, track session and error counts
 
-### 🔐 Auth & Profile
-| Feature | Details |
-|:---|:---|
-| **Email + Password** | Sign up and log in with email/password |
-| **GitHub & Google OAuth** | One-click social sign in |
-| **Password Reset** | Magic link email with custom branded template → password strength indicator on reset page |
-| **GitHub Linking** | Connect / disconnect GitHub from profile — avatar + username auto-read from OAuth identity |
-| **Avatar Upload** | Profile picture stored in Supabase Storage |
+**Project Health Score**
+0–100 score per project — deducted for open critical/high issues, inactivity, and low resolution rate
+
+**Session Streak**
+Tracks consecutive debug days — badge upgrades white → yellow → fiery 🔥 at 7+ days
+
+**GitHub Connect**
+Link your GitHub account from profile — avatar, username, and disconnect all in one place
+
+</td>
+<td width="33%" valign="top" align="center">
+
+### 📊 Insights
+
+**Analytics Page**
+Resolution rates, error trends, severity breakdowns, time-to-fix — all in Recharts
+
+**AI Insights Page**
+Category breakdown, confidence distribution, most flagged files, fix type preferences
+
+**Sync Status Page**
+Live architecture diagram, SQLite row counts, sync event log, write queue — real-time
+
+**Dark Mode**
+Full dark theme saved to your profile, applied globally
+
+</td>
+</tr>
+<tr>
+<td width="33%" valign="top" align="center">
+
+### 🔐 Auth
+
+**Email + Password**
+Standard login with branded magic link password reset flow
+
+**GitHub & Google OAuth**
+One-click social sign in via Supabase Auth
+
+**Password Reset**
+`resetPasswordForEmail()` → custom email → password strength indicator on reset page
+
+**GitHub Linking**
+`linkIdentity()` from profile page — username read from OAuth identity metadata automatically
+
+</td>
+<td width="33%" valign="top" align="center">
 
 ### 📶 Offline & Sync
-| Feature | Details |
-|:---|:---|
-| **Offline-First** | All reads from local SQLite — zero spinners, zero network dependency for existing data |
-| **Offline Write Queue** | Create sessions and projects without internet — auto-synced to Supabase on reconnect |
-| **Real-Time Sync** | PowerSync streams Supabase Postgres changes to local SQLite instantly |
-| **Offline Banner** | Orange banner with pending write count when disconnected |
 
-### 🎨 UX
-| Feature | Details |
-|:---|:---|
-| **Dark Mode** | Full dark theme saved to your profile |
-| **Mobile Responsive** | Collapsible sidebar, all pages work on any screen size |
+**Offline-First Reads**
+All data reads from local SQLite via PowerSync — zero spinners, zero network dependency
+
+**Offline Write Queue**
+Create sessions and projects offline — auto-synced to Supabase on reconnect
+
+**Real-Time Sync**
+PowerSync streams Supabase WAL changes to local SQLite instantly when online
+
+**Offline Banner**
+Orange banner with pending write count shown whenever you're disconnected
+
+</td>
+<td width="33%" valign="top" align="center">
+
+### 📱 UX
+
+**Mobile Responsive**
+Collapsible sidebar, all pages fully usable on phones and tablets
+
+**Avatar Upload**
+Profile pictures stored in Supabase Storage with per-user bucket paths
+
+**Onboarding**
+First-time setup modal walks new users through creating their first project
+
+**Toast Notifications**
+Non-intrusive feedback for every action — success, error, and info states
+
+</td>
+</tr>
+</table>
+
+</div>
 
 ---
 
