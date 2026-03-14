@@ -3,12 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { Share2, FolderOpen, Bug, Clock, ChevronRight, Loader2, Users } from 'lucide-react';
 import DashboardLayout from '../components/dashboard/DashboardLayout';
 import useShares from '../hooks/useShares';
+import { useAuthStore } from '../store/authStore';
 
 const SharedWithMePage = () => {
   const navigate = useNavigate();
   const { sharedWithMe, loading, refetchSharedWithMe } = useShares();
+  const { loading: authLoading } = useAuthStore();
 
-  useEffect(() => { refetchSharedWithMe(); }, []);
+  useEffect(() => {
+    if (!authLoading) refetchSharedWithMe();
+  }, [authLoading]);
 
   const projects = sharedWithMe.filter(s => s.resource_type === 'project');
   const sessions = sharedWithMe.filter(s => s.resource_type === 'session');

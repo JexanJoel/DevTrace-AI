@@ -17,7 +17,7 @@ const ENV_COLORS: Record<string, string> = {
 const SharedSessionView = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  const { user, loading: authLoading } = useAuthStore();
 
   const [session, setSession] = useState<DebugSession | null>(null);
   const [sharedBy, setSharedBy] = useState<string>('');
@@ -26,7 +26,7 @@ const SharedSessionView = () => {
 
   useEffect(() => {
     const load = async () => {
-      if (!id || !user) return;
+      if (!id || !user || authLoading) return;
       setLoading(true);
 
       // Check for direct session share
@@ -105,7 +105,7 @@ const SharedSessionView = () => {
       setLoading(false);
     };
     load();
-  }, [id, user?.id]);
+  }, [id, user?.id, authLoading]);
 
   if (loading) return (
     <DashboardLayout title="Shared Session">
