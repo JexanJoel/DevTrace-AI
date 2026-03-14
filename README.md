@@ -203,6 +203,8 @@ supabase.insert()  →  Supabase Postgres  →  WAL publication
 
 ### 🟢 Online vs 🟠 Offline
 
+<div align="center">
+
 <table width="100%">
 <tr><th align="left">State</th><th align="left">What happens</th></tr>
 <tr><td>🟢 App opens online</td><td>PowerSync connects and streams latest changes from Supabase</td></tr>
@@ -212,6 +214,8 @@ supabase.insert()  →  Supabase Postgres  →  WAL publication
 <tr><td>🟠 User creates offline</td><td>Saved to SQLite + queued in <code>localStorage</code></td></tr>
 <tr><td>🟢 Internet returns</td><td>Queue flushes to Supabase, PowerSync syncs delta back down</td></tr>
 </table>
+
+</div>
 
 ---
 
