@@ -198,7 +198,6 @@ const SharedSessionView = () => {
               onSaveAnalysis={async () => {}}
               onSaveToLibrary={async () => {}}
               savingToLib={false}
-              readOnly
             />
           )}
 
