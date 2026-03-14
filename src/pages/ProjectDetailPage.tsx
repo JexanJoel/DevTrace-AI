@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Github, Bug, Clock, Settings, BarChart2,
-  Trash2, Loader2, Save, ExternalLink, Plus, ChevronRight
+  Trash2, Loader2, Save, ExternalLink, Plus, ChevronRight, Share2
 } from 'lucide-react';
 import DashboardLayout from '../components/dashboard/DashboardLayout';
 import { StatusBadge, SeverityBadge } from '../components/sessions/StatusBadge';
 import GitHubStatsCard from '../components/github/GitHubStatsCard';
+import ShareModal from '../components/shared/ShareModal';
 import useProjects from '../hooks/useProjects';
 import useSessions from '../hooks/useSessions';
 import CreateSessionModal from '../components/sessions/CreateSessionModal';
@@ -40,6 +41,7 @@ const ProjectDetailPage = () => {
 
   const [tab, setTab] = useState<Tab>('overview');
   const [showModal, setShowModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const [editName, setEditName] = useState('');
   const [editDesc, setEditDesc] = useState('');
   const [editGithub, setEditGithub] = useState('');
@@ -138,15 +140,27 @@ const ProjectDetailPage = () => {
                 <Clock size={11} /> Created {new Date(project.created_at).toLocaleDateString()}
               </p>
             </div>
-            {project.github_url && (
-              <a href={project.github_url} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-2 border border-gray-200 dark:border-gray-700 hover:border-gray-300 text-gray-600 dark:text-gray-300 px-3 py-2 rounded-xl text-sm font-medium transition">
-                <Github size={15} /> View Repo <ExternalLink size={12} />
-              </a>
-            )}
+
+            {/* Action buttons */}
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Share button */}
+              <button
+                onClick={() => setShowShareModal(true)}
+                className="flex items-center gap-1.5 border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950 hover:bg-indigo-100 dark:hover:bg-indigo-900 text-indigo-600 dark:text-indigo-400 px-3 py-2 rounded-xl text-sm font-medium transition"
+              >
+                <Share2 size={14} /> Share
+              </button>
+
+              {project.github_url && (
+                <a href={project.github_url} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-2 border border-gray-200 dark:border-gray-700 hover:border-gray-300 text-gray-600 dark:text-gray-300 px-3 py-2 rounded-xl text-sm font-medium transition">
+                  <Github size={15} /> View Repo <ExternalLink size={12} />
+                </a>
+              )}
+            </div>
           </div>
 
-          {/* Stats row — now includes health score */}
+          {/* Stats row */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5">
             {[
               { label: 'Debug Sessions', value: sessions.length,                               color: 'text-blue-600',  bg: 'bg-blue-50 dark:bg-blue-950' },
@@ -158,8 +172,6 @@ const ProjectDetailPage = () => {
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{s.label}</p>
               </div>
             ))}
-
-            {/* Health score stat */}
             <div className={`${health.bg} rounded-xl p-3 text-center ring-2 ${health.ring}`}>
               <p className={`text-xl font-bold ${health.color}`}>{health.score}</p>
               <p className={`text-xs font-semibold mt-0.5 ${health.color}`}>{health.label}</p>
@@ -169,7 +181,6 @@ const ProjectDetailPage = () => {
             </div>
           </div>
 
-          {/* Health deductions detail */}
           {health.deductions.length > 0 && (
             <div className="mt-4 pt-4 border-t border-gray-50 dark:border-gray-800">
               <p className="text-xs font-semibold text-gray-400 mb-2">Health Score Breakdown</p>
@@ -206,7 +217,6 @@ const ProjectDetailPage = () => {
           ))}
         </div>
 
-        {/* Overview */}
         {tab === 'overview' && (
           <div className="space-y-5">
             {project.github_url && <GitHubStatsCard githubUrl={project.github_url} />}
@@ -275,7 +285,6 @@ const ProjectDetailPage = () => {
           </div>
         )}
 
-        {/* Settings */}
         {tab === 'settings' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
@@ -326,6 +335,15 @@ const ProjectDetailPage = () => {
 
       {showModal && (
         <CreateSessionModal onClose={() => setShowModal(false)} onCreate={createSession} defaultProjectId={id} />
+      )}
+
+      {showShareModal && project && (
+        <ShareModal
+          resourceType="project"
+          resourceId={project.id}
+          resourceName={project.name}
+          onClose={() => setShowShareModal(false)}
+        />
       )}
     </DashboardLayout>
   );
