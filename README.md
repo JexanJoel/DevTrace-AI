@@ -24,7 +24,13 @@
 
 ## What is DevTrace AI?
 
-DevTrace AI is a **local-first debugging assistant** built for React, TypeScript, and Supabase developers. Instead of Googling your error or copy-pasting it into ChatGPT and losing the context forever, DevTrace AI gives every bug a **permanent, structured record** with full AI analysis attached - root cause, 3 fix options with code, a crash timeline, an interactive checklist, follow-up chat, test cases, and more. Everything is saved. Everything is searchable. Everything works **even when you're offline.**
+DevTrace AI is a **local-first debugging assistant** built for React, TypeScript, and Supabase developers.
+
+- 🔍 **Every bug gets a permanent record** — error, stack trace, code snippet, severity, and environment all in one place
+- 🤖 **Full AI analysis on demand** — root cause, 3 fix options with code, crash timeline, checklist, follow-up chat, and test cases
+- 💾 **Nothing is lost** — every session and fix is saved, searchable, and persists across reloads
+- 📶 **Works completely offline** — browse, create, and debug without internet thanks to PowerSync's local SQLite
+- 🔗 **Share with teammates** — share projects and sessions with other DevTrace users for read-only collaboration
 
 **The core problem it solves:** Debugging is slow and scattered. You repeat the same mistakes, forget what fixed what, and lose context every time you close a tab. DevTrace AI is your permanent debugging memory.
 
@@ -35,6 +41,7 @@ DevTrace AI is a **local-first debugging assistant** built for React, TypeScript
 - 💬 **Follow-up chat** - ask the AI questions about your exact bug
 - 📚 **Fix Library** - save what works, reuse it across projects
 - 📶 **Offline-first** - create, browse, and debug without internet
+- 🔗 **Share sessions** - invite teammates by email for read-only access
 
 ---
 
@@ -47,6 +54,7 @@ The flow is simple:
 2. Click "Analyze Bug"         →  Groq + Llama 3.3 70B returns a full structured analysis
 3. Read the 8 tab breakdown    →  Overview, Fixes, Timeline, Checklist, Chat, Tests, Logs, Structure
 4. Save what worked            →  Fix goes to your Fix Library, tagged and searchable forever
+5. Share with a teammate       →  They get read-only access via Shared with Me page
 ```
 
 ### Read vs Write - the data flow
@@ -109,9 +117,15 @@ Every table has Row Level Security enabled. Users can only ever read and write *
 <tr><td><code>projects</code></td><td><code>name</code> · <code>description</code> · <code>language</code> · <code>github_url</code> · <code>session_count</code> · <code>error_count</code></td></tr>
 <tr><td><code>debug_sessions</code></td><td><code>error_message</code> · <code>stack_trace</code> · <code>code_snippet</code> · <code>severity</code> · <code>status</code> · <code>ai_analysis</code> (JSONB) · <code>notes</code></td></tr>
 <tr><td><code>fixes</code></td><td><code>title</code> · <code>fix_content</code> · <code>language</code> · <code>tags[]</code> · <code>use_count</code> · <code>session_id</code> · <code>project_id</code></td></tr>
+<tr><td><code>shares</code></td><td><code>owner_id</code> · <code>invitee_id</code> · <code>resource_type</code> · <code>resource_id</code> · unique constraint prevents duplicate shares</td></tr>
 </table>
 
-Each table has 4 RLS policies: `SELECT` · `INSERT` · `UPDATE` · `DELETE` - all checking `auth.uid() = user_id`.
+Each table has RLS policies covering `SELECT` · `INSERT` · `UPDATE` · `DELETE` - all checking `auth.uid() = user_id`.
+
+The `shares` table has its own policies:
+- Owners can manage (create, delete) their own share rows
+- Invitees can read shares addressed to them
+- Shared resource policies on `projects` and `debug_sessions` allow invitees to read rows they've been granted access to
 
 > 💡 The full 8-tab AI breakdown is stored as a single `ai_analysis` JSONB column - no extra tables, loads instantly on revisit, and syncs through PowerSync like any other column.
 
@@ -187,7 +201,7 @@ supabase.insert()  →  Supabase Postgres  →  WAL publication
 <tr><th align="left">State</th><th align="left">What happens</th></tr>
 <tr><td>🟢 App opens online</td><td>PowerSync connects and streams latest changes from Supabase</td></tr>
 <tr><td>🟢 User reads data</td><td><code>useQuery()</code> returns from local SQLite - instant, 0ms</td></tr>
-<tr><td>🟢 User creates a session</td><td><code>supabase.insert()</code> - WAL - PowerSync - SQLite updated</td></tr>
+<tr><td>🟢 User creates a session</td><td><code>supabase.insert()</code> → WAL → PowerSync → SQLite updated</td></tr>
 <tr><td>🟠 Internet drops</td><td>Orange banner appears - all existing data still fully readable</td></tr>
 <tr><td>🟠 User creates offline</td><td>Saved to SQLite + queued in <code>localStorage</code></td></tr>
 <tr><td>🟢 Internet returns</td><td>Queue flushes to Supabase, PowerSync syncs delta back down</td></tr>
@@ -218,6 +232,51 @@ DevTrace AI ships a dedicated `/sync-status` page showing the full architecture,
 
 ---
 
+## Sharing & Collaboration
+
+DevTrace AI supports read-only sharing of projects and sessions between registered users.
+
+### How it works
+
+- **Share a project** → the invitee sees all debug sessions inside it (read-only)
+- **Share a session** → the invitee sees just that one session (read-only)
+- **No email required** — sharing is instant. The invitee logs into their DevTrace account and finds shared content under **Shared with Me** in the sidebar
+- **Revokable** — the owner can remove access at any time from the Share modal
+
+### Share flow
+
+```
+Owner opens project/session
+       ↓
+Clicks "Share" button
+       ↓
+Types invitee's email (must have a DevTrace account)
+       ↓
+Share row inserted into Supabase → RLS grants read access
+       ↓
+Invitee logs in → sees it under "Shared with Me"
+       ↓
+Read-only amber banner shown — no edit, delete, or AI controls
+```
+
+### Database design
+
+```sql
+create table shares (
+  id uuid default gen_random_uuid() primary key,
+  owner_id uuid references auth.users on delete cascade,
+  invitee_id uuid references auth.users on delete cascade,
+  resource_type text not null check (resource_type in ('project', 'session')),
+  resource_id uuid not null,
+  created_at timestamptz default now(),
+  unique(invitee_id, resource_type, resource_id)
+);
+```
+
+RLS on `projects` and `debug_sessions` has additional SELECT policies that allow invitees to read rows they've been shared — enforced entirely at the database level.
+
+---
+
 ## Full Feature List
 
 ### 🐛 Debugging
@@ -226,6 +285,7 @@ DevTrace AI ships a dedicated `/sync-status` page showing the full architecture,
 - **AI Debug Panel** - 8-tab full breakdown - every bug analyzed by Groq + Llama 3.3 70B, saved permanently as JSONB
 - **Follow-up Chat** - Context-aware AI chat inside every session - click suggested questions or type your own
 - **Fix Library** - Save working fixes, filter by language, copy in one click, track use count across projects
+- **Export as Markdown** - Export any debug session as a `.md` file for sharing or archiving
 
 ### 📁 Organization
 
@@ -233,6 +293,14 @@ DevTrace AI ships a dedicated `/sync-status` page showing the full architecture,
 - **Project Health Score** - 0–100 score - deducted for open critical/high issues, inactivity, and low resolution rate
 - **Session Streak** - Tracks consecutive debug days - badge upgrades white → yellow → fiery 🔥 at 7+ days
 - **GitHub Connect** - Link your GitHub account from Profile - avatar, username, and disconnect in one place
+
+### 🔗 Sharing
+
+- **Share Projects** - Invite any registered DevTrace user by email to view a project and all its sessions
+- **Share Sessions** - Share individual debug sessions with teammates
+- **Read-only access** - Invitees can view everything but cannot edit, delete, or run AI analysis
+- **Revoke anytime** - Owner can remove access instantly from the Share modal
+- **Shared with Me page** - Dedicated sidebar page listing all projects and sessions shared with you
 
 ### 📊 Insights & Analytics
 
@@ -347,7 +415,13 @@ create table profiles (
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, email) values (new.id, new.email);
+  insert into public.profiles (id, email)
+  values (
+    new.id,
+    coalesce(new.email, new.raw_user_meta_data->>'email')
+  )
+  on conflict (id) do update
+    set email = coalesce(excluded.email, new.raw_user_meta_data->>'email');
   return new;
 end;
 $$ language plpgsql security definer;
@@ -359,6 +433,7 @@ create trigger on_auth_user_created
 alter table profiles enable row level security;
 create policy "Users can view own profile" on profiles for select using (auth.uid() = id);
 create policy "Users can update own profile" on profiles for update using (auth.uid() = id);
+create policy "Users can look up other profiles" on profiles for select using (true);
 
 -- Projects
 create table projects (
@@ -378,6 +453,14 @@ create policy "Users can view own projects"   on projects for select using (auth
 create policy "Users can create projects"     on projects for insert with check (auth.uid() = user_id);
 create policy "Users can update own projects" on projects for update using (auth.uid() = user_id);
 create policy "Users can delete own projects" on projects for delete using (auth.uid() = user_id);
+create policy "Shared project viewers can read" on projects for select using (
+  exists (
+    select 1 from shares
+    where shares.resource_id = projects.id
+    and shares.resource_type = 'project'
+    and shares.invitee_id = auth.uid()
+  )
+);
 
 -- Debug Sessions
 create table debug_sessions (
@@ -403,6 +486,22 @@ create policy "Users can view own sessions"   on debug_sessions for select using
 create policy "Users can create sessions"     on debug_sessions for insert with check (auth.uid() = user_id);
 create policy "Users can update own sessions" on debug_sessions for update using (auth.uid() = user_id);
 create policy "Users can delete own sessions" on debug_sessions for delete using (auth.uid() = user_id);
+create policy "Shared session viewers can read" on debug_sessions for select using (
+  exists (
+    select 1 from shares
+    where shares.resource_id = debug_sessions.id
+    and shares.resource_type = 'session'
+    and shares.invitee_id = auth.uid()
+  )
+);
+create policy "Sessions in shared projects can read" on debug_sessions for select using (
+  exists (
+    select 1 from shares
+    where shares.resource_id = debug_sessions.project_id
+    and shares.resource_type = 'project'
+    and shares.invitee_id = auth.uid()
+  )
+);
 
 -- Fixes
 create table fixes (
@@ -424,6 +523,20 @@ create policy "Users can create fixes"     on fixes for insert with check (auth.
 create policy "Users can update own fixes" on fixes for update using (auth.uid() = user_id);
 create policy "Users can delete own fixes" on fixes for delete using (auth.uid() = user_id);
 
+-- Shares
+create table shares (
+  id uuid default gen_random_uuid() primary key,
+  owner_id uuid references auth.users on delete cascade,
+  invitee_id uuid references auth.users on delete cascade,
+  resource_type text not null check (resource_type in ('project', 'session')),
+  resource_id uuid not null,
+  created_at timestamptz default now(),
+  unique(invitee_id, resource_type, resource_id)
+);
+alter table shares enable row level security;
+create policy "Owners can manage shares"    on shares for all    using (owner_id = auth.uid());
+create policy "Invitees can view their shares" on shares for select using (invitee_id = auth.uid());
+
 -- updated_at triggers
 create or replace function update_updated_at() returns trigger as $$
 begin new.updated_at = timezone('utc', now()); return new; end;
@@ -434,7 +547,7 @@ create trigger sessions_updated_at before update on debug_sessions
   for each row execute procedure update_updated_at();
 
 -- PowerSync WAL publication (required)
-create publication powersync for table profiles, projects, debug_sessions, fixes;
+create publication powersync for table profiles, projects, debug_sessions, fixes, shares;
 ```
 
 </details>
@@ -511,14 +624,15 @@ src/
 │   ├── sessions/           # AIDebugPanel (8 tabs), CreateSessionModal, StatusBadge
 │   ├── projects/           # ProjectCard (with health score), CreateProjectModal
 │   ├── profile/            # AvatarUpload
-│   ├── providers/          # PowerSyncProvider
-│   └── shared/             # ProtectedRoute, OfflineBanner
+│   ├── shared/             # ProtectedRoute, OfflineBanner, ShareModal
+│   └── providers/          # PowerSyncProvider
 │
 ├── hooks/
 │   ├── useSessions.ts      # PowerSync reads + Supabase writes
 │   ├── useProjects.ts      # PowerSync reads + Supabase writes
 │   ├── useFixes.ts         # PowerSync reads + Supabase writes
 │   ├── useProfile.ts       # PowerSync reads + Supabase writes
+│   ├── useShares.ts        # Share creation, revocation, lookup
 │   ├── useDashboardStats.ts
 │   ├── usePendingQueue.ts  # Offline write queue (localStorage → Supabase)
 │   └── useOnlineStatus.ts  # Network detection
@@ -530,26 +644,29 @@ src/
 │   └── powersync.ts        # Schema + PowerSyncDatabase singleton
 │
 ├── pages/
-│   ├── DashboardPage.tsx       # Stats overview + session streak
+│   ├── DashboardPage.tsx         # Stats overview + session streak
 │   ├── ProjectsPage.tsx
-│   ├── ProjectDetailPage.tsx   # Per-project stats + health score
+│   ├── ProjectDetailPage.tsx     # Per-project stats + health score + share button
 │   ├── SessionsPage.tsx
-│   ├── SessionDetailPage.tsx   # AI Debug Panel - all 8 tabs live here
+│   ├── SessionDetailPage.tsx     # AI Debug Panel - all 8 tabs + share button
 │   ├── FixLibraryPage.tsx
 │   ├── AnalyticsPage.tsx
-│   ├── AIInsightsPage.tsx      # AI usage stats + category breakdown
-│   ├── SyncStatusPage.tsx      # Live PowerSync architecture view
-│   ├── ProfilePage.tsx         # Avatar, GitHub connect/disconnect
+│   ├── AIInsightsPage.tsx        # AI usage stats + category breakdown
+│   ├── SyncStatusPage.tsx        # Live PowerSync architecture view
+│   ├── SharedWithMePage.tsx      # Lists all projects/sessions shared with you
+│   ├── SharedProjectView.tsx     # Read-only project view for invitees
+│   ├── SharedSessionView.tsx     # Read-only session view for invitees
+│   ├── ProfilePage.tsx           # Avatar, GitHub connect/disconnect
 │   ├── SettingsPage.tsx
-│   ├── LoginPage.tsx           # Email + GitHub + Google + forgot password link
+│   ├── LoginPage.tsx             # Email + GitHub + Google + forgot password link
 │   ├── RegisterPage.tsx
-│   ├── ForgotPasswordPage.tsx  # Send magic link reset email
-│   ├── ResetPasswordPage.tsx   # Set new password after clicking link
-│   └── GitHubCallbackPage.tsx  # OAuth callback - reads identity, saves to profile
+│   ├── ForgotPasswordPage.tsx    # Send magic link reset email
+│   ├── ResetPasswordPage.tsx     # Set new password after clicking link
+│   └── GitHubCallbackPage.tsx    # OAuth callback - reads identity, saves to profile
 │
 └── store/
     ├── authStore.ts
-    └── useSyncQueue.ts     # Global sync queue (Zustand)
+    └── useSyncQueue.ts           # Global sync queue (Zustand)
 ```
 
 ---
@@ -565,13 +682,19 @@ Yes. Groq, Supabase, and PowerSync all have generous free tiers. You can self-ho
 <details>
 <summary><b>Is my data private?</b></summary>
 <br/>
-Yes. All data lives in your own Supabase project. Row Level Security is enforced on every table at the database level - no one else can read your sessions, projects, or fixes, including the repo owner.
+Yes. All data lives in your own Supabase project. Row Level Security is enforced on every table at the database level - no one else can read your sessions, projects, or fixes unless you explicitly share them.
 </details>
 
 <details>
 <summary><b>Does offline mode really work?</b></summary>
 <br/>
 Yes. PowerSync syncs all your data to a local SQLite database in the browser on first load. After that, reads are instant with zero network dependency. New sessions and fixes created offline are saved locally and automatically uploaded when you reconnect.
+</details>
+
+<details>
+<summary><b>How does sharing work?</b></summary>
+<br/>
+Open any project or session and click the Share button. Type the email of another registered DevTrace user. They'll immediately see it under "Shared with Me" in their sidebar the next time they log in. You can revoke access at any time from the same Share modal. No email is sent - it's account-to-account sharing only.
 </details>
 
 <details>
@@ -624,7 +747,7 @@ DevTrace AI is submitted to the **PowerSync AI Hackathon 2026**.
 <table width="100%">
 <tr><th align="left">Prize</th><th align="left">Why this qualifies</th></tr>
 <tr><td>🥇 <b>Core Prize</b></td><td>AI-powered developer tool built within the hackathon window using PowerSync as the core sync layer</td></tr>
-<tr><td>🏅 <b>Best Submission Using Supabase</b></td><td>Supabase drives auth (Email · GitHub · Google OAuth · magic link password reset · GitHub account linking), Postgres with RLS on all tables, Storage for avatars, and WAL replication feeding PowerSync</td></tr>
+<tr><td>🏅 <b>Best Submission Using Supabase</b></td><td>Supabase drives auth (Email · GitHub · Google OAuth · magic link password reset · GitHub account linking), Postgres with RLS on all tables, Storage for avatars, WAL replication feeding PowerSync, and the shares table for collaboration</td></tr>
 <tr><td>🏅 <b>Best Local-First App</b></td><td>All reads from local SQLite via PowerSync's <code>useQuery()</code>, offline write queue with auto-sync on reconnect, and a live Sync Status page showing the full architecture and queue state in real time</td></tr>
 </table>
 
