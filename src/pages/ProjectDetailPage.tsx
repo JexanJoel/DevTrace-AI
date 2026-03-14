@@ -119,42 +119,55 @@ const ProjectDetailPage = () => {
         </button>
 
         {/* Header */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6">
-          <div className="flex items-start justify-between flex-wrap gap-4">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
+
+          {/* Title row — stacks on mobile */}
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+
+            {/* Left: name + badges */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-3 flex-wrap">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">{project.name}</h2>
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white break-words">
+                  {project.name}
+                </h2>
                 {project.language && (
-                  <span className={`px-2.5 py-1 rounded-lg text-xs font-medium border ${LANGUAGE_COLORS[project.language] ?? 'bg-gray-100 text-gray-600 border-gray-200'}`}>
+                  <span className={`px-2.5 py-1 rounded-lg text-xs font-medium border flex-shrink-0 ${LANGUAGE_COLORS[project.language] ?? 'bg-gray-100 text-gray-600 border-gray-200'}`}>
                     {LANGUAGE_LABELS[project.language] ?? project.language}
                   </span>
                 )}
                 {project._pending && (
-                  <span className="px-2 py-1 rounded-lg text-xs font-medium bg-orange-50 text-orange-500 border border-orange-200">
+                  <span className="px-2 py-1 rounded-lg text-xs font-medium bg-orange-50 text-orange-500 border border-orange-200 flex-shrink-0">
                     Pending sync
                   </span>
                 )}
               </div>
-              {project.description && <p className="text-gray-400 text-sm mt-1">{project.description}</p>}
+              {project.description && (
+                <p className="text-gray-400 text-sm mt-1.5">{project.description}</p>
+              )}
               <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
                 <Clock size={11} /> Created {new Date(project.created_at).toLocaleDateString()}
               </p>
             </div>
 
-            {/* Action buttons */}
-            <div className="flex items-center gap-2 flex-wrap">
-              {/* Share button */}
+            {/* Right: action buttons — full width on mobile, row on sm+ */}
+            <div className="flex items-center gap-2 flex-shrink-0 flex-wrap sm:flex-nowrap">
               <button
                 onClick={() => setShowShareModal(true)}
-                className="flex items-center gap-1.5 border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950 hover:bg-indigo-100 dark:hover:bg-indigo-900 text-indigo-600 dark:text-indigo-400 px-3 py-2 rounded-xl text-sm font-medium transition"
+                className="flex items-center gap-1.5 border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950 hover:bg-indigo-100 dark:hover:bg-indigo-900 text-indigo-600 dark:text-indigo-400 px-3 py-2 rounded-xl text-sm font-medium transition flex-shrink-0"
               >
-                <Share2 size={14} /> Share
+                <Share2 size={14} />
+                <span>Share</span>
               </button>
-
               {project.github_url && (
-                <a href={project.github_url} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-2 border border-gray-200 dark:border-gray-700 hover:border-gray-300 text-gray-600 dark:text-gray-300 px-3 py-2 rounded-xl text-sm font-medium transition">
-                  <Github size={15} /> View Repo <ExternalLink size={12} />
+                <a
+                  href={project.github_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 border border-gray-200 dark:border-gray-700 hover:border-gray-300 text-gray-600 dark:text-gray-300 px-3 py-2 rounded-xl text-sm font-medium transition flex-shrink-0"
+                >
+                  <Github size={15} />
+                  <span className="hidden sm:inline">View Repo</span>
+                  <ExternalLink size={12} />
                 </a>
               )}
             </div>
@@ -163,8 +176,8 @@ const ProjectDetailPage = () => {
           {/* Stats row */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5">
             {[
-              { label: 'Debug Sessions', value: sessions.length,                               color: 'text-blue-600',  bg: 'bg-blue-50 dark:bg-blue-950' },
-              { label: 'Total Errors',   value: sessions.filter(s => s.error_message).length,  color: 'text-red-600',   bg: 'bg-red-50 dark:bg-red-950' },
+              { label: 'Debug Sessions', value: sessions.length,                                      color: 'text-blue-600',  bg: 'bg-blue-50 dark:bg-blue-950' },
+              { label: 'Total Errors',   value: sessions.filter(s => s.error_message).length,         color: 'text-red-600',   bg: 'bg-red-50 dark:bg-red-950' },
               { label: 'Resolved',       value: sessions.filter(s => s.status === 'resolved').length, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-950' },
             ].map((s, i) => (
               <div key={i} className={`${s.bg} rounded-xl p-3 text-center`}>
@@ -181,6 +194,7 @@ const ProjectDetailPage = () => {
             </div>
           </div>
 
+          {/* Health deductions */}
           {health.deductions.length > 0 && (
             <div className="mt-4 pt-4 border-t border-gray-50 dark:border-gray-800">
               <p className="text-xs font-semibold text-gray-400 mb-2">Health Score Breakdown</p>
@@ -217,10 +231,11 @@ const ProjectDetailPage = () => {
           ))}
         </div>
 
+        {/* Overview tab */}
         {tab === 'overview' && (
           <div className="space-y-5">
             {project.github_url && <GitHubStatsCard githubUrl={project.github_url} />}
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="font-bold text-gray-900 dark:text-white">Debug Sessions</h3>
                 <button onClick={() => setShowModal(true)}
@@ -273,7 +288,7 @@ const ProjectDetailPage = () => {
                           </span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-shrink-0">
                         <StatusBadge status={session.status} />
                         <ChevronRight size={14} className="text-gray-300 group-hover:text-indigo-400 transition" />
                       </div>
@@ -285,10 +300,11 @@ const ProjectDetailPage = () => {
           </div>
         )}
 
+        {/* Settings tab */}
         {tab === 'settings' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
-              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 space-y-4">
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6 space-y-4">
                 <h3 className="font-bold text-gray-900 dark:text-white">Project Settings</h3>
                 <div>
                   <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">Project Name</label>
@@ -314,7 +330,7 @@ const ProjectDetailPage = () => {
               </div>
             </div>
             <div>
-              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-red-100 dark:border-red-900 p-6">
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-red-100 dark:border-red-900 p-5 sm:p-6">
                 <h3 className="font-bold text-red-600 mb-4">Danger Zone</h3>
                 <div className="p-4 bg-red-50 dark:bg-red-950 rounded-xl space-y-3">
                   <div>
