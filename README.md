@@ -26,6 +26,8 @@
 
 DevTrace AI is your **permanent debugging memory** - log bugs, get instant AI analysis, save what works, and share with teammates. Works offline. Remembers everything.
 
+<div align="center">
+
 | | |
 |:--|:--|
 | 🔍 | Every bug gets a permanent structured record |
@@ -33,6 +35,8 @@ DevTrace AI is your **permanent debugging memory** - log bugs, get instant AI an
 | 💾 | Saved as JSONB - persists across reloads |
 | 📶 | Fully offline via PowerSync local SQLite |
 | 🔗 | Share projects and sessions with teammates |
+
+</div>
 
 **The core problem it solves:** Debugging is slow and scattered. You repeat the same mistakes, forget what fixed what, and lose context every time you close a tab. DevTrace AI is your permanent debugging memory.
 
