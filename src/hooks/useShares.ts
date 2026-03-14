@@ -114,10 +114,11 @@ const useShares = () => {
 
   // Look up a user by email — returns their id or null
   const findUserByEmail = async (email: string): Promise<{ id: string; name: string; email: string } | null> => {
+    const cleaned = email.toLowerCase().trim();
     const { data, error } = await supabase
       .from('profiles')
       .select('id, name, email')
-      .eq('email', email.toLowerCase().trim())
+      .ilike('email', cleaned)
       .single();
     if (error || !data) return null;
     return data;
