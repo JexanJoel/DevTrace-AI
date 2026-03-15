@@ -5,108 +5,129 @@ import {
   BarChart2, ArrowRight, Github,
   Menu, X, Wifi, WifiOff,
   Database, Heart, FileText,
-  CheckCircle, Library, Users, Dna, Zap, History, MessageSquare
+  CheckCircle, Library, Users, Dna, Zap, History,
+  MessageSquare, Activity, FolderOpen
 } from 'lucide-react';
 
 /* ─── Marquee data ─────────────────────────────────────────────── */
 const MARQUEE_ITEMS = [
-  { name: 'React',       logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg' },
-  { name: 'TypeScript',  logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg' },
-  { name: 'Supabase',    logo: 'https://www.vectorlogo.zone/logos/supabase/supabase-icon.svg' },
-  { name: 'PowerSync',   logo: 'https://avatars.githubusercontent.com/u/105956274?s=48&v=4' },
-  { name: 'Groq',        logo: 'https://avatars.githubusercontent.com/u/116147397?s=48&v=4' },
-  { name: 'Vite',        logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vitejs/vitejs-original.svg' },
-  { name: 'Tailwind CSS',logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg' },
-  { name: 'Vercel',      logo: 'https://assets.vercel.com/image/upload/v1662130559/nextjs/Icon_dark_background.png' },
-  { name: 'Zustand',     logo: 'https://repository-images.githubusercontent.com/180328715/fca49300-e7f1-11ea-9f51-cfd949b31560' },
-  { name: 'Recharts',    logo: 'https://recharts.org/favicon.ico' },
+  { name: 'React',        logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg' },
+  { name: 'TypeScript',   logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg' },
+  { name: 'Supabase',     logo: 'https://www.vectorlogo.zone/logos/supabase/supabase-icon.svg' },
+  { name: 'PowerSync',    logo: 'https://avatars.githubusercontent.com/u/105956274?s=48&v=4' },
+  { name: 'Groq',         logo: 'https://avatars.githubusercontent.com/u/116147397?s=48&v=4' },
+  { name: 'Vite',         logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vitejs/vitejs-original.svg' },
+  { name: 'Tailwind CSS', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg' },
+  { name: 'Vercel',       logo: 'https://assets.vercel.com/image/upload/v1662130559/nextjs/Icon_dark_background.png' },
+  { name: 'Zustand',      logo: 'https://repository-images.githubusercontent.com/180328715/fca49300-e7f1-11ea-9f51-cfd949b31560' },
+  { name: 'Recharts',     logo: 'https://recharts.org/favicon.ico' },
 ];
 
-/* ─── Features — 8 total ────────────────────────────────────────── */
+/* ─── Features ──────────────────────────────────────────────────── */
 const FEATURES = [
   {
     icon: <Sparkles size={22} />,
     title: 'AI Debug Panel — 8 Tabs',
-    desc: 'Every bug gets a full breakdown: root cause, 3 fix options with code, crash timeline, interactive checklist, follow-up chat, test cases, log analyzer, and architecture review.',
-    color: 'indigo',
-    tag: 'Core',
+    desc: 'Every bug gets a full breakdown: root cause, 3 fix options with code, crash timeline, shared checklist, follow-up chat, test cases, log analyzer, and architecture review.',
+    color: 'indigo', tag: 'Core',
   },
   {
     icon: <Users size={22} />,
     title: 'Live Collaboration',
-    desc: 'Debug together in real time. Presence indicators, a shared live checklist, and team chat — all synced instantly via PowerSync WAL with zero backend code.',
-    color: 'teal',
-    tag: 'New',
+    desc: 'Debug together in real time at both session and project level. Presence indicators, shared checklist, team chat, and activity feed — all via PowerSync WAL with zero backend.',
+    color: 'teal', tag: 'New',
+  },
+  {
+    icon: <Activity size={22} />,
+    title: 'Project Activity Feed',
+    desc: 'Every session created, resolved, or analyzed appears in a live activity feed visible to all project collaborators. Click any event to jump straight to that session.',
+    color: 'cyan', tag: null,
   },
   {
     icon: <History size={22} />,
     title: 'Similar Sessions',
     desc: 'Automatically surfaces past bugs that match your current error — queried from local SQLite with zero network. The tool gets smarter the more you use it.',
-    color: 'amber',
-    tag: null,
+    color: 'amber', tag: null,
   },
   {
     icon: <WifiOff size={22} />,
     title: 'Fully Offline-First',
     desc: 'All reads from local SQLite via PowerSync — zero spinners, zero network dependency. Create and browse sessions without internet. Auto-syncs when connection is restored.',
-    color: 'orange',
-    tag: null,
+    color: 'orange', tag: null,
   },
   {
     icon: <Dna size={22} />,
     title: 'Debug DNA',
-    desc: 'A Supabase Edge Function analyzes your session history server-side and Groq writes your personal error fingerprint — resolution rates by category, habits, strengths, and weaknesses.',
-    color: 'violet',
-    tag: 'Edge Fn',
-  },
-  {
-    icon: <Bug size={22} />,
-    title: 'Session Tracking',
-    desc: 'Log errors with stack traces, code snippets, expected behavior, environment, and severity. Every session is permanent, searchable, and never lost across projects or devices.',
-    color: 'red',
-    tag: null,
+    desc: 'A Supabase Edge Function analyzes your session history server-side and Groq writes your personal error fingerprint — resolution rates, habits, strengths, and weaknesses.',
+    color: 'violet', tag: 'Edge Fn',
   },
   {
     icon: <BookOpen size={22} />,
     title: 'Fix Library',
-    desc: 'Save AI fixes that worked. Filter by language, copy in one click, track usage count. Build a personal knowledge base of solutions that grows smarter with every project.',
-    color: 'green',
-    tag: null,
+    desc: 'Save AI fixes that worked. Filter by language, copy in one click, track usage count. Build a personal knowledge base that grows smarter with every project.',
+    color: 'green', tag: null,
   },
   {
     icon: <BarChart2 size={22} />,
     title: 'Analytics & AI Insights',
-    desc: 'Project health scores, resolution rates, AI confidence trends, error pattern breakdowns, and category insights — all computed locally from your SQLite data with zero server round-trips.',
-    color: 'blue',
-    tag: null,
+    desc: 'Project health scores, resolution rates, AI confidence trends, error pattern breakdowns — all computed locally from SQLite with zero server round-trips.',
+    color: 'blue', tag: null,
   },
 ];
 
 const COLOR_MAP: Record<string, { bg: string; icon: string; tag: string; border: string; glow: string }> = {
   indigo: { bg: 'bg-indigo-50',  icon: 'text-indigo-600',  tag: 'bg-indigo-600 text-white',  border: 'hover:border-indigo-300', glow: 'hover:shadow-indigo-100' },
   teal:   { bg: 'bg-teal-50',    icon: 'text-teal-600',    tag: 'bg-teal-500 text-white',    border: 'hover:border-teal-300',   glow: 'hover:shadow-teal-100'   },
+  cyan:   { bg: 'bg-cyan-50',    icon: 'text-cyan-600',    tag: 'bg-cyan-500 text-white',    border: 'hover:border-cyan-300',   glow: 'hover:shadow-cyan-100'   },
   amber:  { bg: 'bg-amber-50',   icon: 'text-amber-600',   tag: 'bg-amber-500 text-white',   border: 'hover:border-amber-300',  glow: 'hover:shadow-amber-100'  },
   orange: { bg: 'bg-orange-50',  icon: 'text-orange-600',  tag: 'bg-orange-500 text-white',  border: 'hover:border-orange-300', glow: 'hover:shadow-orange-100' },
   violet: { bg: 'bg-violet-50',  icon: 'text-violet-600',  tag: 'bg-violet-600 text-white',  border: 'hover:border-violet-300', glow: 'hover:shadow-violet-100' },
   red:    { bg: 'bg-red-50',     icon: 'text-red-500',     tag: 'bg-red-500 text-white',     border: 'hover:border-red-300',    glow: 'hover:shadow-red-100'    },
   green:  { bg: 'bg-green-50',   icon: 'text-green-600',   tag: 'bg-green-600 text-white',   border: 'hover:border-green-300',  glow: 'hover:shadow-green-100'  },
-  purple: { bg: 'bg-purple-50',  icon: 'text-purple-600',  tag: 'bg-purple-600 text-white',  border: 'hover:border-purple-300', glow: 'hover:shadow-purple-100' },
   blue:   { bg: 'bg-blue-50',    icon: 'text-blue-600',    tag: 'bg-blue-600 text-white',    border: 'hover:border-blue-300',   glow: 'hover:shadow-blue-100'   },
 };
 
 /* ─── Steps ─────────────────────────────────────────────────────── */
 const STEPS = [
-  { icon: <FileText size={20} />,     step: '01', title: 'Create a project',         desc: 'Set up a project, pick your language, and optionally link your GitHub repo for stats and context.' },
-  { icon: <Bug size={20} />,          step: '02', title: 'Log the bug',              desc: 'Paste your error message and stack trace. Add the relevant code snippet, tag severity, and choose the environment. Saved instantly — even offline.' },
-  { icon: <History size={20} />,      step: '03', title: 'See similar past bugs',    desc: "DevTrace AI instantly queries your local SQLite for similar errors — zero network. If you've seen this bug before, it surfaces immediately.", badge: 'Zero network', color: 'amber' },
-  { icon: <Sparkles size={20} />,     step: '04', title: 'Get full AI analysis',     desc: 'Click Analyze Bug — Groq + Llama 3.3 70B returns root cause, 3 fix options with code, a crash timeline, an interactive checklist, and more. All saved as JSONB.' },
-  { icon: <Users size={20} />,        step: '05', title: 'Debug with your team',     desc: 'Invite a teammate — they join the live session instantly. Presence indicators appear, the checklist syncs in real time, and team chat opens automatically. All via PowerSync.', badge: 'Live · PowerSync', color: 'teal' },
-  { icon: <CheckCircle size={20} />,  step: '06', title: 'Work through the fix',     desc: 'Use the 8-tab panel: chat with the AI about your specific bug, check off action items, paste logs for noise filtering, review your architecture.' },
-  { icon: <Library size={20} />,      step: '07', title: 'Save to Fix Library',      desc: 'Save what worked. Your Fix Library grows over time — filter by language, copy fixes in one click, reuse across projects.' },
-  { icon: <Dna size={20} />,          step: '08', title: 'Generate your Debug DNA',  desc: 'Hit "Generate My DNA" — a Supabase Edge Function queries your history server-side, Groq writes your personal debugging fingerprint. Export as Markdown.', badge: 'Edge Function', color: 'violet' },
+  {
+    icon: <FileText size={20} />, step: '01', title: 'Create a project',
+    desc: 'Set up a project, pick your language, and optionally link your GitHub repo for stats and context.',
+  },
+  {
+    icon: <Bug size={20} />, step: '02', title: 'Log the bug',
+    desc: 'Paste your error message and stack trace. Add the relevant code snippet, tag severity, and choose the environment. Saved instantly — even offline.',
+  },
+  {
+    icon: <History size={20} />, step: '03', title: 'See similar past bugs',
+    desc: "DevTrace AI instantly queries your local SQLite for similar errors — zero network. If you've seen this bug before, it surfaces immediately.",
+    badge: 'Zero network', color: 'amber',
+  },
+  {
+    icon: <Sparkles size={20} />, step: '04', title: 'Get full AI analysis',
+    desc: 'Click Analyze Bug — Groq + Llama 3.3 70B returns root cause, 3 fix options with code, a crash timeline, an interactive checklist, and more. All saved as JSONB.',
+  },
+  {
+    icon: <Users size={20} />, step: '05', title: 'Debug with your team',
+    desc: 'Invite a teammate — presence indicators appear, the checklist syncs live, team chat opens, and every action logs to the project activity feed. All via PowerSync.',
+    badge: 'Live · PowerSync', color: 'teal',
+  },
+  {
+    icon: <Activity size={20} />, step: '06', title: 'Track project activity',
+    desc: 'The project activity feed shows every session created, resolved, or analyzed by any collaborator — synced in real time. Click any event to jump to that session.',
+    badge: 'Real-time', color: 'cyan',
+  },
+  {
+    icon: <Library size={20} />, step: '07', title: 'Save to Fix Library',
+    desc: 'Save what worked. Your Fix Library grows over time — filter by language, copy fixes in one click, reuse across projects.',
+  },
+  {
+    icon: <Dna size={20} />, step: '08', title: 'Generate your Debug DNA',
+    desc: 'Hit "Generate My DNA" — a Supabase Edge Function queries your history server-side, Groq writes your personal debugging fingerprint. Export as Markdown.',
+    badge: 'Edge Function', color: 'violet',
+  },
 ];
 
-/* ─── Marquee component ─────────────────────────────────────────── */
+/* ─── Marquee ───────────────────────────────────────────────────── */
 const Marquee = () => {
   const items = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS];
   return (
@@ -128,20 +149,23 @@ const Marquee = () => {
   );
 };
 
-/* ─── Step badge color map ───────────────────────────────────────── */
+/* ─── Step style maps ───────────────────────────────────────────── */
 const STEP_BADGE: Record<string, string> = {
   amber:  'bg-amber-100 text-amber-600',
   teal:   'bg-teal-100 text-teal-600',
+  cyan:   'bg-cyan-100 text-cyan-600',
   violet: 'bg-violet-100 text-violet-600',
 };
 const STEP_BORDER: Record<string, string> = {
   amber:  'border-amber-200 hover:border-amber-300',
   teal:   'border-teal-200 hover:border-teal-300',
+  cyan:   'border-cyan-200 hover:border-cyan-300',
   violet: 'border-violet-200 hover:border-violet-300',
 };
 const STEP_ICON_BG: Record<string, string> = {
   amber:  'bg-gradient-to-br from-amber-500 to-orange-500 shadow-amber-200',
   teal:   'bg-gradient-to-br from-teal-500 to-indigo-600 shadow-teal-200',
+  cyan:   'bg-gradient-to-br from-cyan-500 to-teal-600 shadow-cyan-200',
   violet: 'bg-gradient-to-br from-violet-600 to-indigo-600 shadow-violet-200',
 };
 
@@ -168,10 +192,8 @@ const LandingPage = () => {
               className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition px-3 py-2">
               <Github size={16} /> GitHub
             </a>
-            <button onClick={() => navigate('/login')}
-              className="text-sm text-gray-600 hover:text-gray-900 font-medium transition px-3 py-2">Sign in</button>
-            <button onClick={() => navigate('/register')}
-              className="text-sm bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl transition">
+            <button onClick={() => navigate('/login')} className="text-sm text-gray-600 hover:text-gray-900 font-medium transition px-3 py-2">Sign in</button>
+            <button onClick={() => navigate('/register')} className="text-sm bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl transition">
               Get started free
             </button>
           </div>
@@ -209,6 +231,9 @@ const LandingPage = () => {
             <span className="inline-flex items-center gap-1.5 bg-teal-50 border border-teal-100 text-teal-700 text-xs font-medium px-3 py-1.5 rounded-full">
               <Users size={12} /> Live Collaboration
             </span>
+            <span className="inline-flex items-center gap-1.5 bg-cyan-50 border border-cyan-100 text-cyan-700 text-xs font-medium px-3 py-1.5 rounded-full">
+              <Activity size={12} /> Activity Feed
+            </span>
             <span className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-100 text-amber-700 text-xs font-medium px-3 py-1.5 rounded-full">
               <History size={12} /> Similar Sessions
             </span>
@@ -217,7 +242,7 @@ const LandingPage = () => {
             </span>
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-5 sm:mb-6">
-            Your permanent<br />
+            Your team's permanent<br />
             <span className="text-indigo-600">debugging memory.</span>
           </h1>
           <p className="text-base sm:text-xl text-gray-500 max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed px-2">
@@ -245,7 +270,7 @@ const LandingPage = () => {
               <div className="w-3 h-3 rounded-full bg-red-500" />
               <div className="w-3 h-3 rounded-full bg-yellow-500" />
               <div className="w-3 h-3 rounded-full bg-green-500" />
-              <span className="ml-2 text-gray-500 text-xs font-mono">devtrace · session #42</span>
+              <span className="ml-2 text-gray-500 text-xs font-mono">devtrace · project: api-service</span>
               <span className="ml-auto flex items-center gap-1 text-xs text-orange-400 font-mono">
                 <WifiOff size={10} /> offline
               </span>
@@ -273,6 +298,13 @@ const LandingPage = () => {
                 </div>
               </div>
               <div className="border-t border-gray-800 pt-3 flex items-start gap-3">
+                <span className="text-cyan-400 flex-shrink-0">▶</span>
+                <div>
+                  <p className="text-cyan-300">Project activity · Sarah resolved "Auth token expired"</p>
+                  <p className="text-gray-400 text-xs mt-1">Activity feed · synced to all collaborators · click to view</p>
+                </div>
+              </div>
+              <div className="border-t border-gray-800 pt-3 flex items-start gap-3">
                 <span className="text-indigo-400 flex-shrink-0">⚡</span>
                 <div>
                   <p className="text-indigo-300">AI Analysis · 92% confidence · 8 tabs</p>
@@ -282,7 +314,7 @@ const LandingPage = () => {
               <div className="border-t border-gray-800 pt-3 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <span className="text-green-400">✓</span>
-                  <p className="text-green-300">Resolved · saved to Fix Library</p>
+                  <p className="text-green-300">Resolved · logged to activity feed · saved to Fix Library</p>
                 </div>
                 <span className="text-xs text-gray-500 font-mono">synced offline</span>
               </div>
@@ -386,7 +418,9 @@ const LandingPage = () => {
 
       {/* ── Live Collaboration callout ── */}
       <section className="py-14 sm:py-20 px-4 sm:px-6">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-5xl mx-auto space-y-5">
+
+          {/* Session-level collab */}
           <div className="bg-gradient-to-br from-teal-600 to-indigo-600 rounded-2xl p-6 sm:p-10 text-white">
             <div className="flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-10">
               <div className="flex-shrink-0">
@@ -396,22 +430,17 @@ const LandingPage = () => {
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2 flex-wrap">
-                  <h2 className="text-xl sm:text-2xl font-bold">Live Collaboration</h2>
-                  <span className="text-[10px] font-bold bg-white/20 text-white px-2 py-1 rounded-lg">
-                    Powered by PowerSync
-                  </span>
-                  <span className="text-[10px] font-bold bg-teal-400/30 text-white px-2 py-1 rounded-lg">New</span>
+                  <h2 className="text-xl sm:text-2xl font-bold">Session Collaboration</h2>
+                  <span className="text-[10px] font-bold bg-white/20 text-white px-2 py-1 rounded-lg">Powered by PowerSync</span>
                 </div>
                 <p className="text-teal-100 text-sm sm:text-base leading-relaxed mb-5">
-                  Share a session with a teammate and debug together in real time. Presence indicators show who's in the session,
-                  the AI checklist syncs live across all collaborators, and team chat delivers messages instantly — all via
-                  PowerSync WAL with zero custom backend code.
+                  Open a shared session and debug together in real time. Presence indicators show who's in the session, the AI checklist syncs live across all participants, and team chat delivers messages instantly — all via PowerSync WAL with zero backend code.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {[
                     { icon: <Users size={14} />,         label: 'Live Presence',    sub: 'See who is in the session' },
                     { icon: <CheckCircle size={14} />,   label: 'Shared Checklist', sub: 'Syncs instantly via PowerSync' },
-                    { icon: <MessageSquare size={14} />, label: 'Team Chat',        sub: 'Real-time messages, no polling' },
+                    { icon: <MessageSquare size={14} />, label: 'Team Chat',        sub: 'Real-time, no polling' },
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-2.5 bg-white/10 rounded-xl px-3 py-2.5">
                       <div className="text-teal-200 flex-shrink-0">{item.icon}</div>
@@ -425,6 +454,42 @@ const LandingPage = () => {
               </div>
             </div>
           </div>
+
+          {/* Project-level collab */}
+          <div className="bg-gradient-to-br from-cyan-600 to-teal-600 rounded-2xl p-6 sm:p-10 text-white">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-10">
+              <div className="flex-shrink-0">
+                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
+                  <FolderOpen size={32} className="text-white" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                  <h2 className="text-xl sm:text-2xl font-bold">Project Collaboration</h2>
+                  <span className="text-[10px] font-bold bg-white/20 text-white px-2 py-1 rounded-lg">New</span>
+                </div>
+                <p className="text-cyan-100 text-sm sm:text-base leading-relaxed mb-5">
+                  Collaboration extends to the entire project. See who's browsing the project right now, chat with your team about the project as a whole, and watch a live activity feed show every session created, resolved, or analyzed by any collaborator.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {[
+                    { icon: <Users size={14} />,         label: 'Project Presence', sub: 'Avatar stack on every project' },
+                    { icon: <Activity size={14} />,      label: 'Activity Feed',    sub: 'Every event logged in real time' },
+                    { icon: <MessageSquare size={14} />, label: 'Project Chat',     sub: 'Team discussion at project level' },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-2.5 bg-white/10 rounded-xl px-3 py-2.5">
+                      <div className="text-cyan-200 flex-shrink-0">{item.icon}</div>
+                      <div>
+                        <p className="text-xs font-semibold text-white">{item.label}</p>
+                        <p className="text-xs text-cyan-200">{item.sub}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </section>
 
@@ -441,14 +506,10 @@ const LandingPage = () => {
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2 flex-wrap">
                   <h2 className="text-xl sm:text-2xl font-bold">Debug DNA</h2>
-                  <span className="text-[10px] font-bold bg-white/20 text-white px-2 py-1 rounded-lg">
-                    Supabase Edge Function
-                  </span>
+                  <span className="text-[10px] font-bold bg-white/20 text-white px-2 py-1 rounded-lg">Supabase Edge Function</span>
                 </div>
                 <p className="text-violet-100 text-sm sm:text-base leading-relaxed mb-5">
-                  After enough sessions, DevTrace AI builds your personal error fingerprint. A Supabase Edge Function
-                  queries your history server-side, computes your patterns, then Groq writes a personalized narrative
-                  about how you debug — your strengths, blind spots, and habits.
+                  After enough sessions, DevTrace AI builds your personal error fingerprint. A Supabase Edge Function queries your history server-side, computes your patterns, then Groq writes a personalized narrative about how you debug — your strengths, blind spots, and habits.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {[
@@ -478,28 +539,23 @@ const LandingPage = () => {
             <span className="inline-flex items-center gap-1.5 bg-indigo-50 border border-indigo-100 text-indigo-600 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
               <Zap size={12} /> Everything included
             </span>
-            <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Everything you need to debug seriously
-            </h2>
+            <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-4">Everything you need to debug seriously</h2>
             <p className="text-gray-400 text-base sm:text-lg max-w-xl mx-auto">
-              Not just a fix generator — a complete debugging assistant that gets smarter over time
+              Not just a fix generator — a complete team debugging platform that gets smarter over time
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
             {FEATURES.map((f, i) => {
               const c = COLOR_MAP[f.color];
               return (
-                <div key={i}
-                  className={`group relative bg-white rounded-2xl border border-gray-100 p-5 sm:p-6 transition-all duration-300 hover:shadow-lg ${c.border} ${c.glow} cursor-default overflow-hidden`}>
+                <div key={i} className={`group relative bg-white rounded-2xl border border-gray-100 p-5 sm:p-6 transition-all duration-300 hover:shadow-lg ${c.border} ${c.glow} cursor-default overflow-hidden`}>
                   <div className={`absolute inset-0 ${c.bg} opacity-0 group-hover:opacity-30 transition-opacity duration-300 rounded-2xl`} />
                   <div className="relative">
                     <div className="flex items-start justify-between mb-4">
                       <div className={`w-11 h-11 ${c.bg} rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}>
                         <span className={c.icon}>{f.icon}</span>
                       </div>
-                      {f.tag && (
-                        <span className={`text-[10px] font-bold px-2 py-1 rounded-lg flex-shrink-0 ${c.tag}`}>{f.tag}</span>
-                      )}
+                      {f.tag && <span className={`text-[10px] font-bold px-2 py-1 rounded-lg flex-shrink-0 ${c.tag}`}>{f.tag}</span>}
                     </div>
                     <h3 className="font-bold text-gray-900 mb-2 text-sm sm:text-base leading-snug">{f.title}</h3>
                     <p className="text-gray-400 text-sm leading-relaxed">{f.desc}</p>
@@ -508,10 +564,12 @@ const LandingPage = () => {
               );
             })}
           </div>
+
+          {/* Stats bar */}
           <div className="mt-10 sm:mt-12 grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
               { value: '8',    label: 'AI analysis tabs',      color: 'text-indigo-600' },
-              { value: '8',    label: 'synced tables',          color: 'text-green-600'  },
+              { value: '11',   label: 'synced tables',          color: 'text-green-600'  },
               { value: '0ms',  label: 'read latency (offline)', color: 'text-orange-500' },
               { value: '100%', label: 'server-side AI calls',   color: 'text-violet-600' },
             ].map((s, i) => (
@@ -547,9 +605,7 @@ const LandingPage = () => {
                     <div className={`flex-1 bg-white border rounded-2xl p-4 sm:p-5 hover:shadow-sm transition min-w-0 ${border}`}>
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <h3 className="font-bold text-gray-900 text-sm sm:text-base">{s.title}</h3>
-                        {s.badge && (
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${badgeCls}`}>{s.badge}</span>
-                        )}
+                        {s.badge && <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${badgeCls}`}>{s.badge}</span>}
                       </div>
                       <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">{s.desc}</p>
                     </div>
@@ -587,7 +643,7 @@ const LandingPage = () => {
                 </div>
                 <p className="text-xs font-semibold text-green-600 bg-green-50 border border-green-100 px-2.5 py-1 rounded-lg w-fit mb-4">Source of truth</p>
                 <ul className="space-y-2.5 text-sm text-gray-500 flex-1">
-                  {['Postgres + RLS on 8 tables','Email, GitHub & Google OAuth','Magic link password reset','GitHub account linking','Storage for avatars','WAL replication to PowerSync','Edge Functions for AI + Debug DNA'].map((item, i) => (
+                  {['Postgres + RLS on 11 tables','Email, GitHub & Google OAuth','Magic link password reset','GitHub account linking','Storage for avatars','WAL replication to PowerSync','Edge Functions for AI + Debug DNA'].map((item, i) => (
                     <li key={i} className="flex items-start gap-2.5">
                       <span className="text-green-500 mt-0.5 flex-shrink-0 font-bold">✓</span><span>{item}</span>
                     </li>
@@ -618,7 +674,7 @@ const LandingPage = () => {
                 </div>
                 <p className="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-lg w-fit mb-4">Offline + collab engine</p>
                 <ul className="space-y-2.5 text-sm text-gray-500 flex-1">
-                  {['Local SQLite synced to browser','All reads instant — 0ms latency','Live collaboration via WAL sync','Shared checklist + team chat','Offline write queue via mutations','Similar Sessions on local SQLite','Live Sync Status page built in'].map((item, i) => (
+                  {['11 tables synced to local SQLite','All reads instant — 0ms latency','Session + project collaboration','Activity feed · chat · presence','Offline write queue via mutations','Similar Sessions on local SQLite','5 PowerSync bucket definitions'].map((item, i) => (
                     <li key={i} className="flex items-start gap-2.5">
                       <span className="text-indigo-500 mt-0.5 flex-shrink-0 font-bold">✓</span><span>{item}</span>
                     </li>

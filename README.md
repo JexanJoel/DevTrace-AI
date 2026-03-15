@@ -4,7 +4,7 @@
 
 <img src="https://img.shields.io/badge/⌨️-DevTrace_AI-4f46e5?style=for-the-badge&labelColor=1e1b4b&color=4f46e5" height="36"/>
 
-<h2>AI powered debugging assistant for developers</h2>
+<h2>AI powered team debugging assistant</h2>
 
 <br/>
 
@@ -24,7 +24,7 @@
 
 ## What is DevTrace AI?
 
-DevTrace AI is your **permanent debugging memory** - log bugs, get instant AI analysis, save what works, and debug with teammates in real time. Works offline. Remembers everything.
+DevTrace AI is your team's **permanent debugging memory** - log bugs, get instant AI analysis, save what works, and debug with teammates in real time at both session and project level. Works offline. Remembers everything.
 
 <div align="center">
 
@@ -34,14 +34,15 @@ DevTrace AI is your **permanent debugging memory** - log bugs, get instant AI an
 | 🤖 | Full AI breakdown - root cause, fixes, timeline |
 | 🧬 | Debug DNA - your personal error fingerprint |
 | 🔁 | Similar Sessions - instantly finds bugs you've seen before |
-| 👥 | Live Collaboration - debug together with shared checklist + chat |
+| 👥 | Session Collaboration - shared checklist, presence, team chat |
+| 📋 | Project Collaboration - activity feed, project chat, project presence |
 | 💾 | Saved as JSONB - persists across reloads |
 | 📶 | Fully offline via PowerSync local SQLite |
 | 🔗 | Share projects and sessions with teammates |
 
 </div>
 
-**The core problem it solves:** Debugging is slow and scattered. You repeat the same mistakes, forget what fixed what, and lose context every time you close a tab. DevTrace AI is your permanent debugging memory — and now your team's too.
+**The core problem it solves:** Debugging is slow and scattered. You repeat the same mistakes, forget what fixed what, and lose context every time you close a tab. DevTrace AI is your team's permanent debugging memory.
 
 ---
 
@@ -53,8 +54,9 @@ DevTrace AI is your **permanent debugging memory** - log bugs, get instant AI an
 3. Read the 8 tab breakdown    ->  Overview, Fixes, Timeline, Checklist, Chat, Tests, Logs, Structure
 4. See similar past bugs       ->  "You've seen this before" card queries local SQLite instantly
 5. Invite a teammate           ->  They join the session - presence, checklist, and chat sync live
-6. Save what worked            ->  Fix goes to your Fix Library, tagged and searchable forever
-7. Generate your Debug DNA     ->  Supabase Edge Function analyzes your patterns + Groq writes your fingerprint
+6. Watch the activity feed     ->  Every session event logged to project feed, visible to all collaborators
+7. Save what worked            ->  Fix goes to your Fix Library, tagged and searchable forever
+8. Generate your Debug DNA     ->  Supabase Edge Function analyzes your patterns + Groq writes your fingerprint
 ```
 
 ### Read vs Write - the data flow
@@ -92,7 +94,7 @@ Every session gets a full structured breakdown powered by **Groq + Llama 3.3 70B
 
 ---
 
-## Live Collaboration - Debug Together
+## Live Collaboration - Session Level
 
 DevTrace AI turns a debug session into a **shared live workspace**. When a teammate opens a session you've shared, you both see each other's presence, share a synced checklist, and can chat in real time - all powered by PowerSync with zero backend code.
 
@@ -120,15 +122,13 @@ Both can send chat messages — delivered via PowerSync, zero polling
 
 ### How it works technically
 
-Three new tables power collaboration — all synced via PowerSync WAL:
+Three tables power session collaboration — all synced via PowerSync WAL:
 
 ```
 session_presence   — one row per user per session, last_seen_at updated every 30s
 session_checklist  — one row per checklist item, checked/unchecked state + who did it
 session_chat       — flat message log tied to the session
 ```
-
-All three tables are included in PowerSync sync rules with per-session bucket definitions, so each user only receives data for sessions they have access to.
 
 ```typescript
 // Presence heartbeat - fires on mount, every 30s, cleans up on unmount
@@ -152,17 +152,66 @@ await powerSync.execute(
 );
 ```
 
-### Shared view collaboration
+---
 
-When a teammate opens a session via **Shared with Me**, they are fully present in the collaboration layer:
+## Live Collaboration - Project Level
+
+Collaboration extends beyond individual sessions to the **entire project**. When a project is shared, all collaborators see each other's presence at the project level, can chat about the project as a whole, and watch a live activity feed showing every action taken by any team member.
+
+```
+Owner opens project
+         |
+Teammate opens the shared project
+         |
+project_presence row written via powerSync.execute()
+         |
+Owner sees avatar stack + live dot in project header
+         |
+Joel creates a new session -> project_activity row logged automatically
+         |
+Sarah sees "Joel created Bug: Auth token expired" in activity feed instantly
+         |
+Sarah resolves a session -> "Sarah resolved Bug: Auth token expired" logged
+         |
+Both can chat at project level — Project Chat syncs via PowerSync
+```
+
+### What syncs at project level
+
+- **Project Presence** - Avatar stack in the project header showing who is browsing the project right now
+- **Activity Feed** - Every session created, resolved, analyzed, updated, or deleted is logged as an event and synced to all collaborators instantly. Clickable — jump straight to that session
+- **Project Chat** - Team discussion tied to the project as a whole, separate from session-level chat
+
+### How it works technically
+
+Three additional tables power project collaboration:
+
+```
+project_presence   — one row per user per project, heartbeat every 30s
+project_activity   — event log: session_created | session_resolved | session_analyzed | session_updated | session_deleted
+project_chat       — flat team messages at project level
+```
+
+Activity logging is wired directly into `useSessions.ts` — every `createSession`, `updateSession`, and `deleteSession` call automatically logs the appropriate event to `project_activity` via `powerSync.execute()`:
+
+```typescript
+// Automatically logged on session create
+await logProjectActivity(user, projectId, 'session_created', id, title);
+
+// Automatically logged when status changes to resolved
+await logProjectActivity(user, projectId, 'session_resolved', id, title);
+
+// Automatically logged when AI analysis runs
+await logProjectActivity(user, projectId, 'session_analyzed', id, title);
+```
+
+### Shared view
+
+When a teammate opens a project via **Shared with Me**, they have full access to the project collaboration layer:
 - Their presence is broadcast to the owner immediately
-- They can read and send chat messages
-- They can see the live checklist state (read-only - cannot toggle)
-- The owner sees a live collaboration banner the moment they open the shared session
-
-### Demo moment
-
-Open the same session in two browser tabs (or two different accounts). Check off a checklist item in one tab. Watch it appear in the other tab — **instantly, with zero network requests visible in the DevTools Network tab**. That's PowerSync's local-first sync doing what it was built for.
+- They can read and send project chat messages
+- They can browse the full activity feed and click any event to navigate to that session
+- A dedicated **Activity** tab sits alongside the Sessions tab
 
 ---
 
@@ -187,29 +236,13 @@ Sessions with 2+ matching keywords surfaced
 Click any match -> navigate to that session to see how you fixed it
 ```
 
-**Why this matters:** The tool gets smarter the more you use it. After logging 10-20 sessions, recurring error patterns start surfacing automatically - before you even click Analyze.
-
-**What it shows per match:**
-- Session title and error message preview
-- Severity badge and resolution status (green checkmark if resolved)
-- How long ago the bug occurred
-- Keyword match count badge (e.g. "4 keywords match")
-
-The card is invisible when there are no matches - it never shows empty state noise.
+**Why this matters:** The tool gets smarter the more you use it. After logging 10-20 sessions, recurring error patterns start surfacing automatically.
 
 ---
 
 ## Debug DNA - Your Personal Error Fingerprint
 
 DevTrace AI builds a **personalized analysis of your debugging patterns** using a Supabase Edge Function + Groq.
-
-Click **"Generate My DNA"** on the Debug DNA page and the Edge Function:
-
-1. Queries your `debug_sessions` server-side using the Supabase service role
-2. Computes category resolution rates, severity distribution, fix preferences, weekly activity, avg AI confidence, and busiest debugging day
-3. Sends the structured stats to Groq + Llama 3.3 70B
-4. Groq generates a **personalized narrative** - not just charts, but actual sentences about your specific patterns
-5. Returns everything back to the client for display + Markdown export
 
 ```
 User clicks "Generate My DNA"
@@ -225,14 +258,6 @@ Groq + Llama 3.3 70B generates personalized narrative
 Debug DNA page renders + export as Markdown
 ```
 
-**What it shows:**
-- AI-generated narrative about your debugging profile
-- Category breakdown with resolution rates per error type
-- "You Excel At" vs "Needs Attention" split
-- Severity distribution across all sessions
-- Weekly activity chart (last 4 weeks)
-- Your habits - busiest day, preferred fix type, open vs resolved counts
-
 ---
 
 ## How DevTrace AI Uses Supabase
@@ -244,13 +269,13 @@ Supabase is the **source of truth and auth backbone** for the entire app.
 - **Email + Password** - `supabase.auth.signInWithPassword()`
 - **GitHub OAuth** - `signInWithOAuth({ provider: 'github' })`
 - **Google OAuth** - `signInWithOAuth({ provider: 'google' })`
-- **Password Reset** - `resetPasswordForEmail()` -> branded magic link email -> `/reset-password` -> `updateUser({ password })`
-- **GitHub Linking** - `linkIdentity({ provider: 'github' })` -> `/auth/callback` -> username saved to `profiles`
+- **Password Reset** - `resetPasswordForEmail()` -> branded magic link -> `/reset-password`
+- **GitHub Linking** - `linkIdentity({ provider: 'github' })` -> username saved to `profiles`
 - **Session sync** - `onAuthStateChange()` keeps Zustand `authStore` live across all tabs
 
 ---
 
-### 🗄️ Database - Postgres + RLS
+### 🗄️ Database - Postgres + RLS (11 tables)
 
 Every table has Row Level Security enabled.
 
@@ -261,9 +286,12 @@ Every table has Row Level Security enabled.
 <tr><td><code>debug_sessions</code></td><td>Full session data including ai_analysis JSONB</td></tr>
 <tr><td><code>fixes</code></td><td>Fix library entries with tags and use count</td></tr>
 <tr><td><code>shares</code></td><td>Access grants between users for projects and sessions</td></tr>
-<tr><td><code>session_presence</code></td><td>Live presence — one row per user per session, heartbeat every 30s</td></tr>
-<tr><td><code>session_checklist</code></td><td>Shared checklist state — one row per item, syncs who checked what</td></tr>
-<tr><td><code>session_chat</code></td><td>Flat team chat messages tied to a session</td></tr>
+<tr><td><code>session_presence</code></td><td>Live presence per user per session, heartbeat every 30s</td></tr>
+<tr><td><code>session_checklist</code></td><td>Shared checklist state — one row per item, who checked what</td></tr>
+<tr><td><code>session_chat</code></td><td>Team chat messages tied to a session</td></tr>
+<tr><td><code>project_presence</code></td><td>Live presence per user per project, heartbeat every 30s</td></tr>
+<tr><td><code>project_activity</code></td><td>Event log — session created/resolved/analyzed/updated/deleted</td></tr>
+<tr><td><code>project_chat</code></td><td>Team chat messages tied to a project</td></tr>
 </table>
 
 ---
@@ -284,41 +312,46 @@ Every table has Row Level Security enabled.
 ### 🔗 WAL Replication -> PowerSync
 
 ```sql
--- All 8 tables replicated via WAL
+-- All 11 tables replicated via WAL
 alter publication powersync add table
   profiles, projects, debug_sessions, fixes, shares,
-  session_presence, session_checklist, session_chat;
+  session_presence, session_checklist, session_chat,
+  project_presence, project_activity, project_chat;
 ```
 
 ---
 
 ## How DevTrace AI Uses PowerSync
 
-PowerSync is the **offline engine and real-time collaboration layer**.
+PowerSync is the **offline engine and real-time collaboration layer** — powering both session-level and project-level collaboration with zero custom backend code.
 
 ### 📖 Read path - always instant
 
-Every list, detail page, dashboard, analytics view, Similar Sessions card, and collaboration state reads from local SQLite:
-
 ```typescript
-// All zero-network reads
-const { data: sessions }      = useQuery('SELECT * FROM debug_sessions WHERE user_id = ?', [uid]);
-const { data: collaborators } = useQuery('SELECT * FROM session_presence WHERE session_id = ?', [id]);
-const { data: checklist }     = useQuery('SELECT * FROM session_checklist WHERE session_id = ?', [id]);
-const { data: messages }      = useQuery('SELECT * FROM session_chat WHERE session_id = ?', [id]);
+// All zero-network reads — local SQLite
+const { data: sessions }          = useQuery('SELECT * FROM debug_sessions WHERE user_id = ?', [uid]);
+const { data: collaborators }     = useQuery('SELECT * FROM session_presence WHERE session_id = ?', [id]);
+const { data: checklist }         = useQuery('SELECT * FROM session_checklist WHERE session_id = ?', [id]);
+const { data: sessionMessages }   = useQuery('SELECT * FROM session_chat WHERE session_id = ?', [id]);
+const { data: projectPresence }   = useQuery('SELECT * FROM project_presence WHERE project_id = ?', [pid]);
+const { data: activityFeed }      = useQuery('SELECT * FROM project_activity WHERE project_id = ? ORDER BY created_at DESC LIMIT 50', [pid]);
+const { data: projectMessages }   = useQuery('SELECT * FROM project_chat WHERE project_id = ?', [pid]);
 ```
 
 ---
 
 ### ✍️ Write path - PowerSync mutation queue
 
-All writes go through `powerSync.execute()` - local SQLite first, uploaded automatically:
-
 ```typescript
-await powerSync.execute(`INSERT INTO debug_sessions ...`, [...]);
+// Session collaboration
 await powerSync.execute(`INSERT INTO session_presence ...`, [...]);
 await powerSync.execute(`UPDATE session_checklist SET checked = ? ...`, [...]);
 await powerSync.execute(`INSERT INTO session_chat ...`, [...]);
+
+// Project collaboration
+await powerSync.execute(`INSERT INTO project_presence ...`, [...]);
+await powerSync.execute(`INSERT INTO project_activity ...`, [...]);  // auto-logged by useSessions
+await powerSync.execute(`INSERT INTO project_chat ...`, [...]);
 ```
 
 **Large blob exception:** `ai_analysis` goes direct to Supabase to avoid overloading the WASM crud queue, then syncs back via WAL.
@@ -331,9 +364,10 @@ await powerSync.execute(`INSERT INTO session_chat ...`, [...]);
 <tr><th align="left">State</th><th align="left">What happens</th></tr>
 <tr><td>🟢 App opens online</td><td>PowerSync connects and streams latest changes from Supabase</td></tr>
 <tr><td>🟢 User reads data</td><td><code>useQuery()</code> returns from local SQLite - instant, 0ms</td></tr>
-<tr><td>🟢 User opens a session</td><td>Similar Sessions queries SQLite, presence heartbeat fires, collaboration state loads</td></tr>
+<tr><td>🟢 User opens a session</td><td>Similar Sessions queries SQLite, presence heartbeat fires, all collab state loads</td></tr>
 <tr><td>🟢 Teammate joins session</td><td>Presence row syncs via WAL - owner sees banner within 1-2 seconds</td></tr>
-<tr><td>🟢 Checklist item checked</td><td>SQLite updated instantly, WAL syncs to all collaborators</td></tr>
+<tr><td>🟢 Session resolved</td><td>project_activity row logged automatically - all project collaborators see it</td></tr>
+<tr><td>🟢 Activity feed viewed</td><td>Reads from local SQLite - zero network, instant render</td></tr>
 <tr><td>🟠 Internet drops</td><td>Orange banner appears - all reads still work, writes queue locally</td></tr>
 <tr><td>🟠 User creates offline</td><td><code>powerSync.execute()</code> writes to SQLite, upload queued automatically</td></tr>
 <tr><td>🟢 Internet returns</td><td>PowerSync flushes queue to Supabase, WAL syncs delta back down</td></tr>
@@ -341,7 +375,7 @@ await powerSync.execute(`INSERT INTO session_chat ...`, [...]);
 
 ---
 
-### ⚙️ Sync rules
+### ⚙️ Sync rules (5 bucket definitions)
 
 ```json
 {
@@ -372,31 +406,27 @@ await powerSync.execute(`INSERT INTO session_chat ...`, [...]);
         "SELECT * FROM session_checklist WHERE session_id = bucket.session_id",
         "SELECT * FROM session_chat WHERE session_id = bucket.session_id"
       ]
+    },
+    "owned_project_collab": {
+      "parameters": "SELECT id as project_id FROM projects WHERE user_id = request.user_id()",
+      "data": [
+        "SELECT * FROM project_presence WHERE project_id = bucket.project_id",
+        "SELECT * FROM project_activity WHERE project_id = bucket.project_id",
+        "SELECT * FROM project_chat WHERE project_id = bucket.project_id"
+      ]
+    },
+    "shared_projects": {
+      "parameters": "SELECT resource_id as project_id FROM shares WHERE invitee_id = request.user_id() AND resource_type = 'project'",
+      "data": [
+        "SELECT * FROM projects WHERE id = bucket.project_id",
+        "SELECT * FROM debug_sessions WHERE project_id = bucket.project_id",
+        "SELECT * FROM project_presence WHERE project_id = bucket.project_id",
+        "SELECT * FROM project_activity WHERE project_id = bucket.project_id",
+        "SELECT * FROM project_chat WHERE project_id = bucket.project_id"
+      ]
     }
   }
 }
-```
-
-Three bucket definitions ensure owners receive collaboration data for their sessions, and invitees receive it for sessions shared with them.
-
----
-
-## How DevTrace AI Uses Groq
-
-All Groq API calls are made **server-side** via the `analyze-bug` Supabase Edge Function.
-
-```
-Client clicks "Analyze Bug"
-         |
-POST /functions/v1/analyze-bug  (with Supabase JWT)
-         |
-Edge Function verifies JWT -> rejects unauthorized requests
-         |
-Groq + Llama 3.3 70B called server-side
-         |
-Structured JSON analysis returned to client
-         |
-ai_analysis saved to Supabase -> syncs to local SQLite via WAL
 ```
 
 ---
@@ -412,14 +442,22 @@ ai_analysis saved to Supabase -> syncs to local SQLite via WAL
 - **Fix Library** - Save working fixes, filter by language, copy in one click, track use count
 - **Export as Markdown** - Export any debug session as a `.md` file
 
-### 👥 Live Collaboration
+### 👥 Session Collaboration
 
-- **Presence Indicators** - See who is currently in the session with live avatar stack and pulsing dot
-- **Shared Checklist** - AI checklist syncs live across all collaborators via PowerSync - shows who checked each item
-- **Team Chat** - Real-time flat message thread tied to the session, available to owner and all collaborators
+- **Presence Indicators** - Live avatar stack showing who is currently in the session
+- **Shared Checklist** - AI checklist syncs live across all collaborators - shows who checked each item
+- **Session Chat** - Real-time flat message thread tied to the session
 - **Shared View Presence** - Collaborators viewing via "Shared with Me" are present and visible to the owner
 - **Auto Chat Open** - Chat panel opens automatically when a collaborator joins
-- **Zero Backend Code** - All collaboration powered by PowerSync WAL sync, no custom websocket or polling
+- **Zero Backend Code** - All powered by PowerSync WAL sync, no websocket or polling
+
+### 📋 Project Collaboration
+
+- **Project Presence** - Avatar stack in project header showing who is browsing right now
+- **Activity Feed** - Every session created, resolved, analyzed, updated, or deleted logged as a live event - clickable to navigate to that session
+- **Project Chat** - Team discussion at project level, separate from session chat
+- **Auto Activity Logging** - `useSessions` automatically logs events to `project_activity` on every mutation
+- **Shared Project View** - Collaborators see project presence, activity feed tab, and full project chat
 
 ### 🧬 Debug DNA
 
@@ -440,21 +478,14 @@ ai_analysis saved to Supabase -> syncs to local SQLite via WAL
 
 - **Share Projects / Sessions** - Invite any registered DevTrace user by email
 - **Read-only access** - Invitees can view but cannot edit, delete, or run AI analysis
-- **Collaborative Shared View** - Invitees can send chat messages and are visible as present to the owner
+- **Collaborative Shared Views** - Both SharedSessionView and SharedProjectView are fully collaboration-enabled
 - **Revoke anytime** - From the Share modal
-- **Shared with Me page** - Dedicated sidebar page
 
 ### 📊 Insights & Analytics
 
 - **Analytics Page** - Resolution rates, error trends, severity breakdowns, time-to-fix
 - **AI Insights Page** - Category breakdown, confidence distribution, most flagged files
-- **Sync Status Page** - Live architecture, 8-table SQLite row counts, sync health, upload queue
-
-### 🔐 Auth & Profile
-
-- **Email + Password** - Sign up / log in with branded magic link password reset
-- **GitHub & Google OAuth** - One-click social sign in via Supabase Auth
-- **Avatar Upload** - Stored in Supabase Storage
+- **Sync Status Page** - Live architecture, 11-table SQLite row counts, sync health, upload queue
 
 ### 📶 Offline & Sync
 
@@ -476,7 +507,7 @@ ai_analysis saved to Supabase -> syncs to local SQLite via WAL
 <tr><td>🎨</td><td><b>Tailwind CSS</b></td><td>Utility-first styling + dark mode</td></tr>
 <tr><td>🐻</td><td><b>Zustand</b></td><td>Lightweight global state (auth, sync queue)</td></tr>
 <tr><td>🟢</td><td><b>Supabase</b></td><td>Postgres · Auth · Storage · RLS · WAL replication · Edge Functions</td></tr>
-<tr><td>⚡</td><td><b>PowerSync</b></td><td>Local SQLite sync · offline mutations · real-time collaboration · pattern matching</td></tr>
+<tr><td>⚡</td><td><b>PowerSync</b></td><td>Local SQLite sync · offline mutations · session + project collaboration · pattern matching</td></tr>
 <tr><td>🤖</td><td><b>Groq + Llama 3.3 70B</b></td><td>Server-side AI inference via Edge Function - debug analysis + Debug DNA</td></tr>
 <tr><td>📊</td><td><b>Recharts</b></td><td>Analytics charts and data visualization</td></tr>
 <tr><td>🚀</td><td><b>Vercel</b></td><td>Zero-config deployment + preview URLs</td></tr>
@@ -511,10 +542,10 @@ npm install
 
 **2a.** Create a new project at [supabase.com](https://supabase.com)
 
-**2b.** Go to **SQL Editor** and run the full schema:
+**2b.** Go to **SQL Editor** and run the schemas in order:
 
 <details>
-<summary>📋 Click to expand - base schema</summary>
+<summary>📋 Click to expand - base schema (profiles, projects, sessions, fixes, shares)</summary>
 
 ```sql
 -- Profiles
@@ -624,10 +655,10 @@ create publication powersync for table profiles, projects, debug_sessions, fixes
 </details>
 
 <details>
-<summary>👥 Click to expand - collaboration schema (run after base schema)</summary>
+<summary>👥 Click to expand - session collaboration schema</summary>
 
 ```sql
--- Presence
+-- Session presence
 create table if not exists session_presence (
   id uuid default gen_random_uuid() primary key,
   session_id uuid references debug_sessions on delete cascade not null,
@@ -645,7 +676,7 @@ create policy "Session participants can view presence" on session_presence for s
 );
 create policy "Users manage own presence" on session_presence for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
--- Checklist
+-- Session checklist
 create table if not exists session_checklist (
   id uuid default gen_random_uuid() primary key,
   session_id uuid references debug_sessions on delete cascade not null,
@@ -670,7 +701,7 @@ create policy "Session participants can update checklist" on session_checklist f
     or exists (select 1 from shares where shares.resource_id = session_checklist.session_id and shares.resource_type = 'session' and (shares.owner_id = auth.uid() or shares.invitee_id = auth.uid()))
   );
 
--- Chat
+-- Session chat
 create table if not exists session_chat (
   id uuid default gen_random_uuid() primary key,
   session_id uuid references debug_sessions on delete cascade not null,
@@ -690,10 +721,81 @@ create policy "Session participants can send messages" on session_chat for inser
   )
 );
 
--- Add collaboration tables to WAL publication
 alter publication powersync add table session_presence;
 alter publication powersync add table session_checklist;
 alter publication powersync add table session_chat;
+```
+
+</details>
+
+<details>
+<summary>📋 Click to expand - project collaboration schema</summary>
+
+```sql
+-- Project presence
+create table if not exists project_presence (
+  id uuid default gen_random_uuid() primary key,
+  project_id uuid references projects on delete cascade not null,
+  user_id uuid references auth.users on delete cascade not null,
+  display_name text, avatar_url text,
+  last_seen_at timestamp with time zone default now(),
+  joined_at timestamp with time zone default now(),
+  unique(project_id, user_id)
+);
+alter table project_presence enable row level security;
+create policy "Project participants can view presence" on project_presence for select using (
+  auth.uid() = user_id
+  or exists (select 1 from projects where projects.id = project_presence.project_id and projects.user_id = auth.uid())
+  or exists (select 1 from shares where shares.resource_id = project_presence.project_id and shares.resource_type = 'project' and (shares.owner_id = auth.uid() or shares.invitee_id = auth.uid()))
+);
+create policy "Users manage own project presence" on project_presence for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- Project activity feed
+create table if not exists project_activity (
+  id uuid default gen_random_uuid() primary key,
+  project_id uuid references projects on delete cascade not null,
+  user_id uuid references auth.users on delete cascade not null,
+  display_name text, avatar_url text,
+  event_type text not null,
+  session_id uuid references debug_sessions on delete cascade,
+  session_title text, metadata jsonb,
+  created_at timestamp with time zone default now()
+);
+alter table project_activity enable row level security;
+create policy "Project participants can view activity" on project_activity for select using (
+  exists (select 1 from projects where projects.id = project_activity.project_id and projects.user_id = auth.uid())
+  or exists (select 1 from shares where shares.resource_id = project_activity.project_id and shares.resource_type = 'project' and (shares.owner_id = auth.uid() or shares.invitee_id = auth.uid()))
+);
+create policy "Project participants can log activity" on project_activity for insert with check (
+  auth.uid() = user_id and (
+    exists (select 1 from projects where projects.id = project_activity.project_id and projects.user_id = auth.uid())
+    or exists (select 1 from shares where shares.resource_id = project_activity.project_id and shares.resource_type = 'project' and (shares.owner_id = auth.uid() or shares.invitee_id = auth.uid()))
+  )
+);
+
+-- Project chat
+create table if not exists project_chat (
+  id uuid default gen_random_uuid() primary key,
+  project_id uuid references projects on delete cascade not null,
+  user_id uuid references auth.users on delete cascade not null,
+  display_name text, avatar_url text, message text not null,
+  created_at timestamp with time zone default now()
+);
+alter table project_chat enable row level security;
+create policy "Project participants can view chat" on project_chat for select using (
+  exists (select 1 from projects where projects.id = project_chat.project_id and projects.user_id = auth.uid())
+  or exists (select 1 from shares where shares.resource_id = project_chat.project_id and shares.resource_type = 'project' and (shares.owner_id = auth.uid() or shares.invitee_id = auth.uid()))
+);
+create policy "Project participants can send messages" on project_chat for insert with check (
+  auth.uid() = user_id and (
+    exists (select 1 from projects where projects.id = project_chat.project_id and projects.user_id = auth.uid())
+    or exists (select 1 from shares where shares.resource_id = project_chat.project_id and shares.resource_type = 'project' and (shares.owner_id = auth.uid() or shares.invitee_id = auth.uid()))
+  )
+);
+
+alter publication powersync add table project_presence;
+alter publication powersync add table project_activity;
+alter publication powersync add table project_chat;
 ```
 
 </details>
@@ -718,7 +820,7 @@ alter publication powersync add table session_chat;
 
 **3b.** Connect to your Supabase Postgres URI
 
-**3c.** Paste the full sync rules (3 bucket definitions — see `POWERSYNC_SYNC_RULES.json` in repo)
+**3c.** Paste the full sync rules (5 bucket definitions — see `POWERSYNC_SYNC_RULES.json` in repo)
 
 **3d.** Deploy and copy your PowerSync instance URL
 
@@ -753,19 +855,20 @@ src/
 │   ├── dashboard/          # DashboardLayout, Sidebar, TopBar
 │   ├── sessions/           # AIDebugPanel, SimilarSessionsCard, CollaborationBanner,
 │   │                       # CollaborativeChecklist, SessionChat, CreateSessionModal, StatusBadge
-│   ├── projects/           # ProjectCard (live health score), CreateProjectModal
+│   ├── projects/           # ProjectCard, CreateProjectModal, ProjectActivityFeed, ProjectChat
 │   ├── profile/            # AvatarUpload
 │   ├── shared/             # ProtectedRoute, OfflineBanner, ShareModal
 │   └── providers/          # PowerSyncProvider
 │
 ├── hooks/
-│   ├── useSessions.ts      # PowerSync mutations + reads, split write for ai_analysis
-│   ├── useProjects.ts      # PowerSync reads + Supabase writes
-│   ├── useFixes.ts         # PowerSync mutations + reads
-│   ├── useCollaboration.ts # Presence heartbeat, shared checklist, team chat via PowerSync
-│   ├── useProfile.ts       # PowerSync reads + Supabase writes
-│   ├── useShares.ts        # Share creation, revocation, lookup
-│   ├── useDebugDNA.ts      # Calls debug-dna Edge Function
+│   ├── useSessions.ts           # PowerSync mutations + reads + activity logging
+│   ├── useProjects.ts           # PowerSync reads + Supabase writes
+│   ├── useFixes.ts              # PowerSync mutations + reads
+│   ├── useCollaboration.ts      # Session presence, shared checklist, session chat
+│   ├── useProjectCollaboration.ts  # Project presence, activity feed, project chat
+│   ├── useProfile.ts            # PowerSync reads + Supabase writes
+│   ├── useShares.ts             # Share creation, revocation, lookup
+│   ├── useDebugDNA.ts           # Calls debug-dna Edge Function
 │   ├── useDashboardStats.ts
 │   └── useOnlineStatus.ts
 │
@@ -774,11 +877,13 @@ src/
 │   ├── SupabaseConnector.ts # PowerSync connector - uploadData handles crud queue
 │   ├── projectHealth.ts     # Health score formula (pure client-side)
 │   ├── supabaseClient.ts
-│   └── powersync.ts         # Schema (8 tables) + PowerSyncDatabase singleton
+│   └── powersync.ts         # Schema (11 tables) + PowerSyncDatabase singleton
 │
 └── pages/
-    ├── SessionDetailPage.tsx     # Full collaboration - presence, checklist, chat
-    ├── SharedSessionView.tsx     # Collaboration-enabled shared view - presence + chat
+    ├── ProjectDetailPage.tsx     # Project collab - presence, activity tab, project chat
+    ├── SharedProjectView.tsx     # Collaboration-enabled shared project view
+    ├── SessionDetailPage.tsx     # Session collab - presence, checklist, session chat
+    ├── SharedSessionView.tsx     # Collaboration-enabled shared session view
     └── ... (other pages)
 
 supabase/
@@ -792,21 +897,27 @@ supabase/
 ## FAQ
 
 <details>
-<summary><b>How does live collaboration work?</b></summary>
+<summary><b>How does session collaboration work?</b></summary>
 <br/>
-When you open a debug session, DevTrace AI writes a presence row to session_presence via powerSync.execute(). PowerSync syncs this to all other users who have access to that session via WAL replication. The checklist and chat work the same way - writes go to local SQLite via powerSync.execute(), PowerSync uploads them, and WAL streams the changes to all participants. No websockets, no polling, no custom backend code.
+When you open a session, DevTrace AI writes a presence row to session_presence via powerSync.execute(). PowerSync syncs this to all users who have access via WAL. The checklist and chat work the same way. No websockets, no polling, no custom backend.
 </details>
 
 <details>
-<summary><b>Can collaborators edit the session?</b></summary>
+<summary><b>How does project collaboration work?</b></summary>
 <br/>
-No. Collaborators can check off checklist items and send chat messages, but cannot edit the error message, stack trace, notes, or run AI analysis. The session data itself remains owner-only. Shared view (Shared with Me) can only send chat - checklist toggling is also disabled there.
+When you open a project, a project_presence row is written. Every session mutation (create/resolve/analyze/update/delete) automatically logs an event to project_activity via useSessions. All project collaborators see these events in real time via their local SQLite. The activity feed is clickable — each event navigates to the relevant session.
+</details>
+
+<details>
+<summary><b>Can collaborators edit sessions or projects?</b></summary>
+<br/>
+No. Collaborators can check off checklist items and send chat messages, but cannot edit session data, delete anything, or run AI analysis. Project data and session data remain owner-only.
 </details>
 
 <details>
 <summary><b>Does offline mode really work?</b></summary>
 <br/>
-Yes. All reads come from local SQLite. Writes queue via powerSync.execute() and upload on reconnect. Similar Sessions pattern matching works with no internet. Collaboration data also reads from local SQLite - you can see the last known checklist state and chat history offline.
+Yes. All reads come from local SQLite. Writes queue via powerSync.execute() and upload on reconnect. Similar Sessions, activity feed, and all collaboration data read from local SQLite — you see the last known state even without internet.
 </details>
 
 <details>
@@ -816,15 +927,9 @@ Yes. Stored in Supabase Edge Function Secrets, never in the browser. All AI call
 </details>
 
 <details>
-<summary><b>How does Similar Sessions work?</b></summary>
-<br/>
-Extracts meaningful tokens from your error message, queries all past sessions from local SQLite via powerSync.getAll(), scores each by keyword overlap, surfaces matches with 2+ keywords. Zero network, works offline.
-</details>
-
-<details>
 <summary><b>Do I need a backend server?</b></summary>
 <br/>
-No. Supabase handles auth, database, storage, and Edge Functions. PowerSync handles sync and real-time collaboration. No Express or Node.js backend required.
+No. Supabase handles auth, database, storage, and Edge Functions. PowerSync handles sync and real-time collaboration at both session and project level. No Express or Node.js backend required.
 </details>
 
 ---
@@ -835,9 +940,9 @@ DevTrace AI is submitted to the **PowerSync AI Hackathon 2026**.
 
 <table width="100%">
 <tr><th align="left">Prize</th><th align="left">Why this qualifies</th></tr>
-<tr><td>🥇 <b>Core Prize</b></td><td>AI-powered developer tool using PowerSync as the core sync and real-time collaboration layer</td></tr>
-<tr><td>🏅 <b>Best Submission Using Supabase</b></td><td>Supabase drives auth, Postgres with RLS on 8 tables, Storage, WAL replication, two Edge Functions for server-side AI and Debug DNA</td></tr>
-<tr><td>🏅 <b>Best Local-First App</b></td><td>All reads from local SQLite, all writes via powerSync.execute(), offline write queue, Similar Sessions on local SQLite, live collaboration via PowerSync WAL — zero custom backend</td></tr>
+<tr><td>🥇 <b>Core Prize</b></td><td>AI-powered developer tool using PowerSync as the core sync and real-time collaboration layer at both session and project level</td></tr>
+<tr><td>🏅 <b>Best Submission Using Supabase</b></td><td>Supabase drives auth, Postgres with RLS on 11 tables, Storage, WAL replication, two Edge Functions for server-side AI and Debug DNA</td></tr>
+<tr><td>🏅 <b>Best Local-First App</b></td><td>All reads from local SQLite, all writes via powerSync.execute(), offline write queue, Similar Sessions on local SQLite, session + project collaboration via PowerSync WAL, 5 sync bucket definitions — zero custom backend</td></tr>
 </table>
 
 ---
