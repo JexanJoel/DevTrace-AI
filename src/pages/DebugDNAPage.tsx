@@ -225,35 +225,46 @@ const DebugDNAPage = () => {
 
         {/* ── Header ── */}
         <div className="bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl p-4 sm:p-7">
-          <div className="flex flex-col gap-4">
+          {/* Desktop: single row. Mobile: stacked */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
-            {/* top row: icon + streak */}
-            <div className="flex items-start justify-between">
+            {/* Left: icon + title + description */}
+            <div className="flex flex-col gap-2 min-w-0">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 sm:w-9 sm:h-9 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
                   <Dna size={16} className="text-white" />
                 </div>
-                <span className="text-white/80 text-xs sm:text-sm font-medium">
-                  Supabase Edge + Groq
-                </span>
+                <span className="text-white/70 text-xs font-medium">Supabase Edge + Groq</span>
+                {result && streak > 0 && (
+                  <span className="sm:hidden ml-auto"><StreakBadge streak={streak} /></span>
+                )}
               </div>
-              {result && streak > 0 && <StreakBadge streak={streak} />}
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-white">Your Debug DNA</h2>
+                <p className="text-violet-200 text-xs sm:text-sm mt-0.5 max-w-sm">
+                  Personalized analysis of your debugging patterns, strengths, and blind spots.
+                </p>
+              </div>
             </div>
 
-            {/* title + description */}
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-white">Your Debug DNA</h2>
-              <p className="text-violet-200 text-xs sm:text-sm mt-1 max-w-md">
-                Personalized analysis of your debugging patterns, strengths, and blind spots.
-              </p>
-            </div>
-
-            {/* action buttons — stack on mobile */}
-            <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-2">
+            {/* Right: streak (desktop) + buttons */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-shrink-0">
+              {result && streak > 0 && (
+                <span className="hidden sm:block"><StreakBadge streak={streak} /></span>
+              )}
+              {result && (
+                <button
+                  onClick={handleExport}
+                  className="flex items-center justify-center gap-1.5 border border-white/30 hover:border-white/60 text-white px-4 py-2 rounded-xl text-sm font-medium transition whitespace-nowrap"
+                >
+                  <Download size={14} />
+                  {exported ? 'Exported!' : 'Export .md'}
+                </button>
+              )}
               <button
                 onClick={generate}
                 disabled={loading}
-                className="flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-indigo-600 font-bold px-5 py-2.5 rounded-xl text-sm transition disabled:opacity-60 shadow-lg"
+                className="flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-indigo-600 font-bold px-5 py-2 rounded-xl text-sm transition disabled:opacity-60 shadow-lg whitespace-nowrap"
               >
                 {loading
                   ? <><Loader2 size={15} className="animate-spin" /> Analyzing...</>
@@ -262,16 +273,8 @@ const DebugDNAPage = () => {
                   : <><Sparkles size={15} /> Generate My DNA</>
                 }
               </button>
-              {result && (
-                <button
-                  onClick={handleExport}
-                  className="flex items-center justify-center gap-1.5 border border-white/30 hover:border-white/60 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition"
-                >
-                  <Download size={14} />
-                  {exported ? 'Exported!' : 'Export .md'}
-                </button>
-              )}
             </div>
+
           </div>
         </div>
 
