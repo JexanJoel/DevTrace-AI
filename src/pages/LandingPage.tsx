@@ -5,7 +5,7 @@ import {
   BarChart2, ArrowRight, Github,
   Share2, Menu, X, Wifi, WifiOff,
   Database, Heart, FileText,
-  CheckCircle, Library, Users
+  CheckCircle, Library, Users, Dna, Zap
 } from 'lucide-react';
 
 /* ─── Marquee data ─────────────────────────────────────────────── */
@@ -24,27 +24,29 @@ const MARQUEE_ITEMS = [
 
 /* ─── Features ─────────────────────────────────────────────────── */
 const FEATURES = [
-  { icon: <Sparkles size={22} />, title: 'AI Debug Panel — 8 Tabs',    desc: 'Every bug gets a full breakdown: root cause, 3 fix options with code, crash timeline, interactive checklist, follow-up chat, test cases, log analyzer, and architecture review.', color: 'bg-indigo-50 text-indigo-500' },
-  { icon: <WifiOff size={22} />,  title: 'Fully Offline-First',         desc: 'All data reads from local SQLite via PowerSync — zero spinners, zero network dependency. Create and browse sessions without internet. Auto-syncs on reconnect.',                color: 'bg-orange-50 text-orange-500' },
-  { icon: <Bug size={22} />,      title: 'Session Tracking',            desc: 'Log errors with stack traces, code snippets, expected behavior, environment, and severity. Every session is permanent, searchable, and never lost.',                                color: 'bg-red-50 text-red-500'      },
-  { icon: <BookOpen size={22} />, title: 'Fix Library',                 desc: 'Save AI fixes that worked. Filter by language, copy in one click, track usage count. Build a personal knowledge base of solutions across all your projects.',                    color: 'bg-green-50 text-green-500'  },
-  { icon: <Share2 size={22} />,   title: 'Share with Teammates',        desc: 'Share projects and sessions with other DevTrace users for read-only collaboration. Instant access — no email required, revokable anytime.',                                        color: 'bg-purple-50 text-purple-500' },
-  { icon: <BarChart2 size={22} />,title: 'Analytics & Insights',        desc: 'Project health scores, session streaks, resolution rates, AI confidence trends, and error patterns — all computed locally from your SQLite data.',                                color: 'bg-blue-50 text-blue-500'    },
+  { icon: <Sparkles size={22} />, title: 'AI Debug Panel — 8 Tabs',  desc: 'Every bug gets a full breakdown: root cause, 3 fix options with code, crash timeline, interactive checklist, follow-up chat, test cases, log analyzer, and architecture review.', color: 'bg-indigo-50 text-indigo-500' },
+  { icon: <WifiOff size={22} />,  title: 'Fully Offline-First',       desc: 'All data reads from local SQLite via PowerSync — zero spinners, zero network dependency. Create and browse sessions without internet. Auto-syncs on reconnect.',                color: 'bg-orange-50 text-orange-500' },
+  { icon: <Dna size={22} />,      title: 'Debug DNA',                 desc: 'A Supabase Edge Function analyzes your session history server-side and Groq writes your personal error fingerprint — resolution rates by category, habits, strengths, and weaknesses.', color: 'bg-violet-50 text-violet-500' },
+  { icon: <Bug size={22} />,      title: 'Session Tracking',          desc: 'Log errors with stack traces, code snippets, expected behavior, environment, and severity. Every session is permanent, searchable, and never lost.',                                color: 'bg-red-50 text-red-500'      },
+  { icon: <BookOpen size={22} />, title: 'Fix Library',               desc: 'Save AI fixes that worked. Filter by language, copy in one click, track usage count. Build a personal knowledge base of solutions across all your projects.',                    color: 'bg-green-50 text-green-500'  },
+  { icon: <Share2 size={22} />,   title: 'Share with Teammates',      desc: 'Share projects and sessions with other DevTrace users for read-only collaboration. Instant access — no email required, revokable anytime.',                                        color: 'bg-purple-50 text-purple-500' },
+  { icon: <BarChart2 size={22} />,title: 'Analytics & Insights',      desc: 'Project health scores, session streaks, resolution rates, AI confidence trends, and error patterns — all computed locally from your SQLite data.',                                color: 'bg-blue-50 text-blue-500'    },
 ];
 
 /* ─── Steps ─────────────────────────────────────────────────────── */
 const STEPS = [
-  { icon: <FileText size={20} />,    step: '01', title: 'Create a project',         desc: 'Set up a project, pick your language, and optionally link your GitHub repo for stats and context.' },
-  { icon: <Bug size={20} />,         step: '02', title: 'Log the bug',              desc: 'Paste your error message and stack trace. Add the relevant code snippet, tag severity, and choose the environment. Saved instantly — even offline.' },
-  { icon: <Sparkles size={20} />,    step: '03', title: 'Get full AI analysis',     desc: 'Click Analyze Bug — Groq + Llama 3.3 70B returns root cause, 3 fix options with code, a crash timeline, an interactive checklist, and more. All saved as JSONB.' },
-  { icon: <CheckCircle size={20} />, step: '04', title: 'Work through the fix',     desc: 'Use the 8-tab panel: chat with the AI about your specific bug, check off action items, paste logs for noise filtering, review your architecture.' },
-  { icon: <Library size={20} />,     step: '05', title: 'Save to Fix Library',      desc: 'Save what worked. Your Fix Library grows over time — filter by language, copy fixes in one click, reuse across projects.' },
-  { icon: <Users size={20} />,       step: '06', title: 'Share or export',          desc: 'Share the session with a teammate for read-only access, or export it as Markdown for your docs, PRs, or post-mortems.' },
+  { icon: <FileText size={20} />,    step: '01', title: 'Create a project',       desc: 'Set up a project, pick your language, and optionally link your GitHub repo for stats and context.' },
+  { icon: <Bug size={20} />,         step: '02', title: 'Log the bug',            desc: 'Paste your error message and stack trace. Add the relevant code snippet, tag severity, and choose the environment. Saved instantly — even offline.' },
+  { icon: <Sparkles size={20} />,    step: '03', title: 'Get full AI analysis',   desc: 'Click Analyze Bug — Groq + Llama 3.3 70B returns root cause, 3 fix options with code, a crash timeline, an interactive checklist, and more. All saved as JSONB.' },
+  { icon: <CheckCircle size={20} />, step: '04', title: 'Work through the fix',   desc: 'Use the 8-tab panel: chat with the AI about your specific bug, check off action items, paste logs for noise filtering, review your architecture.' },
+  { icon: <Library size={20} />,     step: '05', title: 'Save to Fix Library',    desc: 'Save what worked. Your Fix Library grows over time — filter by language, copy fixes in one click, reuse across projects.' },
+  { icon: <Users size={20} />,       step: '06', title: 'Share or export',        desc: 'Share the session with a teammate for read-only access, or export it as Markdown for your docs, PRs, or post-mortems.' },
+  { icon: <Dna size={20} />,         step: '07', title: 'Generate your Debug DNA', desc: 'Hit "Generate My DNA" — a Supabase Edge Function queries your history server-side, Groq writes your personal debugging fingerprint. Export as Markdown.' },
 ];
 
 /* ─── Marquee component ─────────────────────────────────────────── */
 const Marquee = () => {
-  const items = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS]; // duplicate for seamless loop
+  const items = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS];
   return (
     <div className="overflow-hidden w-full">
       <style>{`
@@ -145,6 +147,9 @@ const LandingPage = () => {
             <span className="inline-flex items-center gap-1.5 bg-green-50 border border-green-100 text-green-700 text-xs font-medium px-3 py-1.5 rounded-full">
               <Database size={12} /> PowerSync + Supabase
             </span>
+            <span className="inline-flex items-center gap-1.5 bg-violet-50 border border-violet-100 text-violet-700 text-xs font-medium px-3 py-1.5 rounded-full">
+              <Dna size={12} /> Debug DNA · Edge Functions
+            </span>
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-5 sm:mb-6">
             Your permanent<br />
@@ -218,8 +223,6 @@ const LandingPage = () => {
       {/* ── Offline callout ── */}
       <section className="py-14 sm:py-20 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
-
-          {/* Header */}
           <div className="text-center mb-8 sm:mb-12">
             <span className="inline-flex items-center gap-1.5 bg-orange-50 border border-orange-200 text-orange-600 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
               <WifiOff size={12} /> Powered by PowerSync
@@ -232,10 +235,7 @@ const LandingPage = () => {
             </p>
           </div>
 
-          {/* Before / After */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-
-            {/* Without PowerSync */}
             <div className="rounded-2xl border border-red-100 bg-red-50 p-5 sm:p-6">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-7 h-7 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -259,7 +259,6 @@ const LandingPage = () => {
               </ul>
             </div>
 
-            {/* With PowerSync */}
             <div className="rounded-2xl border border-green-100 bg-green-50 p-5 sm:p-6">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-7 h-7 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -287,8 +286,6 @@ const LandingPage = () => {
           {/* Data flow diagram */}
           <div className="bg-gray-900 rounded-2xl p-5 sm:p-7">
             <p className="text-xs text-gray-500 font-mono uppercase tracking-widest mb-5">Data flow</p>
-
-            {/* Mobile: vertical stack */}
             <div className="flex flex-col sm:hidden gap-2">
               {[
                 { label: 'Supabase',     sub: 'Source of truth',      color: 'bg-green-900 border-green-700 text-green-300' },
@@ -308,8 +305,6 @@ const LandingPage = () => {
                 </div>
               ))}
             </div>
-
-            {/* Desktop: horizontal */}
             <div className="hidden sm:flex items-center gap-0">
               {[
                 { label: 'Supabase',     sub: 'Source of truth',      color: 'bg-green-900 border-green-700 text-green-300' },
@@ -329,23 +324,64 @@ const LandingPage = () => {
                 </div>
               ))}
             </div>
-
             <p className="text-xs text-gray-600 font-mono mt-4 leading-relaxed">
               Writes go directly to Supabase · PowerSync detects via WAL · local SQLite updates · <span className="text-orange-400">useQuery()</span> reflects change instantly
             </p>
           </div>
+        </div>
+      </section>
 
+      {/* ── Debug DNA callout ── */}
+      <section className="py-14 sm:py-20 px-4 sm:px-6 bg-gray-50">
+        <div className="max-w-5xl mx-auto">
+          <div className="bg-gradient-to-br from-violet-600 to-indigo-600 rounded-2xl p-6 sm:p-10 text-white">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-10">
+              <div className="flex-shrink-0">
+                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
+                  <Dna size={32} className="text-white" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                  <h2 className="text-xl sm:text-2xl font-bold">Debug DNA</h2>
+                  <span className="text-[10px] font-bold bg-white/20 text-white px-2 py-1 rounded-lg">
+                    Supabase Edge Function
+                  </span>
+                </div>
+                <p className="text-violet-100 text-sm sm:text-base leading-relaxed mb-5">
+                  After enough sessions, DevTrace AI builds your personal error fingerprint. A Supabase Edge Function
+                  queries your history server-side, computes your patterns, then Groq writes a personalized narrative
+                  about how you debug — your strengths, blind spots, and habits.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {[
+                    { icon: <Zap size={14} />, label: 'Server-side SQL', sub: 'Edge Function + service role' },
+                    { icon: <Sparkles size={14} />, label: 'AI Narrative', sub: 'Groq writes your profile' },
+                    { icon: <Database size={14} />, label: 'Export as .md', sub: 'Your debugging fingerprint' },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-2.5 bg-white/10 rounded-xl px-3 py-2.5">
+                      <div className="text-violet-200 flex-shrink-0">{item.icon}</div>
+                      <div>
+                        <p className="text-xs font-semibold text-white">{item.label}</p>
+                        <p className="text-xs text-violet-200">{item.sub}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* ── Features ── */}
-      <section className="py-8 sm:py-12 px-4 sm:px-6 bg-gray-50">
+      <section className="py-8 sm:py-12 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10 sm:mb-14">
             <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-4">Everything you need to debug seriously</h2>
             <p className="text-gray-400 text-base sm:text-lg max-w-xl mx-auto">Not just a fix generator — a complete debugging assistant</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {FEATURES.map((f, i) => (
               <div key={i} className="bg-white rounded-2xl border border-gray-100 p-5 sm:p-6 hover:border-indigo-200 hover:shadow-md transition">
                 <div className={`w-10 h-10 sm:w-11 sm:h-11 ${f.color} rounded-2xl flex items-center justify-center mb-4`}>
@@ -360,29 +396,39 @@ const LandingPage = () => {
       </section>
 
       {/* ── How it works ── */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-gray-50">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-10 sm:mb-16">
             <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-4">How it works</h2>
-            <p className="text-gray-400 text-base sm:text-lg">From error to fix in under 30 seconds</p>
+            <p className="text-gray-400 text-base sm:text-lg">From error to fix — and beyond</p>
           </div>
 
-          {/* Vertical timeline */}
           <div className="relative">
-            {/* Connecting line — desktop only */}
             <div className="absolute left-6 sm:left-7 top-0 bottom-0 w-px bg-gray-200 hidden sm:block" />
-
             <div className="space-y-4 sm:space-y-0">
               {STEPS.map((s, i) => (
                 <div key={i} className="relative flex items-start gap-4 sm:gap-6 sm:pb-8 last:pb-0">
-                  {/* Step circle */}
-                  <div className="relative z-10 flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 bg-indigo-600 rounded-2xl flex flex-col items-center justify-center shadow-lg shadow-indigo-200">
+                  <div className={`relative z-10 flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex flex-col items-center justify-center shadow-lg ${
+                    s.step === '07'
+                      ? 'bg-gradient-to-br from-violet-600 to-indigo-600 shadow-violet-200'
+                      : 'bg-indigo-600 shadow-indigo-200'
+                  }`}>
                     <div className="text-white">{s.icon}</div>
                     <span className="text-white/70 text-[9px] font-bold mt-0.5">{s.step}</span>
                   </div>
-                  {/* Content */}
-                  <div className="flex-1 bg-white border border-gray-100 rounded-2xl p-4 sm:p-5 hover:border-indigo-200 hover:shadow-sm transition min-w-0">
-                    <h3 className="font-bold text-gray-900 mb-1 text-sm sm:text-base">{s.title}</h3>
+                  <div className={`flex-1 bg-white border rounded-2xl p-4 sm:p-5 hover:shadow-sm transition min-w-0 ${
+                    s.step === '07'
+                      ? 'border-violet-200 hover:border-violet-300'
+                      : 'border-gray-100 hover:border-indigo-200'
+                  }`}>
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <h3 className="font-bold text-gray-900 text-sm sm:text-base">{s.title}</h3>
+                      {s.step === '07' && (
+                        <span className="text-[10px] font-bold bg-violet-100 text-violet-600 px-2 py-0.5 rounded-full">
+                          Edge Function
+                        </span>
+                      )}
+                    </div>
                     <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">{s.desc}</p>
                   </div>
                 </div>
@@ -393,7 +439,7 @@ const LandingPage = () => {
       </section>
 
       {/* ── Built on best infra ── */}
-      <section className="py-14 sm:py-20 px-4 sm:px-6 bg-gray-50">
+      <section className="py-14 sm:py-20 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-10 sm:mb-14">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
@@ -408,20 +454,17 @@ const LandingPage = () => {
 
             {/* Supabase */}
             <div className="relative bg-white rounded-2xl border border-green-100 overflow-hidden flex flex-col group hover:shadow-lg hover:border-green-200 transition-all duration-300">
-              {/* Top accent bar */}
               <div className="h-1.5 w-full bg-gradient-to-r from-green-400 to-emerald-500" />
               <div className="p-5 sm:p-6 flex flex-col flex-1">
-                {/* Header */}
                 <div className="flex items-center gap-3 mb-5">
                   <div className="w-11 h-11 rounded-2xl bg-green-50 border border-green-100 flex items-center justify-center flex-shrink-0">
                     <img src="https://www.vectorlogo.zone/logos/supabase/supabase-icon.svg" alt="Supabase" className="w-6 h-6" />
                   </div>
                   <div>
                     <p className="font-bold text-gray-900 leading-tight">Supabase</p>
-                    <p className="text-xs text-gray-400 mt-0.5">Database · Auth · Storage</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Database · Auth · Storage · Edge</p>
                   </div>
                 </div>
-                {/* Role tag */}
                 <p className="text-xs font-semibold text-green-600 bg-green-50 border border-green-100 px-2.5 py-1 rounded-lg w-fit mb-4">
                   Source of truth
                 </p>
@@ -433,7 +476,7 @@ const LandingPage = () => {
                     'GitHub account linking',
                     'Storage for avatars',
                     'WAL replication to PowerSync',
-                    'Sharing enforced via RLS policies',
+                    'Edge Function for Debug DNA',
                   ].map((item, i) => (
                     <li key={i} className="flex items-start gap-2.5">
                       <span className="text-green-500 mt-0.5 flex-shrink-0 font-bold">✓</span>
@@ -444,18 +487,15 @@ const LandingPage = () => {
                 <div className="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between">
                   <span className="text-xs bg-green-50 text-green-600 border border-green-100 px-2.5 py-1 rounded-full font-semibold">Apache 2.0</span>
                   <a href="https://supabase.com" target="_blank" rel="noopener noreferrer"
-                    className="text-xs text-gray-400 hover:text-green-600 transition font-medium">
-                    supabase.com →
-                  </a>
+                    className="text-xs text-gray-400 hover:text-green-600 transition font-medium">supabase.com →</a>
                 </div>
               </div>
             </div>
 
-            {/* PowerSync — featured / center */}
+            {/* PowerSync */}
             <div className="relative bg-white rounded-2xl border border-indigo-200 overflow-hidden flex flex-col group hover:shadow-lg hover:border-indigo-300 transition-all duration-300 sm:scale-[1.02]">
               <div className="h-1.5 w-full bg-gradient-to-r from-indigo-500 to-violet-500" />
               <div className="p-5 sm:p-6 flex flex-col flex-1">
-                {/* Featured badge */}
                 <div className="flex items-center justify-between mb-5">
                   <div className="flex items-center gap-3">
                     <div className="w-11 h-11 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center flex-shrink-0">
@@ -466,9 +506,7 @@ const LandingPage = () => {
                       <p className="text-xs text-gray-400 mt-0.5">Offline Sync · Local SQLite</p>
                     </div>
                   </div>
-                  <span className="text-[10px] font-bold bg-indigo-600 text-white px-2 py-1 rounded-lg flex-shrink-0">
-                    CORE
-                  </span>
+                  <span className="text-[10px] font-bold bg-indigo-600 text-white px-2 py-1 rounded-lg flex-shrink-0">CORE</span>
                 </div>
                 <p className="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-lg w-fit mb-4">
                   Offline engine
@@ -492,9 +530,7 @@ const LandingPage = () => {
                 <div className="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between">
                   <span className="text-xs bg-indigo-50 text-indigo-600 border border-indigo-100 px-2.5 py-1 rounded-full font-semibold">Apache 2.0</span>
                   <a href="https://www.powersync.com" target="_blank" rel="noopener noreferrer"
-                    className="text-xs text-gray-400 hover:text-indigo-600 transition font-medium">
-                    powersync.com →
-                  </a>
+                    className="text-xs text-gray-400 hover:text-indigo-600 transition font-medium">powersync.com →</a>
                 </div>
               </div>
             </div>
@@ -534,9 +570,7 @@ const LandingPage = () => {
                 <div className="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between">
                   <span className="text-xs bg-blue-50 text-blue-600 border border-blue-100 px-2.5 py-1 rounded-full font-semibold">MIT License</span>
                   <a href="https://react.dev" target="_blank" rel="noopener noreferrer"
-                    className="text-xs text-gray-400 hover:text-blue-600 transition font-medium">
-                    react.dev →
-                  </a>
+                    className="text-xs text-gray-400 hover:text-blue-600 transition font-medium">react.dev →</a>
                 </div>
               </div>
             </div>
@@ -546,7 +580,7 @@ const LandingPage = () => {
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-gray-50">
         <div className="max-w-3xl mx-auto">
           <div className="rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-center"
             style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)' }}>
