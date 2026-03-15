@@ -159,22 +159,16 @@ const SessionDetailPage = () => {
         {/* Session header card */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
 
-          {/* Title row — always full width, truncated safely */}
+          {/* Title */}
           <div className="flex items-start gap-3 mb-3">
             <h2 className="flex-1 min-w-0 text-lg sm:text-xl font-bold text-gray-900 dark:text-white leading-snug break-words">
               {session.title}
             </h2>
-            {session._pending && (
-              <span className="flex-shrink-0 text-xs font-medium text-orange-500 bg-orange-50 border border-orange-200 px-2 py-1 rounded-lg whitespace-nowrap">
-                Pending sync
-              </span>
-            )}
           </div>
 
-          {/* Badges + status button — badges wrap, button stays right on sm+ */}
+          {/* Badges + status button */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 
-            {/* Badges — wrap freely on all widths */}
             <div className="flex items-center gap-2 flex-wrap">
               <StatusBadge status={effectiveStatus} />
               <SeverityBadge severity={session.severity} />
@@ -201,7 +195,7 @@ const SessionDetailPage = () => {
               </div>
             </div>
 
-            {/* Status dropdown — full width on mobile, auto on sm+ */}
+            {/* Status dropdown */}
             <div className="relative flex-shrink-0">
               <button onClick={() => setShowStatusMenu(!showStatusMenu)}
                 className="w-full sm:w-auto flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700 hover:border-indigo-300 text-gray-600 dark:text-gray-400 px-3 py-2 rounded-xl text-sm font-medium transition whitespace-nowrap">
@@ -226,10 +220,9 @@ const SessionDetailPage = () => {
           </div>
         </div>
 
-        {/* Body — single column on mobile, 3-col on desktop */}
+        {/* Body */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-          {/* Main content — full width on mobile, 2/3 on desktop */}
           <div className="lg:col-span-2 space-y-5">
 
             {session.error_message && (
@@ -274,10 +267,9 @@ const SessionDetailPage = () => {
             />
           </div>
 
-          {/* Sidebar — after main content on mobile, right column on desktop */}
+          {/* Sidebar */}
           <div className="space-y-5">
 
-            {/* Notes */}
             <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
               <h3 className="font-bold text-gray-900 dark:text-white text-sm mb-3">Notes</h3>
               <textarea value={notes} onChange={(e) => setNotes(e.target.value)}
@@ -291,7 +283,6 @@ const SessionDetailPage = () => {
               </button>
             </div>
 
-            {/* Session Info */}
             <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
               <h3 className="font-bold text-gray-900 dark:text-white text-sm mb-4">Session Info</h3>
               <div className="space-y-2">
@@ -314,7 +305,6 @@ const SessionDetailPage = () => {
               </div>
             </div>
 
-            {/* Danger Zone */}
             <div className="bg-white dark:bg-gray-900 rounded-2xl border border-red-100 dark:border-red-900 p-5 sm:p-6">
               <h3 className="font-bold text-red-600 mb-4">Danger Zone</h3>
               <div className="p-4 bg-red-50 dark:bg-red-950 rounded-xl space-y-3">

@@ -121,7 +121,7 @@ const ProjectDetailPage = () => {
         {/* Header */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
 
-          {/* Title row — stacks on mobile */}
+          {/* Title row */}
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
 
             {/* Left: name + badges */}
@@ -135,11 +135,6 @@ const ProjectDetailPage = () => {
                     {LANGUAGE_LABELS[project.language] ?? project.language}
                   </span>
                 )}
-                {project._pending && (
-                  <span className="px-2 py-1 rounded-lg text-xs font-medium bg-orange-50 text-orange-500 border border-orange-200 flex-shrink-0">
-                    Pending sync
-                  </span>
-                )}
               </div>
               {project.description && (
                 <p className="text-gray-400 text-sm mt-1.5">{project.description}</p>
@@ -149,7 +144,7 @@ const ProjectDetailPage = () => {
               </p>
             </div>
 
-            {/* Right: action buttons — full width on mobile, row on sm+ */}
+            {/* Right: action buttons */}
             <div className="flex items-center gap-2 flex-shrink-0 flex-wrap sm:flex-nowrap">
               <button
                 onClick={() => setShowShareModal(true)}
@@ -279,7 +274,6 @@ const ProjectDetailPage = () => {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate group-hover:text-indigo-600 transition">
                           {session.title}
-                          {session._pending && <span className="ml-2 text-xs text-orange-400">(pending)</span>}
                         </p>
                         <div className="flex items-center gap-2 mt-0.5">
                           <SeverityBadge severity={session.severity} />
