@@ -3,13 +3,16 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Loader2, Trash2, Save,
   ChevronDown, Clock, FolderOpen,
-  CheckCircle, Download, Share2
+  CheckCircle, Download, Share2, MessageSquare
 } from 'lucide-react';
 import DashboardLayout from '../components/dashboard/DashboardLayout';
 import { StatusBadge, SeverityBadge } from '../components/sessions/StatusBadge';
 import AIDebugPanel from '../components/sessions/AIDebugPanel';
 import SimilarSessionsCard from '../components/sessions/SimilarSessionsCard';
+import CollaborationBanner from '../components/sessions/CollaborationBanner';
+import SessionChat from '../components/sessions/SessionChat';
 import useSessions from '../hooks/useSessions';
+import useCollaboration from '../hooks/useCollaboration';
 import type { Status } from '../hooks/useSessions';
 import useFixes from '../hooks/useFixes';
 import type { AIAnalysis } from '../lib/groqClient';
@@ -38,6 +41,20 @@ const SessionDetailPage = () => {
   const { sessions, updateSession, deleteSession } = useSessions();
   const { createFix } = useFixes();
 
+  // Collaboration — all three concerns in one hook
+  const {
+    activeCollaborators,
+    otherCollaborators,
+    isCollaborative,
+    isChecked,
+    checkedBy,
+    toggleChecklistItem,
+    completedCount,
+    chatMessages,
+    sendMessage,
+    currentUserName,
+  } = useCollaboration(id ?? '');
+
   const [notes, setNotes] = useState('');
   const [savingNotes, setSavingNotes] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -45,6 +62,7 @@ const SessionDetailPage = () => {
   const [showStatusMenu, setShowStatusMenu] = useState(false);
   const [localStatus, setLocalStatus] = useState<Status | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showChat, setShowChat] = useState(false);
 
   const session = sessions.find(s => s.id === id) ?? null;
   const loading = sessions.length === 0 && !session;
@@ -52,6 +70,11 @@ const SessionDetailPage = () => {
   useEffect(() => {
     if (session) setNotes(session.notes ?? '');
   }, [session?.id]);
+
+  // Auto-open chat when a collaborator joins
+  useEffect(() => {
+    if (isCollaborative && !showChat) setShowChat(true);
+  }, [isCollaborative]);
 
   const effectiveStatus = localStatus ?? session?.status ?? 'open';
 
@@ -148,6 +171,25 @@ const SessionDetailPage = () => {
             <span className="hidden xs:inline">All Sessions</span>
           </button>
           <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Chat toggle — shown when collaborative */}
+            {isCollaborative && (
+              <button
+                onClick={() => setShowChat(v => !v)}
+                className={`flex items-center gap-1.5 px-2.5 py-2 sm:px-3 rounded-xl text-sm font-medium transition relative ${
+                  showChat
+                    ? 'bg-indigo-600 text-white'
+                    : 'border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950 text-indigo-600'
+                }`}
+              >
+                <MessageSquare size={14} />
+                <span className="hidden sm:inline">Chat</span>
+                {chatMessages.length > 0 && !showChat && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                    {chatMessages.length > 9 ? '9+' : chatMessages.length}
+                  </span>
+                )}
+              </button>
+            )}
             <button
               onClick={() => setShowShareModal(true)}
               className="flex items-center gap-1.5 border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950 hover:bg-indigo-100 dark:hover:bg-indigo-900 text-indigo-600 dark:text-indigo-400 px-2.5 py-2 sm:px-3 rounded-xl text-sm font-medium transition"
@@ -164,6 +206,14 @@ const SessionDetailPage = () => {
             </button>
           </div>
         </div>
+
+        {/* Collaboration banner — appears when others are in the session */}
+        {otherCollaborators.length > 0 && (
+          <CollaborationBanner
+            collaborators={activeCollaborators}
+            currentUserId={user?.id ?? ''}
+          />
+        )}
 
         {/* Session header card */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-6 min-w-0">
@@ -188,13 +238,10 @@ const SessionDetailPage = () => {
                   {new Date(session.created_at).toLocaleDateString()} at{' '}
                   {new Date(session.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
-                <span className="sm:hidden">
-                  {new Date(session.created_at).toLocaleDateString()}
-                </span>
+                <span className="sm:hidden">{new Date(session.created_at).toLocaleDateString()}</span>
               </div>
             </div>
 
-            {/* Status dropdown */}
             <div className="relative flex-shrink-0">
               <button
                 onClick={() => setShowStatusMenu(!showStatusMenu)}
@@ -224,6 +271,7 @@ const SessionDetailPage = () => {
         {/* Body */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 min-w-0">
 
+          {/* Main content */}
           <div className="lg:col-span-2 space-y-5 min-w-0">
 
             {session.error_message && (
@@ -260,7 +308,7 @@ const SessionDetailPage = () => {
               </div>
             )}
 
-            {/* Similar sessions from debug history — queries local SQLite, zero network */}
+            {/* Similar sessions */}
             {session.error_message && user && (
               <SimilarSessionsCard
                 currentSessionId={session.id}
@@ -269,12 +317,29 @@ const SessionDetailPage = () => {
               />
             )}
 
+            {/* AI Debug Panel with collaborative checklist */}
             <AIDebugPanel
               session={session}
               onSaveAnalysis={handleSaveAnalysis}
               onSaveToLibrary={handleSaveToLibrary}
               savingToLib={savingToLib}
+              isChecked={isChecked}
+              checkedBy={checkedBy}
+              onToggleChecklist={toggleChecklistItem}
+              completedCount={completedCount}
+              isCollaborative={isCollaborative}
+              currentUserName={currentUserName}
             />
+
+            {/* Team chat — shown when collaborative or manually toggled */}
+            {showChat && (
+              <SessionChat
+                messages={chatMessages}
+                onSend={sendMessage}
+                currentUserId={user?.id ?? ''}
+                sessionTitle={session.title}
+              />
+            )}
           </div>
 
           {/* Sidebar */}
@@ -284,7 +349,7 @@ const SessionDetailPage = () => {
               <h3 className="font-bold text-gray-900 dark:text-white text-sm mb-3">Notes</h3>
               <textarea
                 value={notes}
-                onChange={(e) => setNotes(e.target.value)}
+                onChange={e => setNotes(e.target.value)}
                 placeholder="Add your debugging notes, observations, or next steps..."
                 rows={5}
                 className="w-full border-2 border-gray-100 dark:border-gray-700 focus:border-indigo-400 text-gray-900 dark:text-white dark:bg-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-4 focus:ring-indigo-50 transition placeholder-gray-300 resize-none"
@@ -320,6 +385,27 @@ const SessionDetailPage = () => {
                       {new Date(session.created_at).toLocaleDateString()}
                     </span>
                   )},
+                  ...(activeCollaborators.length > 0 ? [{
+                    label: 'In session',
+                    value: (
+                      <div className="flex -space-x-1.5">
+                        {activeCollaborators.slice(0, 3).map((c, i) => (
+                          <div key={c.user_id} title={c.display_name}
+                            className="w-6 h-6 rounded-full bg-indigo-500 border-2 border-white dark:border-gray-900 flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0">
+                            {c.avatar_url
+                              ? <img src={c.avatar_url} className="w-full h-full rounded-full object-cover" />
+                              : c.display_name[0].toUpperCase()
+                            }
+                          </div>
+                        ))}
+                        {activeCollaborators.length > 3 && (
+                          <div className="w-6 h-6 rounded-full bg-gray-400 border-2 border-white dark:border-gray-900 flex items-center justify-center text-white text-[9px] font-bold">
+                            +{activeCollaborators.length - 3}
+                          </div>
+                        )}
+                      </div>
+                    ),
+                  }] : []),
                 ].map((item, i) => (
                   <div key={i} className="flex items-center justify-between py-1.5 border-b border-gray-50 dark:border-gray-800 last:border-0 gap-2 min-w-0">
                     <span className="text-xs text-gray-400 flex-shrink-0">{item.label}</span>

@@ -10,6 +10,7 @@ import {
   type AIAnalysis, type ChatMessage, type IssueCategory, type AnalyzeSessionInput
 } from '../../lib/groqClient';
 import type { DebugSession } from '../../hooks/useSessions';
+import CollaborativeChecklist from './CollaborativeChecklist';
 
 // ─── Category badge ───────────────────────────────────────────────────────────
 
@@ -32,8 +33,6 @@ const CategoryBadge = ({ category }: { category: IssueCategory }) => {
   return <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${s.color}`}>{s.label}</span>;
 };
 
-// ─── Code block with copy ─────────────────────────────────────────────────────
-
 const CodeBlock = ({ code }: { code: string }) => {
   const [copied, setCopied] = useState(false);
   const copy = () => { navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 2000); };
@@ -50,8 +49,6 @@ const CodeBlock = ({ code }: { code: string }) => {
   );
 };
 
-// ─── Confidence meter ─────────────────────────────────────────────────────────
-
 const ConfidenceMeter = ({ value }: { value: number }) => {
   const color = value >= 80 ? 'bg-green-500' : value >= 60 ? 'bg-yellow-500' : 'bg-red-500';
   const label = value >= 80 ? 'High confidence' : value >= 60 ? 'Medium confidence' : 'Low confidence';
@@ -64,8 +61,6 @@ const ConfidenceMeter = ({ value }: { value: number }) => {
     </div>
   );
 };
-
-// ─── Tab definitions ──────────────────────────────────────────────────────────
 
 type Tab = 'overview' | 'fixes' | 'timeline' | 'checklist' | 'followup' | 'tests' | 'logs' | 'structure';
 
@@ -80,40 +75,39 @@ const TABS: { key: Tab; label: string; icon: React.ReactNode }[] = [
   { key: 'structure',  label: 'Structure',  icon: <FolderTree size={13} /> },
 ];
 
-// ─── Props ────────────────────────────────────────────────────────────────────
-
 interface Props {
   session: DebugSession;
   onSaveAnalysis: (analysis: AIAnalysis) => Promise<void>;
   onSaveToLibrary: () => Promise<void>;
   savingToLib: boolean;
+  // Collaboration props — passed from SessionDetailPage
+  isChecked: (index: number) => boolean;
+  checkedBy: (index: number) => string | null;
+  onToggleChecklist: (index: number, currentChecked: boolean) => void;
+  completedCount: number;
+  isCollaborative: boolean;
+  currentUserName: string;
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
-
-const AIDebugPanel = ({ session, onSaveAnalysis, onSaveToLibrary, savingToLib }: Props) => {
+const AIDebugPanel = ({
+  session, onSaveAnalysis, onSaveToLibrary, savingToLib,
+  isChecked, checkedBy, onToggleChecklist, completedCount, isCollaborative, currentUserName,
+}: Props) => {
   const [tab, setTab] = useState<Tab>('overview');
   const [analysis, setAnalysis] = useState<AIAnalysis | null>(session.ai_analysis ?? null);
   const [analyzing, setAnalyzing] = useState(false);
 
-  // Follow-up chat
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
-  // Checklist state
-  const [checkedItems, setCheckedItems] = useState<Set<number>>(new Set());
-
-  // Fix expand
   const [expandedFix, setExpandedFix] = useState<number | null>(null);
 
-  // Logs tab
   const [rawLogs, setRawLogs] = useState('');
   const [logAnalysis, setLogAnalysis] = useState<any>(null);
   const [analyzingLogs, setAnalyzingLogs] = useState(false);
 
-  // Structure tab
   const [fileTree, setFileTree] = useState('');
   const [structureAnalysis, setStructureAnalysis] = useState<any>(null);
   const [analyzingStructure, setAnalyzingStructure] = useState(false);
@@ -140,10 +134,7 @@ const AIDebugPanel = ({ session, onSaveAnalysis, onSaveToLibrary, savingToLib }:
       environment: session.environment,
     };
     const result = await analyzeSession(input);
-    if (result) {
-      setAnalysis(result);
-      await onSaveAnalysis(result);
-    }
+    if (result) { setAnalysis(result); await onSaveAnalysis(result); }
     setAnalyzing(false);
   };
 
@@ -185,7 +176,6 @@ const AIDebugPanel = ({ session, onSaveAnalysis, onSaveToLibrary, savingToLib }:
   return (
     <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800">
 
-      {/* Panel Header */}
       <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800 flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-indigo-50 dark:bg-indigo-950 rounded-xl flex items-center justify-center">
@@ -209,15 +199,12 @@ const AIDebugPanel = ({ session, onSaveAnalysis, onSaveToLibrary, savingToLib }:
             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed">
             {analyzing
               ? <><Loader2 size={13} className="animate-spin" /> Analyzing...</>
-              : analysis
-                ? <><RotateCcw size={13} /> Re-analyze</>
-                : <><Sparkles size={13} /> Analyze Bug</>
+              : analysis ? <><RotateCcw size={13} /> Re-analyze</> : <><Sparkles size={13} /> Analyze Bug</>
             }
           </button>
         </div>
       </div>
 
-      {/* No error message state */}
       {!hasError && (
         <div className="p-8 text-center">
           <AlertTriangle size={24} className="text-gray-300 mx-auto mb-2" />
@@ -225,7 +212,6 @@ const AIDebugPanel = ({ session, onSaveAnalysis, onSaveToLibrary, savingToLib }:
         </div>
       )}
 
-      {/* Loading state */}
       {analyzing && (
         <div className="p-10 text-center space-y-3">
           <Loader2 size={28} className="animate-spin text-indigo-500 mx-auto" />
@@ -234,19 +220,16 @@ const AIDebugPanel = ({ session, onSaveAnalysis, onSaveToLibrary, savingToLib }:
         </div>
       )}
 
-      {/* No analysis yet */}
       {hasError && !analyzing && !analysis && (
         <div className="p-8 text-center">
           <Sparkles size={24} className="text-gray-300 mx-auto mb-2" />
           <p className="text-gray-600 dark:text-gray-400 text-sm font-medium mb-1">Ready to analyze</p>
-          <p className="text-gray-400 text-xs">Click "Analyze Bug" to get a full AI breakdown — explanation, fixes, checklist, and more</p>
+          <p className="text-gray-400 text-xs">Click "Analyze Bug" to get a full AI breakdown</p>
         </div>
       )}
 
-      {/* Tabs + Content */}
       {hasError && !analyzing && analysis && (
         <>
-          {/* Tab bar */}
           <div className="flex gap-0.5 px-4 pt-3 pb-0 overflow-x-auto">
             {TABS.map(t => (
               <button key={t.key} onClick={() => setTab(t.key)}
@@ -262,16 +245,13 @@ const AIDebugPanel = ({ session, onSaveAnalysis, onSaveToLibrary, savingToLib }:
 
           <div className="p-5 space-y-4">
 
-            {/* ── OVERVIEW ─────────────────────────────── */}
             {tab === 'overview' && (
               <div className="space-y-4">
                 <ConfidenceMeter value={analysis.confidence} />
-
                 <div className="bg-blue-50 dark:bg-blue-950 border border-blue-100 dark:border-blue-900 rounded-xl p-4">
                   <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1">Plain English</p>
                   <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">{analysis.plain_english}</p>
                 </div>
-
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
                     <p className="text-xs font-semibold text-gray-500 mb-1.5">Root Cause</p>
@@ -282,25 +262,20 @@ const AIDebugPanel = ({ session, onSaveAnalysis, onSaveToLibrary, savingToLib }:
                     <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">{analysis.symptom_vs_cause}</p>
                   </div>
                 </div>
-
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
                   <p className="text-xs font-semibold text-gray-500 mb-1.5">Why this category: <span className="text-indigo-500">{CATEGORY_STYLES[analysis.category]?.label}</span></p>
                   <p className="text-sm text-gray-700 dark:text-gray-300">{analysis.category_reason}</p>
                 </div>
-
                 {analysis.files_to_check.length > 0 && (
                   <div>
                     <p className="text-xs font-semibold text-gray-500 mb-2">Files to inspect</p>
                     <div className="flex flex-wrap gap-2">
                       {analysis.files_to_check.map((f, i) => (
-                        <span key={i} className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-2.5 py-1 rounded-lg font-mono border border-gray-200 dark:border-gray-700">
-                          {f}
-                        </span>
+                        <span key={i} className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-2.5 py-1 rounded-lg font-mono border border-gray-200 dark:border-gray-700">{f}</span>
                       ))}
                     </div>
                   </div>
                 )}
-
                 <div className="bg-green-50 dark:bg-green-950 border border-green-100 dark:border-green-900 rounded-xl p-4">
                   <p className="text-xs font-semibold text-green-600 dark:text-green-400 mb-1">How to verify fix</p>
                   <p className="text-sm text-gray-800 dark:text-gray-200">{analysis.verify_fix}</p>
@@ -308,20 +283,13 @@ const AIDebugPanel = ({ session, onSaveAnalysis, onSaveToLibrary, savingToLib }:
               </div>
             )}
 
-            {/* ── FIXES ────────────────────────────────── */}
             {tab === 'fixes' && (
               <div className="space-y-3">
                 <p className="text-xs text-gray-400">Best fix recommended: <span className="font-semibold text-indigo-600">Option {analysis.best_fix_index + 1}</span></p>
                 {analysis.fixes.map((fix, i) => (
-                  <div key={i} className={`rounded-xl border-2 overflow-hidden transition ${
-                    i === analysis.best_fix_index
-                      ? 'border-indigo-300 dark:border-indigo-700'
-                      : 'border-gray-100 dark:border-gray-800'
-                  }`}>
+                  <div key={i} className={`rounded-xl border-2 overflow-hidden transition ${i === analysis.best_fix_index ? 'border-indigo-300 dark:border-indigo-700' : 'border-gray-100 dark:border-gray-800'}`}>
                     <button onClick={() => setExpandedFix(expandedFix === i ? null : i)}
-                      className={`w-full flex items-center justify-between p-4 text-left ${
-                        i === analysis.best_fix_index ? 'bg-indigo-50 dark:bg-indigo-950' : 'bg-gray-50 dark:bg-gray-800'
-                      }`}>
+                      className={`w-full flex items-center justify-between p-4 text-left ${i === analysis.best_fix_index ? 'bg-indigo-50 dark:bg-indigo-950' : 'bg-gray-50 dark:bg-gray-800'}`}>
                       <div className="flex items-center gap-3">
                         <span className={`text-xs font-bold px-2 py-0.5 rounded-lg border ${
                           fix.type === 'quick_patch' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
@@ -331,9 +299,7 @@ const AIDebugPanel = ({ session, onSaveAnalysis, onSaveToLibrary, savingToLib }:
                           {fix.type === 'quick_patch' ? 'Quick Patch' : fix.type === 'proper_fix' ? 'Proper Fix' : 'Workaround'}
                         </span>
                         <span className="text-sm font-semibold text-gray-900 dark:text-white">{fix.title}</span>
-                        {i === analysis.best_fix_index && (
-                          <span className="text-xs bg-indigo-600 text-white px-2 py-0.5 rounded-full">⭐ Best</span>
-                        )}
+                        {i === analysis.best_fix_index && <span className="text-xs bg-indigo-600 text-white px-2 py-0.5 rounded-full">⭐ Best</span>}
                       </div>
                       {expandedFix === i ? <ChevronUp size={15} className="text-gray-400" /> : <ChevronDown size={15} className="text-gray-400" />}
                     </button>
@@ -358,7 +324,6 @@ const AIDebugPanel = ({ session, onSaveAnalysis, onSaveToLibrary, savingToLib }:
               </div>
             )}
 
-            {/* ── TIMELINE ─────────────────────────────── */}
             {tab === 'timeline' && (
               <div className="space-y-2">
                 <p className="text-xs text-gray-400 mb-3">How the crash happened step by step</p>
@@ -380,52 +345,32 @@ const AIDebugPanel = ({ session, onSaveAnalysis, onSaveToLibrary, savingToLib }:
               </div>
             )}
 
-            {/* ── CHECKLIST ────────────────────────────── */}
+            {/* ── CHECKLIST — now collaborative ──────────────────────────── */}
             {tab === 'checklist' && (
-              <div className="space-y-2">
-                <p className="text-xs text-gray-400 mb-3">Work through these checks in order</p>
-                {analysis.checklist.map((item, i) => (
-                  <button key={i} onClick={() => setCheckedItems(s => { const n = new Set(s); n.has(i) ? n.delete(i) : n.add(i); return n; })}
-                    className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 text-left transition ${
-                      checkedItems.has(i)
-                        ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950'
-                        : 'border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 bg-gray-50 dark:bg-gray-800'
-                    }`}>
-                    {checkedItems.has(i)
-                      ? <CheckCircle size={16} className="text-green-500 flex-shrink-0" />
-                      : <Circle size={16} className="text-gray-300 flex-shrink-0" />
-                    }
-                    <span className={`text-sm flex-1 ${checkedItems.has(i) ? 'line-through text-gray-400' : 'text-gray-700 dark:text-gray-300'}`}>
-                      {item.item}
-                    </span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${
-                      item.priority === 'high' ? 'bg-red-100 text-red-600' :
-                      item.priority === 'medium' ? 'bg-yellow-100 text-yellow-600' :
-                      'bg-gray-100 text-gray-500'
-                    }`}>{item.priority}</span>
-                  </button>
-                ))}
-                <p className="text-xs text-gray-400 text-right mt-2">{checkedItems.size}/{analysis.checklist.length} completed</p>
-              </div>
+              <CollaborativeChecklist
+                items={analysis.checklist}
+                isChecked={isChecked}
+                checkedBy={checkedBy}
+                onToggle={onToggleChecklist}
+                completedCount={completedCount}
+                isCollaborative={isCollaborative}
+                currentUserName={currentUserName}
+              />
             )}
 
-            {/* ── FOLLOW-UP CHAT ────────────────────────── */}
             {tab === 'followup' && (
               <div className="space-y-3">
-                {/* AI starter questions */}
                 {chatHistory.length === 0 && analysis.follow_up_questions.length > 0 && (
                   <div className="space-y-2">
-                    <p className="text-xs text-gray-400">AI wants to know more. Click a question to send it, or type your own:</p>
+                    <p className="text-xs text-gray-400">AI wants to know more. Click a question or type your own:</p>
                     {analysis.follow_up_questions.map((q, i) => (
-                      <button key={i} onClick={() => { setChatInput(q); }}
+                      <button key={i} onClick={() => setChatInput(q)}
                         className="w-full text-left text-sm bg-indigo-50 dark:bg-indigo-950 border border-indigo-100 dark:border-indigo-900 text-indigo-700 dark:text-indigo-300 px-4 py-2.5 rounded-xl hover:bg-indigo-100 dark:hover:bg-indigo-900 transition flex items-center gap-2">
                         <ChevronRight size={13} /> {q}
                       </button>
                     ))}
                   </div>
                 )}
-
-                {/* Chat history */}
                 {chatHistory.length > 0 && (
                   <div className="space-y-3 max-h-72 overflow-y-auto">
                     {chatHistory.map((msg, i) => (
@@ -434,9 +379,7 @@ const AIDebugPanel = ({ session, onSaveAnalysis, onSaveToLibrary, savingToLib }:
                           msg.role === 'user'
                             ? 'bg-indigo-600 text-white rounded-br-sm'
                             : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-bl-sm'
-                        }`}>
-                          {msg.content}
-                        </div>
+                        }`}>{msg.content}</div>
                       </div>
                     ))}
                     {chatLoading && (
@@ -449,15 +392,11 @@ const AIDebugPanel = ({ session, onSaveAnalysis, onSaveToLibrary, savingToLib }:
                     <div ref={chatBottomRef} />
                   </div>
                 )}
-
-                {/* Input */}
                 <div className="flex gap-2 mt-2">
-                  <input
-                    value={chatInput} onChange={(e) => setChatInput(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendChat()}
+                  <input value={chatInput} onChange={e => setChatInput(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSendChat()}
                     placeholder="Ask a follow-up question..."
-                    className="flex-1 border-2 border-gray-100 dark:border-gray-700 focus:border-indigo-400 text-gray-900 dark:text-white dark:bg-gray-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none transition placeholder-gray-300"
-                  />
+                    className="flex-1 border-2 border-gray-100 dark:border-gray-700 focus:border-indigo-400 text-gray-900 dark:text-white dark:bg-gray-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none transition placeholder-gray-300" />
                   <button onClick={handleSendChat} disabled={!chatInput.trim() || chatLoading}
                     className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition disabled:opacity-40">
                     <Send size={14} />
@@ -466,7 +405,6 @@ const AIDebugPanel = ({ session, onSaveAnalysis, onSaveToLibrary, savingToLib }:
               </div>
             )}
 
-            {/* ── TESTS ────────────────────────────────── */}
             {tab === 'tests' && (
               <div className="space-y-4">
                 <div>
@@ -494,15 +432,13 @@ const AIDebugPanel = ({ session, onSaveAnalysis, onSaveToLibrary, savingToLib }:
               </div>
             )}
 
-            {/* ── LOGS ─────────────────────────────────── */}
             {tab === 'logs' && (
               <div className="space-y-4">
                 <div>
                   <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">Paste raw logs</label>
-                  <textarea value={rawLogs} onChange={(e) => setRawLogs(e.target.value)} rows={7}
+                  <textarea value={rawLogs} onChange={e => setRawLogs(e.target.value)} rows={7}
                     placeholder="Paste your console output, server logs, or network logs here..."
-                    className="w-full border-2 border-gray-100 dark:border-gray-700 focus:border-indigo-400 text-gray-900 dark:text-white dark:bg-gray-800 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none transition placeholder-gray-300 resize-none"
-                  />
+                    className="w-full border-2 border-gray-100 dark:border-gray-700 focus:border-indigo-400 text-gray-900 dark:text-white dark:bg-gray-800 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none transition placeholder-gray-300 resize-none" />
                   <button onClick={handleAnalyzeLogs} disabled={analyzingLogs || !rawLogs.trim()}
                     className="mt-2 flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition disabled:opacity-40">
                     {analyzingLogs ? <><Loader2 size={13} className="animate-spin" /> Analyzing logs...</> : <><FileText size={13} /> Analyze Logs</>}
@@ -533,15 +469,13 @@ const AIDebugPanel = ({ session, onSaveAnalysis, onSaveToLibrary, savingToLib }:
               </div>
             )}
 
-            {/* ── STRUCTURE ────────────────────────────── */}
             {tab === 'structure' && (
               <div className="space-y-4">
                 <div>
                   <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 block">Paste your file tree</label>
-                  <textarea value={fileTree} onChange={(e) => setFileTree(e.target.value)} rows={7}
+                  <textarea value={fileTree} onChange={e => setFileTree(e.target.value)} rows={7}
                     placeholder={"src/\n  components/\n    auth/\n    dashboard/\n  hooks/\n  pages/\n  store/\n  lib/"}
-                    className="w-full border-2 border-gray-100 dark:border-gray-700 focus:border-indigo-400 text-gray-900 dark:text-white dark:bg-gray-800 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none transition placeholder-gray-300 resize-none"
-                  />
+                    className="w-full border-2 border-gray-100 dark:border-gray-700 focus:border-indigo-400 text-gray-900 dark:text-white dark:bg-gray-800 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none transition placeholder-gray-300 resize-none" />
                   <button onClick={handleAnalyzeStructure} disabled={analyzingStructure || !fileTree.trim()}
                     className="mt-2 flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition disabled:opacity-40">
                     {analyzingStructure ? <><Loader2 size={13} className="animate-spin" /> Analyzing...</> : <><FolderTree size={13} /> Analyze Structure</>}
