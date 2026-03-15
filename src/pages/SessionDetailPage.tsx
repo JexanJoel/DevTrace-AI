@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Loader2, Trash2, Save,
   ChevronDown, Clock, FolderOpen,
-  CheckCircle, Download, Share2, MessageSquare
+  CheckCircle, Download, Share2, MessageSquare,
+  WifiOff, Sparkles, Info
 } from 'lucide-react';
 import DashboardLayout from '../components/dashboard/DashboardLayout';
 import { StatusBadge, SeverityBadge } from '../components/sessions/StatusBadge';
@@ -11,8 +12,11 @@ import AIDebugPanel from '../components/sessions/AIDebugPanel';
 import SimilarSessionsCard from '../components/sessions/SimilarSessionsCard';
 import CollaborationBanner from '../components/sessions/CollaborationBanner';
 import SessionChat from '../components/sessions/SessionChat';
+import OfflineAssistCard from '../components/sessions/OfflineAssistCard';
 import useSessions from '../hooks/useSessions';
 import useCollaboration from '../hooks/useCollaboration';
+import { useOnlineStatus } from '../hooks/useOnlineStatus';
+import useOfflineMemory from '../hooks/useOfflineMemory';
 import type { Status } from '../hooks/useSessions';
 import useFixes from '../hooks/useFixes';
 import type { AIAnalysis } from '../lib/groqClient';
@@ -64,11 +68,17 @@ const SessionDetailPage = () => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [showChat, setShowChat] = useState(false);
 
+  const isOnline = useOnlineStatus();
+  const { guidance: offlineGuidance, loading: loadingOffline, getOfflineGuidance } = useOfflineMemory();
+  const [showOfflineAssist, setShowOfflineAssist] = useState(false);
+
   const session = sessions.find(s => s.id === id) ?? null;
   const loading = sessions.length === 0 && !session;
 
   useEffect(() => {
     if (session) setNotes(session.notes ?? '');
+    // Reset offline guidance when session changes
+    setShowOfflineAssist(false);
   }, [session?.id]);
 
   const hasInitialized = useRef(false);
@@ -141,6 +151,12 @@ const SessionDetailPage = () => {
     const ok = await deleteSession(session.id);
     if (ok) navigate('/sessions');
     setDeleting(false);
+  };
+
+  const handleRunOfflineAssist = async () => {
+    if (!session?.error_message || !user) return;
+    setShowOfflineAssist(true);
+    await getOfflineGuidance(session.error_message, session.id, user.id);
   };
 
   if (loading) return (
@@ -336,6 +352,51 @@ const SessionDetailPage = () => {
               isCollaborative={isCollaborative}
               currentUserName={currentUserName}
             />
+
+            {/* Offline AI Memory Assist */}
+            {!session.ai_analysis && !isOnline && session.error_message && (
+              <div className="space-y-4">
+                {!showOfflineAssist ? (
+                  <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-900 rounded-2xl p-6 text-center animate-fade-in">
+                    <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                      <WifiOff size={24} className="text-amber-600" />
+                    </div>
+                    <h3 className="font-bold text-gray-900 dark:text-white mb-2">You're currently offline</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 max-w-sm mx-auto">
+                      Fresh AI analysis requires an internet connection. However, we can synthesize guidance from your local debugging history.
+                    </p>
+                    <button 
+                      onClick={handleRunOfflineAssist}
+                      className="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold px-6 py-2.5 rounded-xl transition shadow-sm hover:shadow-md"
+                    >
+                      <Sparkles size={16} />
+                      Run Offline Memory Assist
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    {loadingOffline ? (
+                      <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-10 text-center space-y-3">
+                        <Loader2 size={28} className="animate-spin text-amber-500 mx-auto" />
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Scanning local memory...</p>
+                        <p className="text-xs text-gray-400">Retrieving similar sessions and synthesizing previous AI insights</p>
+                      </div>
+                    ) : offlineGuidance ? (
+                      <OfflineAssistCard 
+                        guidance={offlineGuidance} 
+                        onViewSession={(sid) => navigate(`/sessions/${sid}`)}
+                        onReconnect={() => toast.success('Checking connection...')}
+                      />
+                    ) : (
+                      <div className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-800 rounded-2xl p-8 text-center">
+                        <Info size={24} className="text-gray-300 mx-auto mb-2" />
+                        <p className="text-gray-500 text-sm">No similar sessions found in local history to provide offline guidance.</p>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
 
             {/* Team chat — pb-20 gives breathing room above floating FAB on mobile */}
             {showChat && (
