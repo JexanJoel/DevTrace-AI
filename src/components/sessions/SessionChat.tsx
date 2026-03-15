@@ -31,10 +31,17 @@ const SessionChat = ({ messages, onSend, currentUserId }: Props) => {
   const [sending, setSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isMounted = useRef(false);
 
-  // Only auto-scroll when the current user sends a message,
-  // or when the user is already near the bottom (within 100px)
+  // Skip scroll on initial mount — only scroll for new messages
   useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true;
+      // Scroll to bottom silently on first open without affecting page scroll
+      bottomRef.current?.scrollIntoView({ block: 'nearest' });
+      return;
+    }
+
     const container = containerRef.current;
     if (!container) return;
 
@@ -44,7 +51,7 @@ const SessionChat = ({ messages, onSend, currentUserId }: Props) => {
     const isNearBottom = distanceFromBottom < 100;
 
     if (isMyMessage || isNearBottom) {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   }, [messages]);
 
@@ -126,8 +133,8 @@ const SessionChat = ({ messages, onSend, currentUserId }: Props) => {
         <div ref={bottomRef} />
       </div>
 
-      {/* Input — pr-16 on mobile clears the floating action button */}
-      <div className="flex gap-2 p-3 pr-16 sm:pr-3 border-t border-gray-100 dark:border-gray-800 flex-shrink-0">
+      {/* Input — pr-20 on mobile clears the floating action button */}
+      <div className="flex gap-2 p-3 pr-20 sm:pr-3 border-t border-gray-100 dark:border-gray-800 flex-shrink-0">
         <input
           value={input}
           onChange={e => setInput(e.target.value)}
