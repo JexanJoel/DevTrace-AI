@@ -12,7 +12,6 @@ import useFixes from '../hooks/useFixes';
 import useShares from '../hooks/useShares';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { useSyncQueue, type QueueItem } from '../store/useSyncQueue';
-import { useAuthStore } from '../store/authStore';
 
 const TABLE_META = [
   { key: 'profiles',       label: 'Profiles',       icon: <User size={14} />,       color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-950',  bar: 'bg-purple-400' },
@@ -50,7 +49,6 @@ const ArchNode = ({
 
 const SyncStatusPage = () => {
   const isOnline = useOnlineStatus();
-  const { user } = useAuthStore();
   const { sessions } = useSessions();
   const { projects } = useProjects();
   const { fixes } = useFixes();
