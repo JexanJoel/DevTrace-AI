@@ -63,9 +63,9 @@ All **writes** go through PowerSync's mutation queue — written to local SQLite
 ```
 WRITE (small fields)  →  powerSync.execute()  →  Local SQLite  →  PowerSync uploads  →  Supabase Postgres
                                                                                                 │
-WRITE (ai_analysis)   →  supabase.update()    →  Supabase Postgres                            │
-                                                        │                                      │
-                                                PowerSync WAL listener ←──────────────────────┘
+WRITE (ai_analysis)   →  supabase.update()    →  Supabase Postgres                              │
+                                                        │                                       │
+                                                PowerSync WAL listener ←──────────────────────--┘
                                                         │
 READ  ←  useQuery() from @powersync/react  ←  Local SQLite  (0ms, no spinner)
 ```
@@ -76,7 +76,7 @@ Offline? `powerSync.execute()` writes to local SQLite and queues the upload auto
 
 ## The AI Debug Panel - 8 Tabs Per Bug
 
-Every session gets a full structured breakdown powered by **Groq + Llama 3.3 70B** — called server-side via a Supabase Edge Function. The Groq API key is never exposed to the browser. The complete analysis is saved as JSONB in Supabase — persists across reloads, no re-analyzing needed.
+Every session gets a full structured breakdown powered by **Groq + Llama 3.3 70B** - called server-side via a Supabase Edge Function. The Groq API key is never exposed to the browser. The complete analysis is saved as JSONB in Supabase - persists across reloads, no re-analyzing needed.
 
 - 🔍 **Overview** - Plain English explanation, root cause, symptom vs cause, category badge, confidence score, files to check
 - ⚡ **Fixes** - 3 options (quick patch, proper fix, workaround) each with full code & pros/cons
@@ -241,9 +241,9 @@ await powerSync.execute(
 ```
 powerSync.execute()  →  Local SQLite  →  PowerSync crud queue  →  Supabase Postgres
                                                                           │
-supabase.update() [ai_analysis only]  →  Supabase Postgres               │
+supabase.update() [ai_analysis only]  →  Supabase Postgres                │
                                                  │                        │
-                                         PowerSync WAL listener ←────────┘
+                                         PowerSync WAL listener ←────────-┘
                                                  │
                                         Local SQLite updated
                                                  │
