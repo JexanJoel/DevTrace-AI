@@ -4,7 +4,7 @@ import {
   Terminal, Bug, Sparkles, BookOpen,
   BarChart2, ArrowRight, Github,
   Share2, Menu, X, Wifi, WifiOff,
-  Database, Zap, FolderOpen, Heart
+  Database, Zap, Heart
 } from 'lucide-react';
 
 const FEATURES = [
