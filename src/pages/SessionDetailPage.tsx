@@ -133,23 +133,33 @@ const SessionDetailPage = () => {
   return (
     <>
     <DashboardLayout title={session.title}>
-      <div className="space-y-5">
+      {/* overflow-hidden on the root prevents any child from blowing out the width */}
+      <div className="space-y-5 overflow-x-hidden">
 
-        {/* Top bar — back + share + export */}
-        <div className="flex items-center justify-between gap-3">
-          <button onClick={() => navigate('/sessions')}
-            className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition flex-shrink-0">
+        {/* Top bar — back + share + export
+            Key fix: min-w-0 on the left side, buttons never grow, row never wraps wide */}
+        <div className="flex items-center justify-between gap-2 min-w-0">
+          <button
+            onClick={() => navigate('/sessions')}
+            className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition flex-shrink-0"
+          >
             <ArrowLeft size={14} />
             <span className="hidden xs:inline">All Sessions</span>
           </button>
-          <div className="flex items-center gap-2">
-            <button onClick={() => setShowShareModal(true)}
-              className="flex items-center gap-1.5 border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950 hover:bg-indigo-100 dark:hover:bg-indigo-900 text-indigo-600 dark:text-indigo-400 px-3 py-2 rounded-xl text-sm font-medium transition flex-shrink-0">
+
+          {/* Action buttons — icons only on mobile, labels on sm+ */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={() => setShowShareModal(true)}
+              className="flex items-center gap-1.5 border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950 hover:bg-indigo-100 dark:hover:bg-indigo-900 text-indigo-600 dark:text-indigo-400 px-2.5 py-2 sm:px-3 rounded-xl text-sm font-medium transition"
+            >
               <Share2 size={14} />
               <span className="hidden sm:inline">Share</span>
             </button>
-            <button onClick={handleExport}
-              className="flex items-center gap-1.5 border border-gray-200 dark:border-gray-700 hover:border-gray-300 text-gray-600 dark:text-gray-400 px-3 py-2 rounded-xl text-sm font-medium transition flex-shrink-0">
+            <button
+              onClick={handleExport}
+              className="flex items-center gap-1.5 border border-gray-200 dark:border-gray-700 hover:border-gray-300 text-gray-600 dark:text-gray-400 px-2.5 py-2 sm:px-3 rounded-xl text-sm font-medium transition"
+            >
               <Download size={14} />
               <span className="hidden sm:inline">Export .md</span>
             </button>
@@ -157,11 +167,12 @@ const SessionDetailPage = () => {
         </div>
 
         {/* Session header card */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-6 min-w-0">
 
-          {/* Title */}
-          <div className="flex items-start gap-3 mb-3">
-            <h2 className="flex-1 min-w-0 text-lg sm:text-xl font-bold text-gray-900 dark:text-white leading-snug break-words">
+          {/* Title — truncate on mobile, wrap on sm+ */}
+          <div className="mb-3 min-w-0">
+            <h2 className="text-base sm:text-xl font-bold text-gray-900 dark:text-white leading-snug
+                           truncate sm:whitespace-normal sm:break-words min-w-0">
               {session.title}
             </h2>
           </div>
@@ -169,21 +180,21 @@ const SessionDetailPage = () => {
           {/* Badges + status button */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap min-w-0">
               <StatusBadge status={effectiveStatus} />
               <SeverityBadge severity={session.severity} />
               {session.environment && (
-                <span className={`text-xs px-2.5 py-1 rounded-lg border font-medium capitalize ${ENV_COLORS[session.environment] ?? 'bg-gray-50 text-gray-600 border-gray-200'}`}>
+                <span className={`text-xs px-2.5 py-1 rounded-lg border font-medium capitalize flex-shrink-0 ${ENV_COLORS[session.environment] ?? 'bg-gray-50 text-gray-600 border-gray-200'}`}>
                   {session.environment}
                 </span>
               )}
               {session.project && (
-                <div className="flex items-center gap-1 text-xs text-gray-400 bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded-lg border border-gray-200 dark:border-gray-700 max-w-[140px]">
+                <div className="flex items-center gap-1 text-xs text-gray-400 bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded-lg border border-gray-200 dark:border-gray-700 max-w-[120px] min-w-0">
                   <FolderOpen size={11} className="flex-shrink-0" />
                   <span className="truncate">{session.project.name}</span>
                 </div>
               )}
-              <div className="flex items-center gap-1 text-xs text-gray-400">
+              <div className="flex items-center gap-1 text-xs text-gray-400 flex-shrink-0">
                 <Clock size={11} />
                 <span className="hidden sm:inline">
                   {new Date(session.created_at).toLocaleDateString()} at{' '}
@@ -197,8 +208,10 @@ const SessionDetailPage = () => {
 
             {/* Status dropdown */}
             <div className="relative flex-shrink-0">
-              <button onClick={() => setShowStatusMenu(!showStatusMenu)}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700 hover:border-indigo-300 text-gray-600 dark:text-gray-400 px-3 py-2 rounded-xl text-sm font-medium transition whitespace-nowrap">
+              <button
+                onClick={() => setShowStatusMenu(!showStatusMenu)}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700 hover:border-indigo-300 text-gray-600 dark:text-gray-400 px-3 py-2 rounded-xl text-sm font-medium transition whitespace-nowrap"
+              >
                 Change Status <ChevronDown size={14} />
               </button>
               {showStatusMenu && (
@@ -221,21 +234,21 @@ const SessionDetailPage = () => {
         </div>
 
         {/* Body */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 min-w-0">
 
-          <div className="lg:col-span-2 space-y-5">
+          <div className="lg:col-span-2 space-y-5 min-w-0">
 
             {session.error_message && (
-              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-6 min-w-0">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Error Message</p>
-                <div className="bg-red-50 dark:bg-red-950 border border-red-100 dark:border-red-900 rounded-xl p-4 font-mono text-xs sm:text-sm text-red-800 dark:text-red-300 whitespace-pre-wrap break-all">
+                <div className="bg-red-50 dark:bg-red-950 border border-red-100 dark:border-red-900 rounded-xl p-4 font-mono text-xs sm:text-sm text-red-800 dark:text-red-300 whitespace-pre-wrap break-all overflow-x-auto">
                   {session.error_message}
                 </div>
               </div>
             )}
 
             {session.stack_trace && (
-              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-6 min-w-0">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Stack Trace</p>
                 <div className="bg-gray-900 rounded-xl p-4 font-mono text-xs text-gray-300 whitespace-pre-wrap overflow-x-auto max-h-48 overflow-y-auto">
                   {session.stack_trace}
@@ -244,7 +257,7 @@ const SessionDetailPage = () => {
             )}
 
             {session.code_snippet && (
-              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-6 min-w-0">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Related Code</p>
                 <div className="bg-gray-900 rounded-xl p-4 font-mono text-xs text-gray-300 whitespace-pre-wrap overflow-x-auto max-h-48 overflow-y-auto">
                   {session.code_snippet}
@@ -253,9 +266,9 @@ const SessionDetailPage = () => {
             )}
 
             {session.expected_behavior && (
-              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5">
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-5 min-w-0">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Expected Behavior</p>
-                <p className="text-sm text-gray-700 dark:text-gray-300">{session.expected_behavior}</p>
+                <p className="text-sm text-gray-700 dark:text-gray-300 break-words">{session.expected_behavior}</p>
               </div>
             )}
 
@@ -270,20 +283,26 @@ const SessionDetailPage = () => {
           {/* Sidebar */}
           <div className="space-y-5">
 
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-6">
               <h3 className="font-bold text-gray-900 dark:text-white text-sm mb-3">Notes</h3>
-              <textarea value={notes} onChange={(e) => setNotes(e.target.value)}
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
                 placeholder="Add your debugging notes, observations, or next steps..."
                 rows={5}
-                className="w-full border-2 border-gray-100 dark:border-gray-700 focus:border-indigo-400 text-gray-900 dark:text-white dark:bg-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-4 focus:ring-indigo-50 transition placeholder-gray-300 resize-none" />
-              <button onClick={handleSaveNotes} disabled={savingNotes || notes === (session.notes ?? '')}
-                className="mt-3 w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition disabled:opacity-40">
+                className="w-full border-2 border-gray-100 dark:border-gray-700 focus:border-indigo-400 text-gray-900 dark:text-white dark:bg-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-4 focus:ring-indigo-50 transition placeholder-gray-300 resize-none"
+              />
+              <button
+                onClick={handleSaveNotes}
+                disabled={savingNotes || notes === (session.notes ?? '')}
+                className="mt-3 w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition disabled:opacity-40"
+              >
                 {savingNotes ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
                 {savingNotes ? 'Saving...' : 'Save Notes'}
               </button>
             </div>
 
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-6">
               <h3 className="font-bold text-gray-900 dark:text-white text-sm mb-4">Session Info</h3>
               <div className="space-y-2">
                 {[
@@ -294,26 +313,37 @@ const SessionDetailPage = () => {
                       {session.environment ?? 'development'}
                     </span>
                   )},
-                  { label: 'Project',     value: <span className="text-sm text-gray-700 dark:text-gray-300 truncate max-w-[120px] text-right">{session.project?.name ?? '—'}</span> },
-                  { label: 'Created',     value: <span className="text-sm text-gray-700 dark:text-gray-300">{new Date(session.created_at).toLocaleDateString()}</span> },
+                  { label: 'Project', value: (
+                    <span className="text-sm text-gray-700 dark:text-gray-300 truncate max-w-[100px] text-right block">
+                      {session.project?.name ?? '—'}
+                    </span>
+                  )},
+                  { label: 'Created', value: (
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      {new Date(session.created_at).toLocaleDateString()}
+                    </span>
+                  )},
                 ].map((item, i) => (
-                  <div key={i} className="flex items-center justify-between py-1.5 border-b border-gray-50 dark:border-gray-800 last:border-0 gap-2">
+                  <div key={i} className="flex items-center justify-between py-1.5 border-b border-gray-50 dark:border-gray-800 last:border-0 gap-2 min-w-0">
                     <span className="text-xs text-gray-400 flex-shrink-0">{item.label}</span>
-                    <div className="flex-shrink-0">{item.value}</div>
+                    <div className="flex-shrink-0 min-w-0">{item.value}</div>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-red-100 dark:border-red-900 p-5 sm:p-6">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-red-100 dark:border-red-900 p-4 sm:p-6">
               <h3 className="font-bold text-red-600 mb-4">Danger Zone</h3>
               <div className="p-4 bg-red-50 dark:bg-red-950 rounded-xl space-y-3">
                 <div>
                   <p className="text-sm font-semibold text-gray-900 dark:text-white">Delete Session</p>
                   <p className="text-xs text-gray-400 mt-0.5">Permanently delete this session and all its data.</p>
                 </div>
-                <button onClick={handleDelete} disabled={deleting}
-                  className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-xl text-sm transition disabled:opacity-50 w-full justify-center">
+                <button
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-xl text-sm transition disabled:opacity-50 w-full justify-center"
+                >
                   {deleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
                   {deleting ? 'Deleting...' : 'Delete Session'}
                 </button>
