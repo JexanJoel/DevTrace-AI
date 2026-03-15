@@ -8,12 +8,14 @@ import {
 import DashboardLayout from '../components/dashboard/DashboardLayout';
 import { StatusBadge, SeverityBadge } from '../components/sessions/StatusBadge';
 import AIDebugPanel from '../components/sessions/AIDebugPanel';
+import SimilarSessionsCard from '../components/sessions/SimilarSessionsCard';
 import useSessions from '../hooks/useSessions';
 import type { Status } from '../hooks/useSessions';
 import useFixes from '../hooks/useFixes';
 import type { AIAnalysis } from '../lib/groqClient';
 import { exportSessionAsMarkdown } from '../hooks/exportUtils';
 import ShareModal from '../components/shared/ShareModal';
+import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
 
 const STATUS_OPTIONS: { value: Status; label: string }[] = [
@@ -31,6 +33,7 @@ const ENV_COLORS: Record<string, string> = {
 const SessionDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuthStore();
 
   const { sessions, updateSession, deleteSession } = useSessions();
   const { createFix } = useFixes();
@@ -133,11 +136,9 @@ const SessionDetailPage = () => {
   return (
     <>
     <DashboardLayout title="Session">
-      {/* overflow-hidden on the root prevents any child from blowing out the width */}
       <div className="space-y-5 overflow-x-hidden">
 
-        {/* Top bar — back + share + export
-            Key fix: min-w-0 on the left side, buttons never grow, row never wraps wide */}
+        {/* Top bar */}
         <div className="flex items-center justify-between gap-2 min-w-0">
           <button
             onClick={() => navigate('/sessions')}
@@ -146,8 +147,6 @@ const SessionDetailPage = () => {
             <ArrowLeft size={14} />
             <span className="hidden xs:inline">All Sessions</span>
           </button>
-
-          {/* Action buttons — icons only on mobile, labels on sm+ */}
           <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={() => setShowShareModal(true)}
@@ -168,18 +167,7 @@ const SessionDetailPage = () => {
 
         {/* Session header card */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-6 min-w-0">
-
-          {/* Title — truncate on mobile, wrap on sm+ */}
-          <div className="mb-3 min-w-0">
-            <h2 className="text-base sm:text-xl font-bold text-gray-900 dark:text-white leading-snug
-                           truncate sm:whitespace-normal sm:break-words min-w-0">
-              {session.title}
-            </h2>
-          </div>
-
-          {/* Badges + status button */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-
             <div className="flex items-center gap-2 flex-wrap min-w-0">
               <StatusBadge status={effectiveStatus} />
               <SeverityBadge severity={session.severity} />
@@ -241,7 +229,7 @@ const SessionDetailPage = () => {
             {session.error_message && (
               <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-6 min-w-0">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Error Message</p>
-                <div className="bg-red-50 dark:bg-red-950 border border-red-100 dark:border-red-900 rounded-xl p-4 font-mono text-xs sm:text-sm text-red-800 dark:text-red-300 whitespace-pre-wrap break-all overflow-x-auto">
+                <div className="bg-red-50 dark:bg-red-950 border border-red-100 dark:border-red-900 rounded-xl p-4 font-mono text-xs sm:text-sm text-red-800 dark:text-red-300 whitespace-pre-wrap break-all overflow-x-auto max-w-full">
                   {session.error_message}
                 </div>
               </div>
@@ -250,7 +238,7 @@ const SessionDetailPage = () => {
             {session.stack_trace && (
               <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-6 min-w-0">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Stack Trace</p>
-                <div className="bg-gray-900 rounded-xl p-4 font-mono text-xs text-gray-300 whitespace-pre-wrap overflow-x-auto max-h-48 overflow-y-auto">
+                <div className="bg-gray-900 rounded-xl p-4 font-mono text-xs text-gray-300 whitespace-pre-wrap overflow-x-auto max-h-48 overflow-y-auto max-w-full">
                   {session.stack_trace}
                 </div>
               </div>
@@ -259,7 +247,7 @@ const SessionDetailPage = () => {
             {session.code_snippet && (
               <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-6 min-w-0">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Related Code</p>
-                <div className="bg-gray-900 rounded-xl p-4 font-mono text-xs text-gray-300 whitespace-pre-wrap overflow-x-auto max-h-48 overflow-y-auto">
+                <div className="bg-gray-900 rounded-xl p-4 font-mono text-xs text-gray-300 whitespace-pre-wrap overflow-x-auto max-h-48 overflow-y-auto max-w-full">
                   {session.code_snippet}
                 </div>
               </div>
@@ -270,6 +258,15 @@ const SessionDetailPage = () => {
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Expected Behavior</p>
                 <p className="text-sm text-gray-700 dark:text-gray-300 break-words">{session.expected_behavior}</p>
               </div>
+            )}
+
+            {/* Similar sessions from debug history — queries local SQLite, zero network */}
+            {session.error_message && user && (
+              <SimilarSessionsCard
+                currentSessionId={session.id}
+                errorMessage={session.error_message}
+                userId={user.id}
+              />
             )}
 
             <AIDebugPanel
