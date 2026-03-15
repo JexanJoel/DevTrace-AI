@@ -1,10 +1,8 @@
 import { useQuery } from '@powersync/react';
-import { supabase } from '../lib/supabaseClient';
+import { powerSync } from '../lib/powersync';
 import { useAuthStore } from '../store/authStore';
-import { usePendingQueue } from './usePendingQueue';
 import { syncQueueAddItem, syncQueueUpdateItem } from '../store/useSyncQueue';
 import { v4 as uuidv4 } from 'uuid';
-import { useOnlineStatus } from './useOnlineStatus';
 
 export interface Fix {
   id: string;
@@ -18,69 +16,117 @@ export interface Fix {
   tags?: string;
   use_count: number;
   created_at: string;
-  _pending?: boolean;
 }
+
+export interface CreateFixInput {
+  title: string;
+  fix_content: string;
+  session_id?: string;
+  project_id?: string;
+  error_pattern?: string;
+  language?: string;
+  tags?: string[];
+}
+
+// Real columns in the fixes SQLite table
+const UPDATABLE_COLUMNS = new Set([
+  'session_id', 'project_id', 'title', 'error_pattern',
+  'fix_content', 'language', 'tags', 'use_count',
+]);
 
 const useFixes = () => {
   const { user } = useAuthStore();
   const uid = user?.id ?? '';
-  const { pending, addPending, removePending } = usePendingQueue<Fix>('fixes');
-  const isOnline = useOnlineStatus();
 
-  const { data: syncedFixes = [] } = useQuery<Fix>(
-    'SELECT * FROM fixes WHERE user_id = ? ORDER BY created_at DESC', [uid]
+  // ── Reads: local SQLite via PowerSync ────────────────────────────────────
+  const { data: fixes = [] } = useQuery<Fix>(
+    'SELECT * FROM fixes WHERE user_id = ? ORDER BY created_at DESC',
+    [uid]
   );
 
-  const syncedIds = new Set(syncedFixes.map(f => f.id));
-  const pendingOnly = pending.filter(f => !syncedIds.has(f.id));
-
-  const fixes = [
-    ...pendingOnly,
-    ...syncedFixes,
-  ].filter((f, i, arr) => arr.findIndex(x => x.id === f.id) === i)
-   .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-
-  const createFix = async (data: Partial<Fix>) => {
+  // ── createFix ─────────────────────────────────────────────────────────────
+  const createFix = async (data: CreateFixInput) => {
     if (!user) return null;
     const id = uuidv4();
     const qid = `save_fix_${id}`;
     const now = new Date().toISOString();
-    const row: Fix = { id, user_id: user.id, use_count: 0, created_at: now, _pending: true, ...data } as Fix;
 
-    addPending(row);
-    syncQueueAddItem({ id: qid, action: 'save_fix', label: `Save fix "${data.title ?? 'fix'}"`, status: 'pending' });
-
-    await new Promise(r => setTimeout(r, 80));
-    syncQueueUpdateItem(qid, { status: 'syncing' });
-
-    const { error } = await supabase.from('fixes').insert({
-      id, user_id: user.id, use_count: 0, created_at: now, ...data,
+    syncQueueAddItem({
+      id: qid,
+      action: 'save_fix',
+      label: `Save fix "${data.title ?? 'fix'}"`,
+      status: 'syncing',
     });
 
-    if (!error) {
-      removePending(id);
-      syncQueueUpdateItem(qid, { status: 'done' });
-    } else {
-      syncQueueUpdateItem(qid, { status: isOnline ? 'error' : 'pending' });
-    }
+    try {
+      // tags array → comma-separated text for SQLite
+      const tagsText = Array.isArray(data.tags) ? data.tags.join(',') : (data.tags ?? null);
 
-    return row;
+      await powerSync.execute(
+        `INSERT INTO fixes (
+          id, user_id, session_id, project_id, title, error_pattern,
+          fix_content, language, tags, use_count, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          id,
+          user.id,
+          data.session_id ?? null,
+          data.project_id ?? null,
+          data.title,
+          data.error_pattern ?? null,
+          data.fix_content,
+          data.language ?? null,
+          tagsText,
+          0,
+          now,
+        ]
+      );
+
+      syncQueueUpdateItem(qid, { status: 'done' });
+
+      return { id, user_id: user.id, use_count: 0, created_at: now, ...data } as Fix;
+    } catch (err) {
+      console.error('createFix error:', err);
+      syncQueueUpdateItem(qid, { status: 'error' });
+      return null;
+    }
   };
 
+  // ── deleteFix ─────────────────────────────────────────────────────────────
   const deleteFix = async (id: string) => {
     const qid = `delete_fix_${id}`;
     const fix = fixes.find(f => f.id === id);
-    syncQueueAddItem({ id: qid, action: 'delete_fix', label: `Delete fix "${fix?.title ?? 'fix'}"`, status: 'syncing' });
-    removePending(id);
-    const { error } = await supabase.from('fixes').delete().eq('id', id);
-    syncQueueUpdateItem(qid, { status: error ? 'error' : 'done' });
-    return !error;
+    syncQueueAddItem({
+      id: qid,
+      action: 'delete_fix',
+      label: `Delete fix "${fix?.title ?? 'fix'}"`,
+      status: 'syncing',
+    });
+
+    try {
+      await powerSync.execute(`DELETE FROM fixes WHERE id = ?`, [id]);
+      syncQueueUpdateItem(qid, { status: 'done' });
+      return true;
+    } catch (err) {
+      console.error('deleteFix error:', err);
+      syncQueueUpdateItem(qid, { status: 'error' });
+      return false;
+    }
   };
 
+  // ── incrementUseCount ─────────────────────────────────────────────────────
   const incrementUseCount = async (id: string) => {
     const fix = fixes.find(f => f.id === id);
     if (!fix) return;
-    await supabase.from('fixes').update({ use_count: (fix.use_count ?? 0) + 1 }).eq('id', id);
+
+    try {
+      await powerSync.execute(
+        `UPDATE fixes SET use_count = ? WHERE id = ?`,
+        [(fix.use_count ?? 0) + 1, id]
+      );
+    } catch (err) {
+      console.error('incrementUseCount error:', err);
+    }
   };
 
   return { fixes, loading: false, createFix, deleteFix, incrementUseCount };
