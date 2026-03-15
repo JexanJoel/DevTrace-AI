@@ -55,9 +55,8 @@ const fixes = new Table({
   created_at: column.text,
 });
 
-// ── Collaboration tables ───────────────────────────────────────────────────────
+// ── Session collaboration tables ──────────────────────────────────────────────
 
-// One row per user per session — updated every 30s for live presence
 const session_presence = new Table({
   session_id: column.text,
   user_id: column.text,
@@ -67,19 +66,52 @@ const session_presence = new Table({
   joined_at: column.text,
 });
 
-// One row per checklist item per session — syncs checked state across users
 const session_checklist = new Table({
   session_id: column.text,
   item_index: column.integer,
-  checked: column.integer,         // 0 or 1 (SQLite has no boolean)
+  checked: column.integer,
   checked_by: column.text,
   checked_by_name: column.text,
   checked_at: column.text,
 });
 
-// Flat chat messages tied to a session
 const session_chat = new Table({
   session_id: column.text,
+  user_id: column.text,
+  display_name: column.text,
+  avatar_url: column.text,
+  message: column.text,
+  created_at: column.text,
+});
+
+// ── Project collaboration tables ──────────────────────────────────────────────
+
+// Who is currently viewing a project
+const project_presence = new Table({
+  project_id: column.text,
+  user_id: column.text,
+  display_name: column.text,
+  avatar_url: column.text,
+  last_seen_at: column.text,
+  joined_at: column.text,
+});
+
+// Activity feed — session created/resolved/analyzed events
+const project_activity = new Table({
+  project_id: column.text,
+  user_id: column.text,
+  display_name: column.text,
+  avatar_url: column.text,
+  event_type: column.text,
+  session_id: column.text,
+  session_title: column.text,
+  metadata: column.text,  // JSON string
+  created_at: column.text,
+});
+
+// Project-level team chat
+const project_chat = new Table({
+  project_id: column.text,
   user_id: column.text,
   display_name: column.text,
   avatar_url: column.text,
@@ -95,6 +127,9 @@ export const AppSchema = new Schema({
   session_presence,
   session_checklist,
   session_chat,
+  project_presence,
+  project_activity,
+  project_chat,
 });
 
 export type Database = (typeof AppSchema)['types'];

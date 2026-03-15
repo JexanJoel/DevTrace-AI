@@ -1,15 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Github, Bug, Clock, Settings, BarChart2,
-  Trash2, Loader2, Save, ExternalLink, Plus, ChevronRight, Share2
+  Trash2, Loader2, Save, ExternalLink, Plus, ChevronRight,
+  Share2, MessageSquare, Activity
 } from 'lucide-react';
 import DashboardLayout from '../components/dashboard/DashboardLayout';
 import { StatusBadge, SeverityBadge } from '../components/sessions/StatusBadge';
 import GitHubStatsCard from '../components/github/GitHubStatsCard';
 import ShareModal from '../components/shared/ShareModal';
+import ProjectActivityFeed from '../components/projects/ProjectActivityFeed';
+import ProjectChat from '../components/projects/ProjectChat';
 import useProjects from '../hooks/useProjects';
 import useSessions from '../hooks/useSessions';
+import useProjectCollaboration from '../hooks/useProjectCollaboration';
 import CreateSessionModal from '../components/sessions/CreateSessionModal';
 import { computeHealthScore } from '../lib/projectHealth';
 
@@ -30,7 +34,16 @@ const LANGUAGE_LABELS: Record<string, string> = {
   python: 'Python', other: 'Other',
 };
 
-type Tab = 'overview' | 'settings';
+type Tab = 'overview' | 'activity' | 'settings';
+
+const COLORS = [
+  'bg-indigo-500', 'bg-violet-500', 'bg-pink-500',
+  'bg-amber-500', 'bg-emerald-500', 'bg-blue-500',
+];
+const colorForUser = (userId: string) => {
+  const hash = userId.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+  return COLORS[hash % COLORS.length];
+};
 
 const ProjectDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -39,14 +52,29 @@ const ProjectDetailPage = () => {
   const { projects, updateProject, deleteProject } = useProjects();
   const { sessions, loading: sessionsLoading, createSession } = useSessions(id);
 
+  const {
+    activeCollaborators,
+    otherCollaborators,
+    isCollaborative,
+    activityFeed,
+    getActivityLabel,
+    getActivityIcon,
+    chatMessages,
+    sendMessage,
+    currentUserId,
+  } = useProjectCollaboration(id ?? '');
+
   const [tab, setTab] = useState<Tab>('overview');
   const [showModal, setShowModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showChat, setShowChat] = useState(false);
   const [editName, setEditName] = useState('');
   const [editDesc, setEditDesc] = useState('');
   const [editGithub, setEditGithub] = useState('');
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  const hasInitialized = useRef(false);
 
   const project = projects.find(p => p.id === id) ?? null;
   const loading = projects.length === 0 && !project;
@@ -59,6 +87,15 @@ const ProjectDetailPage = () => {
       setEditGithub(project.github_url ?? '');
     }
   }, [project?.id]);
+
+  // Auto-open chat only when a collaborator joins AFTER mount
+  useEffect(() => {
+    if (!hasInitialized.current) {
+      hasInitialized.current = true;
+      return;
+    }
+    if (isCollaborative && !showChat) setShowChat(true);
+  }, [isCollaborative]);
 
   const handleSave = async () => {
     if (!project) return;
@@ -102,9 +139,7 @@ const ProjectDetailPage = () => {
     <DashboardLayout title="Project">
       <div className="flex flex-col items-center justify-center h-64 text-center">
         <p className="text-gray-500 mb-4">Project not found</p>
-        <button onClick={() => navigate('/projects')} className="text-indigo-600 font-medium text-sm">
-          Back to Projects
-        </button>
+        <button onClick={() => navigate('/projects')} className="text-indigo-600 font-medium text-sm">Back to Projects</button>
       </div>
     </DashboardLayout>
   );
@@ -120,46 +155,82 @@ const ProjectDetailPage = () => {
 
         {/* Header */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
-
-          {/* Title row */}
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-
-            {/* Left: name + badges */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2.5 flex-wrap">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white break-words">
-                  {project.name}
-                </h2>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white break-words">{project.name}</h2>
                 {project.language && (
                   <span className={`px-2.5 py-1 rounded-lg text-xs font-medium border flex-shrink-0 ${LANGUAGE_COLORS[project.language] ?? 'bg-gray-100 text-gray-600 border-gray-200'}`}>
                     {LANGUAGE_LABELS[project.language] ?? project.language}
                   </span>
                 )}
               </div>
-              {project.description && (
-                <p className="text-gray-400 text-sm mt-1.5">{project.description}</p>
-              )}
+              {project.description && <p className="text-gray-400 text-sm mt-1.5">{project.description}</p>}
               <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
                 <Clock size={11} /> Created {new Date(project.created_at).toLocaleDateString()}
               </p>
+
+              {/* Active collaborators strip */}
+              {activeCollaborators.length > 0 && (
+                <div className="flex items-center gap-2 mt-3">
+                  <div className="flex -space-x-1.5">
+                    {activeCollaborators.slice(0, 4).map((c) => (
+                      <div key={c.user_id} title={c.display_name}
+                        className={`w-6 h-6 rounded-full border-2 border-white dark:border-gray-900 flex items-center justify-center text-white text-[9px] font-bold ${colorForUser(c.user_id)}`}>
+                        {c.avatar_url
+                          ? <img src={c.avatar_url} className="w-full h-full rounded-full object-cover" alt={c.display_name} />
+                          : c.display_name[0].toUpperCase()
+                        }
+                      </div>
+                    ))}
+                    {activeCollaborators.length > 4 && (
+                      <div className="w-6 h-6 rounded-full bg-gray-400 border-2 border-white dark:border-gray-900 flex items-center justify-center text-white text-[9px] font-bold">
+                        +{activeCollaborators.length - 4}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-600" />
+                    </span>
+                    <span className="text-xs text-indigo-600 font-medium">
+                      {otherCollaborators.length === 1
+                        ? `${otherCollaborators[0].display_name} is here`
+                        : `${activeCollaborators.length} people here`}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Right: action buttons */}
             <div className="flex items-center gap-2 flex-shrink-0 flex-wrap sm:flex-nowrap">
+              {/* Chat toggle */}
               <button
-                onClick={() => setShowShareModal(true)}
-                className="flex items-center gap-1.5 border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950 hover:bg-indigo-100 dark:hover:bg-indigo-900 text-indigo-600 dark:text-indigo-400 px-3 py-2 rounded-xl text-sm font-medium transition flex-shrink-0"
+                onClick={() => setShowChat(v => !v)}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition relative ${
+                  showChat
+                    ? 'bg-indigo-600 text-white'
+                    : 'border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950 text-indigo-600'
+                }`}
               >
-                <Share2 size={14} />
-                <span>Share</span>
+                <MessageSquare size={14} />
+                <span className="hidden sm:inline">Chat</span>
+                {chatMessages.length > 0 && !showChat && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                    {chatMessages.length > 9 ? '9+' : chatMessages.length}
+                  </span>
+                )}
               </button>
+
+              <button onClick={() => setShowShareModal(true)}
+                className="flex items-center gap-1.5 border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950 hover:bg-indigo-100 dark:hover:bg-indigo-900 text-indigo-600 dark:text-indigo-400 px-3 py-2 rounded-xl text-sm font-medium transition flex-shrink-0">
+                <Share2 size={14} /><span>Share</span>
+              </button>
+
               {project.github_url && (
-                <a
-                  href={project.github_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 border border-gray-200 dark:border-gray-700 hover:border-gray-300 text-gray-600 dark:text-gray-300 px-3 py-2 rounded-xl text-sm font-medium transition flex-shrink-0"
-                >
+                <a href={project.github_url} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 border border-gray-200 dark:border-gray-700 hover:border-gray-300 text-gray-600 dark:text-gray-300 px-3 py-2 rounded-xl text-sm font-medium transition flex-shrink-0">
                   <Github size={15} />
                   <span className="hidden sm:inline">View Repo</span>
                   <ExternalLink size={12} />
@@ -189,7 +260,6 @@ const ProjectDetailPage = () => {
             </div>
           </div>
 
-          {/* Health deductions */}
           {health.deductions.length > 0 && (
             <div className="mt-4 pt-4 border-t border-gray-50 dark:border-gray-800">
               <p className="text-xs font-semibold text-gray-400 mb-2">Health Score Breakdown</p>
@@ -209,19 +279,23 @@ const ProjectDetailPage = () => {
           )}
         </div>
 
-        {/* Tabs */}
+        {/* Tabs — now includes Activity */}
         <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl w-fit">
           {([
-            { key: 'overview', label: 'Overview', icon: <BarChart2 size={14} /> },
-            { key: 'settings', label: 'Settings', icon: <Settings size={14} /> },
-          ] as { key: Tab; label: string; icon: any }[]).map((t) => (
+            { key: 'overview',  label: 'Overview',  icon: <BarChart2 size={14} /> },
+            { key: 'activity',  label: 'Activity',  icon: <Activity size={14} />, badge: activityFeed.length > 0 },
+            { key: 'settings',  label: 'Settings',  icon: <Settings size={14} /> },
+          ] as { key: Tab; label: string; icon: any; badge?: boolean }[]).map((t) => (
             <button key={t.key} onClick={() => setTab(t.key)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition ${
+              className={`relative flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition ${
                 tab === t.key
                   ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm'
                   : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
               }`}>
               {t.icon} {t.label}
+              {t.badge && tab !== t.key && (
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-indigo-500 rounded-full" />
+              )}
             </button>
           ))}
         </div>
@@ -230,6 +304,18 @@ const ProjectDetailPage = () => {
         {tab === 'overview' && (
           <div className="space-y-5">
             {project.github_url && <GitHubStatsCard githubUrl={project.github_url} />}
+
+            {/* Project chat — shown when toggled */}
+            {showChat && (
+              <div className="pb-20 sm:pb-0 sm:mr-16">
+                <ProjectChat
+                  messages={chatMessages}
+                  onSend={sendMessage}
+                  currentUserId={currentUserId}
+                />
+              </div>
+            )}
+
             <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="font-bold text-gray-900 dark:text-white">Debug Sessions</h3>
@@ -294,6 +380,25 @@ const ProjectDetailPage = () => {
           </div>
         )}
 
+        {/* Activity tab */}
+        {tab === 'activity' && (
+          <div className="space-y-5">
+            <ProjectActivityFeed
+              feed={activityFeed}
+              getActivityLabel={getActivityLabel}
+              getActivityIcon={getActivityIcon}
+            />
+            {/* Also show chat in activity tab */}
+            <div className="pb-20 sm:pb-0 sm:mr-16">
+              <ProjectChat
+                messages={chatMessages}
+                onSend={sendMessage}
+                currentUserId={currentUserId}
+              />
+            </div>
+          </div>
+        )}
+
         {/* Settings tab */}
         {tab === 'settings' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -346,7 +451,6 @@ const ProjectDetailPage = () => {
       {showModal && (
         <CreateSessionModal onClose={() => setShowModal(false)} onCreate={createSession} defaultProjectId={id} />
       )}
-
       {showShareModal && project && (
         <ShareModal
           resourceType="project"

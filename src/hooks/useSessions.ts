@@ -45,17 +45,44 @@ export interface CreateSessionInput {
   notes?: string;
 }
 
-// Real SQLite columns that are safe to write through PowerSync's mutation queue.
-// ai_analysis and ai_fix are intentionally excluded — they are large blobs that
-// crash PowerSync's WASM crud reader. They go direct to Supabase instead.
 const POWERSYNC_COLUMNS = new Set([
   'project_id', 'title', 'error_message', 'stack_trace', 'code_snippet',
   'expected_behavior', 'environment', 'severity', 'status', 'notes', 'updated_at',
 ]);
 
-// ai_analysis and ai_fix are written directly to Supabase (bypassing PowerSync
-// mutation queue) then synced back down via WAL — same end result, no WASM crash.
 const SUPABASE_DIRECT_COLUMNS = new Set(['ai_analysis', 'ai_fix']);
+
+// ── Activity logging helper ───────────────────────────────────────────────────
+// Writes a project_activity row via PowerSync so it syncs to all collaborators
+const logProjectActivity = async (
+  user: any,
+  projectId: string,
+  eventType: string,
+  sessionId: string,
+  sessionTitle: string,
+  metadata?: Record<string, any>
+) => {
+  if (!user || !projectId) return;
+  const meta = user?.user_metadata ?? {};
+  const displayName: string = meta?.full_name ?? meta?.name ?? user?.email ?? 'Anonymous';
+  const avatarUrl: string = meta?.avatar_url ?? '';
+
+  try {
+    await powerSync.execute(
+      `INSERT INTO project_activity (id, project_id, user_id, display_name, avatar_url, event_type, session_id, session_title, metadata, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        uuidv4(), projectId, user.id, displayName, avatarUrl,
+        eventType, sessionId, sessionTitle,
+        metadata ? JSON.stringify(metadata) : null,
+        new Date().toISOString(),
+      ]
+    );
+  } catch (err) {
+    // Activity logging is non-critical — never throw
+    console.warn('logProjectActivity error:', err);
+  }
+};
 
 const useSessions = (projectId?: string) => {
   const { user } = useAuthStore();
@@ -145,6 +172,11 @@ const useSessions = (projectId?: string) => {
         ]
       );
 
+      // Log activity to project feed
+      if (data.project_id) {
+        await logProjectActivity(user, data.project_id, 'session_created', id, data.title);
+      }
+
       syncQueueUpdateItem(qid, { status: 'done' });
       return await getSession(id);
     } catch (err) {
@@ -195,17 +227,23 @@ const useSessions = (projectId?: string) => {
       const hasDirectFields = Object.keys(data).some(k => SUPABASE_DIRECT_COLUMNS.has(k));
       if (hasDirectFields) {
         const directPayload: Record<string, any> = { updated_at: now };
-        if (data.ai_analysis !== undefined) {
-          directPayload.ai_analysis = data.ai_analysis ?? null;
-        }
-        if (data.ai_fix !== undefined) {
-          directPayload.ai_fix = data.ai_fix ?? null;
-        }
-        const { error } = await supabase
-          .from('debug_sessions')
-          .update(directPayload)
-          .eq('id', id);
+        if (data.ai_analysis !== undefined) directPayload.ai_analysis = data.ai_analysis ?? null;
+        if (data.ai_fix !== undefined) directPayload.ai_fix = data.ai_fix ?? null;
+        const { error } = await supabase.from('debug_sessions').update(directPayload).eq('id', id);
         if (error) throw error;
+      }
+
+      // ── Log activity to project feed ────────────────────────────────────
+      const pid = session?.project_id;
+      const title = session?.title ?? 'Untitled';
+      if (pid) {
+        if (data.status === 'resolved') {
+          await logProjectActivity(user, pid, 'session_resolved', id, title);
+        } else if (data.ai_analysis) {
+          await logProjectActivity(user, pid, 'session_analyzed', id, title);
+        } else if (data.status || data.notes !== undefined || data.severity) {
+          await logProjectActivity(user, pid, 'session_updated', id, title);
+        }
       }
 
       syncQueueUpdateItem(qid, { status: 'done' });
@@ -229,6 +267,11 @@ const useSessions = (projectId?: string) => {
     });
 
     try {
+      // Log deletion before the row disappears
+      if (session?.project_id) {
+        await logProjectActivity(user, session.project_id, 'session_deleted', id, session.title ?? 'Untitled');
+      }
+
       await powerSync.execute(`DELETE FROM debug_sessions WHERE id = ?`, [id]);
       syncQueueUpdateItem(qid, { status: 'done' });
       return true;
