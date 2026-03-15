@@ -65,7 +65,7 @@ All **writes** go through PowerSync's mutation queue - written to local SQLite f
 ```
 WRITE (small fields)  ->  powerSync.execute()  ->  Local SQLite  ->  PowerSync uploads  ->  Supabase Postgres
                                                                                                  |
-WRITE (ai_analysis)   ->  supabase.update()    ->  Supabase Postgres                            |
+WRITE (ai_analysis)   ->  supabase.update()    ->  Supabase Postgres                             |
                                                         |                                        |
                                                 PowerSync WAL listener <-----------------------  |
                                                         |
@@ -282,7 +282,7 @@ await powerSync.execute(
 ```
 powerSync.execute()  ->  Local SQLite  ->  PowerSync crud queue  ->  Supabase Postgres
                                                                            |
-supabase.update() [ai_analysis only]  ->  Supabase Postgres               |
+supabase.update() [ai_analysis only]  ->  Supabase Postgres                |
                                                  |                         |
                                          PowerSync WAL listener <----------+
                                                  |
