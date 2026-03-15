@@ -241,38 +241,38 @@ ${analysis.verify_fix}
   return (
     <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 h-full flex flex-col overflow-hidden animate-fade-in">
 
-      <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800 flex-wrap gap-3 glass dark:glass-dark">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-100 dark:border-gray-800 flex-wrap gap-3 glass dark:glass-dark">
+        <div className="flex items-center gap-2 sm:gap-3">
           <div className="w-8 h-8 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center">
             <Sparkles size={15} className="text-indigo-600 animate-pulse" />
           </div>
           <div>
-            <h3 className="font-bold text-gray-900 dark:text-white text-sm">AI Debug Panel</h3>
-            <p className="text-xs text-gray-400">Powered by Groq · Llama 3.3 70B</p>
+            <h3 className="font-bold text-gray-900 dark:text-white text-sm whitespace-nowrap">AI Debug Panel</h3>
+            <p className="text-[10px] text-gray-400 hidden sm:block">Powered by Groq · Llama 3.3 70B</p>
           </div>
-          {analysis && <CategoryBadge category={analysis.category} />}
-          <span className="text-[10px] font-bold bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-lg border border-indigo-100 dark:border-indigo-800/50">PowerSync</span>
+          {analysis && <div className="hidden xs:block"><CategoryBadge category={analysis.category} /></div>}
+          <span className="text-[10px] font-bold bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-lg border border-indigo-100 dark:border-indigo-800/50 hidden md:inline-block">PowerSync</span>
         </div>
         <div className="flex items-center gap-2">
           {analysis && (
             <button onClick={onSaveToLibrary} disabled={savingToLib}
-              className="hidden lg:flex items-center gap-1.5 border border-indigo-200 dark:border-indigo-800/50 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs font-semibold px-3 py-1.5 rounded-xl transition disabled:opacity-40">
+              className="flex items-center gap-1.5 border border-indigo-200 dark:border-indigo-800/50 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs font-semibold px-2.5 py-1.5 sm:px-3 rounded-xl transition disabled:opacity-40">
               {savingToLib ? <Loader2 size={12} className="animate-spin" /> : <BookOpen size={12} />}
-              Save to Library
+              <span className="hidden sm:inline">Save</span>
             </button>
           )}
           {analysis && (
             <button onClick={handleExportGitHub}
-              className="flex items-center gap-1.5 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-semibold px-3 py-1.5 rounded-xl transition shadow-sm">
+              className="flex items-center gap-1.5 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-semibold px-2.5 py-1.5 sm:px-3 rounded-xl transition shadow-sm">
               <Github size={13} />
-              GitHub Issue
+              <span className="hidden sm:inline">GitHub</span>
             </button>
           )}
           <button onClick={handleAnalyze} disabled={analyzing || !hasError}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-indigo-100 dark:shadow-none hover:scale-105 active:scale-95">
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3 py-2 sm:px-4 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-indigo-100 dark:shadow-none hover:scale-105 active:scale-95">
             {analyzing
-              ? <><Loader2 size={13} className="animate-spin" /> Analyzing...</>
-              : analysis ? <><RotateCcw size={13} /> Re-analyze</> : <><Sparkles size={13} /> Analyze Bug</>
+              ? <><Loader2 size={13} className="animate-spin" /> <span className="hidden xs:inline">Analyzing...</span></>
+              : analysis ? <><RotateCcw size={13} /> <span className="hidden xs:inline">Re-analyze</span></> : <><Sparkles size={13} /> <span className="hidden xs:inline">Analyze Bug</span></>
             }
           </button>
         </div>
@@ -317,10 +317,10 @@ ${analysis.verify_fix}
 
       {hasError && !analyzing && analysis && (
         <>
-          <div className="flex gap-0.5 px-4 pt-3 pb-0 overflow-x-auto border-b border-gray-50 dark:border-gray-800/50">
+          <div className="flex gap-0.5 px-2 sm:px-4 pt-3 pb-0 overflow-x-auto border-b border-gray-50 dark:border-gray-800/50 custom-scrollbar">
             {TABS.map(t => (
               <button key={t.key} onClick={() => setTab(t.key)}
-                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-t-xl text-[11px] uppercase tracking-wider font-bold transition whitespace-nowrap border-b-2 ${
+                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 rounded-t-xl text-[11px] uppercase tracking-wider font-bold transition whitespace-nowrap border-b-2 ${
                   tab === t.key
                     ? 'text-indigo-600 border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/50'
                     : 'text-gray-400 border-transparent hover:text-gray-600 dark:hover:text-gray-200'

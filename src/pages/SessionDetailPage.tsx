@@ -192,7 +192,7 @@ const SessionDetailPage = () => {
             <ArrowLeft size={14} />
             <span className="hidden xs:inline">All Sessions</span>
           </button>
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
             {/* Chat toggle — shown when collaborative */}
             {isCollaborative && (
               <button
@@ -239,12 +239,12 @@ const SessionDetailPage = () => {
 
         {/* Session header card */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-6 min-w-0">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="flex items-center gap-2 flex-wrap min-w-0">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0">
               <StatusBadge status={effectiveStatus} />
               <SeverityBadge severity={session.severity} />
               {session.environment && (
-                <span className={`text-xs px-2.5 py-1 rounded-lg border font-medium capitalize flex-shrink-0 ${ENV_COLORS[session.environment] ?? 'bg-gray-50 text-gray-600 border-gray-200'}`}>
+                <span className={`text-[10px] sm:text-xs px-2 sm:px-2.5 py-1 rounded-lg border font-bold sm:font-medium capitalize flex-shrink-0 ${ENV_COLORS[session.environment] ?? 'bg-gray-50 text-gray-600 border-gray-200'}`}>
                   {session.environment}
                 </span>
               )}
@@ -254,13 +254,13 @@ const SessionDetailPage = () => {
                   <span className="truncate">{session.project.name}</span>
                 </div>
               )}
-              <div className="flex items-center gap-1 text-xs text-gray-400 flex-shrink-0">
+              <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-gray-400 flex-shrink-0">
                 <Clock size={11} />
                 <span className="hidden sm:inline">
                   {new Date(session.created_at).toLocaleDateString()} at{' '}
                   {new Date(session.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
-                <span className="sm:hidden">{new Date(session.created_at).toLocaleDateString()}</span>
+                <span className="sm:hidden">{new Date(session.created_at).toLocaleDateString()} · {new Date(session.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
               </div>
             </div>
 
@@ -413,7 +413,7 @@ const SessionDetailPage = () => {
           {/* Sidebar */}
           <div className="space-y-5">
 
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-6">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-5">
               <h3 className="font-bold text-gray-900 dark:text-white text-sm mb-3">Notes</h3>
               <textarea
                 value={notes}
@@ -432,7 +432,7 @@ const SessionDetailPage = () => {
               </button>
             </div>
 
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-6">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-5">
               <h3 className="font-bold text-gray-900 dark:text-white text-sm mb-4">Session Info</h3>
               <div className="space-y-2">
                 {[
