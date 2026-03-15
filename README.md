@@ -31,29 +31,19 @@ DevTrace AI is your **permanent debugging memory** - log bugs, get instant AI an
 | | |
 |:--|:--|
 | 🔍 | Every bug gets a permanent structured record |
-| 🤖 | Full AI breakdown - root cause, fixes, timeline |
-| 💾 | Saved as JSONB - persists across reloads |
+| 🤖 | Full AI breakdown - root cause, fixes, timeline, checklist |
+| 🧬 | Debug DNA - your personal error fingerprint powered by Supabase Edge Functions |
+| 💾 | Saved as JSONB - persists across reloads, zero re-analyzing |
 | 📶 | Fully offline via PowerSync local SQLite |
-| 🔗 | Share projects and sessions with teammates |
+| 🔗 | Share projects and sessions with teammates (read-only) |
 
 </div>
 
 **The core problem it solves:** Debugging is slow and scattered. You repeat the same mistakes, forget what fixed what, and lose context every time you close a tab. DevTrace AI is your permanent debugging memory.
 
-<br/>
-
-- 🐛 **Log bugs** with stack traces, code snippets, severity, and environment
-- 🤖 **Full AI analysis** - root cause, 3 fixes, timeline, checklist, and more
-- 💬 **Follow up chat** - ask the AI questions about your exact bug
-- 📚 **Fix Library** - save what works, reuse it across projects
-- 📶 **Offline first** - create, browse, and debug without internet
-- 🔗 **Share sessions** - invite teammates by email for read-only access
-
 ---
 
 ## How It Works
-
-The flow is simple:
 
 ```
 1. You paste an error          →  Log a debug session (error, stack trace, code, severity)
@@ -61,6 +51,7 @@ The flow is simple:
 3. Read the 8 tab breakdown    →  Overview, Fixes, Timeline, Checklist, Chat, Tests, Logs, Structure
 4. Save what worked            →  Fix goes to your Fix Library, tagged and searchable forever
 5. Share with a teammate       →  They get read-only access via Shared with Me page
+6. Generate your Debug DNA     →  Supabase Edge Function analyzes your patterns + Groq writes your fingerprint
 ```
 
 ### Read vs Write - the data flow
@@ -85,7 +76,7 @@ Offline? Writes go into a queue in `localStorage`. The moment you reconnect, the
 
 Every session gets a full structured breakdown powered by **Groq + Llama 3.3 70B**. The complete analysis is saved as JSONB in Supabase - persists across reloads, no re-analyzing needed.
 
-- 🔍 **Overview** - Plain English explanation, root cause, symptom vs cause, category badge, files to check
+- 🔍 **Overview** - Plain English explanation, root cause, symptom vs cause, category badge, confidence score, files to check
 - ⚡ **Fixes** - 3 options (quick patch, proper fix, workaround) each with full code & pros/cons
 - 🕐 **Timeline** - Visual step-by-step of how the crash happened from component mount to error throw
 - ✅ **Checklist** - Interactive priority-ranked action list - check items off as you debug
@@ -93,6 +84,42 @@ Every session gets a full structured breakdown powered by **Groq + Llama 3.3 70B
 - 🧪 **Tests** - AI-generated reproduction steps and test cases to verify the fix works
 - 📋 **Logs** - Paste raw console or server logs - AI strips noise and surfaces what matters
 - 🏗️ **Structure** - Paste your file tree - AI reviews architecture and flags problems
+
+---
+
+## Debug DNA — Your Personal Error Fingerprint
+
+DevTrace AI builds a **personalized analysis of your debugging patterns** using a Supabase Edge Function + Groq.
+
+Click **"Generate My DNA"** on the Debug DNA page and the Edge Function:
+
+1. Queries your `debug_sessions` server-side using the Supabase service role
+2. Computes category resolution rates, severity distribution, fix preferences, weekly activity, avg AI confidence, and busiest debugging day
+3. Sends the structured stats to Groq + Llama 3.3 70B
+4. Groq generates a **personalized narrative** — not just charts, but actual sentences about your specific patterns
+5. Returns everything back to the client for display + Markdown export
+
+```
+User clicks "Generate My DNA"
+         ↓
+Supabase Edge Function (debug-dna)
+         ↓
+Server-side SQL aggregations on debug_sessions
+         ↓
+Groq + Llama 3.3 70B generates personalized narrative
+         ↓
+{ stats, narrative } returned to client
+         ↓
+Debug DNA page renders + export as Markdown
+```
+
+**What it shows:**
+- AI-generated narrative about your debugging profile
+- Category breakdown with resolution rates per error type
+- "You Excel At" vs "Needs Attention" split
+- Severity distribution across all sessions
+- Weekly activity chart (last 4 weeks)
+- Your habits — busiest day, preferred fix type, open vs resolved counts
 
 ---
 
@@ -128,12 +155,20 @@ Every table has Row Level Security enabled. Users can only ever read and write *
 
 Each table has RLS policies covering `SELECT` · `INSERT` · `UPDATE` · `DELETE` - all checking `auth.uid() = user_id`.
 
-The `shares` table has its own policies:
-- Owners can manage (create, delete) their own share rows
-- Invitees can read shares addressed to them
-- Shared resource policies on `projects` and `debug_sessions` allow invitees to read rows they've been granted access to
+The `shares` table has its own policies — owners manage their shares, invitees read theirs, and `projects`/`debug_sessions` have additional SELECT policies granting invitees access to shared resources.
 
 > 💡 The full 8-tab AI breakdown is stored as a single `ai_analysis` JSONB column - no extra tables, loads instantly on revisit, and syncs through PowerSync like any other column.
+
+---
+
+### ⚡ Edge Functions
+
+DevTrace AI uses a **Supabase Edge Function** (`debug-dna`) for the Debug DNA feature:
+
+- Runs server-side — uses the service role key to query Postgres directly
+- Performs SQL aggregations not practical client-side (GROUP BY category, date math, resolution time)
+- Calls Groq API server-side — API key never exposed to the browser
+- Returns structured stats + AI narrative in a single response
 
 ---
 
@@ -155,7 +190,7 @@ A single Postgres publication called `powersync` connects Supabase to PowerSync:
 
 ```sql
 create publication powersync
-  for table profiles, projects, debug_sessions, fixes;
+  for table profiles, projects, debug_sessions, fixes, shares;
 ```
 
 PowerSync listens to this WAL stream and streams every change down to connected browser clients in real time.
@@ -203,8 +238,6 @@ supabase.insert()  →  Supabase Postgres  →  WAL publication
 
 ### 🟢 Online vs 🟠 Offline
 
-<div align="center">
-
 <table width="100%">
 <tr><th align="left">State</th><th align="left">What happens</th></tr>
 <tr><td>🟢 App opens online</td><td>PowerSync connects and streams latest changes from Supabase</td></tr>
@@ -214,8 +247,6 @@ supabase.insert()  →  Supabase Postgres  →  WAL publication
 <tr><td>🟠 User creates offline</td><td>Saved to SQLite + queued in <code>localStorage</code></td></tr>
 <tr><td>🟢 Internet returns</td><td>Queue flushes to Supabase, PowerSync syncs delta back down</td></tr>
 </table>
-
-</div>
 
 ---
 
@@ -230,6 +261,7 @@ bucket_definitions:
       - SELECT * FROM projects       WHERE user_id = bucket.user_id
       - SELECT * FROM debug_sessions WHERE user_id = bucket.user_id
       - SELECT * FROM fixes          WHERE user_id = bucket.user_id
+      - SELECT * FROM shares         WHERE owner_id = bucket.user_id
 ```
 
 Each user only receives their own rows - data isolation enforced at the sync layer on top of RLS.
@@ -238,7 +270,7 @@ Each user only receives their own rows - data isolation enforced at the sync lay
 
 ### 📊 Live Sync Status page
 
-DevTrace AI ships a dedicated `/sync-status` page showing the full architecture, live SQLite row counts per table, recent sync events, and the pending write queue - all updating in real time as you use the app.
+DevTrace AI ships a dedicated `/sync-status` page showing the full architecture, live SQLite row counts across all 5 tables, sync health indicator, recent sync events, and the pending write queue with upload progress - all updating in real time.
 
 ---
 
@@ -283,7 +315,7 @@ create table shares (
 );
 ```
 
-RLS on `projects` and `debug_sessions` has additional SELECT policies that allow invitees to read rows they've been shared — enforced entirely at the database level.
+RLS on `projects` and `debug_sessions` has additional SELECT policies allowing invitees to read rows they've been granted access to — enforced entirely at the database level.
 
 ---
 
@@ -296,6 +328,16 @@ RLS on `projects` and `debug_sessions` has additional SELECT policies that allow
 - **Follow-up Chat** - Context-aware AI chat inside every session - click suggested questions or type your own
 - **Fix Library** - Save working fixes, filter by language, copy in one click, track use count across projects
 - **Export as Markdown** - Export any debug session as a `.md` file for sharing or archiving
+
+### 🧬 Debug DNA
+
+- **Personal Error Fingerprint** - Supabase Edge Function queries your session history server-side and computes your debugging patterns
+- **AI Narrative** - Groq generates a personalized written profile of your strengths, weaknesses, and habits
+- **Category Resolution Rates** - See which error types you crush and which ones beat you
+- **Strengths & Weaknesses** - "You Excel At" vs "Needs Attention" split cards
+- **Weekly Activity Chart** - Sessions logged per week over the last 4 weeks
+- **Severity Distribution** - How you classify your bugs across critical / high / medium / low
+- **Export DNA Report** - Download your full Debug DNA as Markdown
 
 ### 📁 Organization
 
@@ -316,7 +358,7 @@ RLS on `projects` and `debug_sessions` has additional SELECT policies that allow
 
 - **Analytics Page** - Resolution rates, error trends, severity breakdowns, time-to-fix - visualized with Recharts
 - **AI Insights Page** - Category breakdown across all sessions, confidence distribution, most flagged files
-- **Sync Status Page** - Live architecture diagram, SQLite row counts, sync event log, write queue - all real-time
+- **Sync Status Page** - Live architecture diagram, 5-table SQLite row counts, sync health, event log, write queue
 
 ### 🔐 Auth & Profile
 
@@ -349,9 +391,9 @@ RLS on `projects` and `debug_sessions` has additional SELECT policies that allow
 <tr><td>⚛️</td><td><b>React 18 + TypeScript + Vite</b></td><td>Frontend framework + type safety + build tool</td></tr>
 <tr><td>🎨</td><td><b>Tailwind CSS</b></td><td>Utility-first styling + dark mode</td></tr>
 <tr><td>🐻</td><td><b>Zustand</b></td><td>Lightweight global state (auth, sync queue)</td></tr>
-<tr><td>🟢</td><td><b>Supabase</b></td><td>Postgres database · Auth · Storage · RLS · WAL replication</td></tr>
+<tr><td>🟢</td><td><b>Supabase</b></td><td>Postgres · Auth · Storage · RLS · WAL replication · Edge Functions</td></tr>
 <tr><td>⚡</td><td><b>PowerSync</b></td><td>Local SQLite sync · offline reads · real-time streaming</td></tr>
-<tr><td>🤖</td><td><b>Groq + Llama 3.3 70B</b></td><td>Ultra-fast AI inference for debug analysis</td></tr>
+<tr><td>🤖</td><td><b>Groq + Llama 3.3 70B</b></td><td>Ultra-fast AI inference — debug analysis + Debug DNA narrative</td></tr>
 <tr><td>📊</td><td><b>Recharts</b></td><td>Analytics charts and data visualization</td></tr>
 <tr><td>🚀</td><td><b>Vercel</b></td><td>Zero-config deployment + preview URLs</td></tr>
 </table>
@@ -544,7 +586,7 @@ create table shares (
   unique(invitee_id, resource_type, resource_id)
 );
 alter table shares enable row level security;
-create policy "Owners can manage shares"    on shares for all    using (owner_id = auth.uid());
+create policy "Owners can manage shares"       on shares for all    using (owner_id = auth.uid());
 create policy "Invitees can view their shares" on shares for select using (invitee_id = auth.uid());
 
 -- updated_at triggers
@@ -578,6 +620,15 @@ Redirect URLs: https://your-app.vercel.app/reset-password
 
 **2e.** Go to **Storage** → create a bucket called `avatars` → set to **public**
 
+**2f.** Go to **Edge Functions → Create function** → name it `debug-dna` → paste the function code from `supabase/functions/debug-dna/index.ts`
+
+**2g.** Go to **Settings → Edge Functions → Secrets** and add:
+
+```
+GROQ_API_KEY       = your_groq_api_key
+SERVICE_ROLE_KEY   = your_supabase_service_role_key
+```
+
 ---
 
 ### Step 3 - PowerSync setup
@@ -588,15 +639,21 @@ Redirect URLs: https://your-app.vercel.app/reset-password
 
 **3c.** In the **Sync Rules** editor, paste:
 
-```yaml
-bucket_definitions:
-  user_data:
-    parameters: SELECT request.user_id() as user_id
-    data:
-      - SELECT * FROM profiles WHERE id = bucket.user_id
-      - SELECT * FROM projects WHERE user_id = bucket.user_id
-      - SELECT * FROM debug_sessions WHERE user_id = bucket.user_id
-      - SELECT * FROM fixes WHERE user_id = bucket.user_id
+```json
+{
+  "bucket_definitions": {
+    "user_data": {
+      "parameters": "SELECT request.user_id() as user_id",
+      "data": [
+        "SELECT * FROM profiles WHERE id = bucket.user_id",
+        "SELECT * FROM projects WHERE user_id = bucket.user_id",
+        "SELECT * FROM debug_sessions WHERE user_id = bucket.user_id",
+        "SELECT * FROM fixes WHERE user_id = bucket.user_id",
+        "SELECT * FROM shares WHERE owner_id = bucket.user_id"
+      ]
+    }
+  }
+}
 ```
 
 **3d.** Click **Deploy** → copy your **PowerSync instance URL**
@@ -643,6 +700,7 @@ src/
 │   ├── useFixes.ts         # PowerSync reads + Supabase writes
 │   ├── useProfile.ts       # PowerSync reads + Supabase writes
 │   ├── useShares.ts        # Share creation, revocation, lookup
+│   ├── useDebugDNA.ts      # Calls debug-dna Edge Function, manages result state
 │   ├── useDashboardStats.ts
 │   ├── usePendingQueue.ts  # Offline write queue (localStorage → Supabase)
 │   └── useOnlineStatus.ts  # Network detection
@@ -658,11 +716,12 @@ src/
 │   ├── ProjectsPage.tsx
 │   ├── ProjectDetailPage.tsx     # Per-project stats + health score + share button
 │   ├── SessionsPage.tsx
-│   ├── SessionDetailPage.tsx     # AI Debug Panel - all 8 tabs + share button
+│   ├── SessionDetailPage.tsx     # AI Debug Panel - all 8 tabs + share + export
 │   ├── FixLibraryPage.tsx
 │   ├── AnalyticsPage.tsx
 │   ├── AIInsightsPage.tsx        # AI usage stats + category breakdown
-│   ├── SyncStatusPage.tsx        # Live PowerSync architecture view
+│   ├── DebugDNAPage.tsx          # Personal error fingerprint + AI narrative
+│   ├── SyncStatusPage.tsx        # Live PowerSync architecture + 5-table row counts
 │   ├── SharedWithMePage.tsx      # Lists all projects/sessions shared with you
 │   ├── SharedProjectView.tsx     # Read-only project view for invitees
 │   ├── SharedSessionView.tsx     # Read-only session view for invitees
@@ -677,6 +736,11 @@ src/
 └── store/
     ├── authStore.ts
     └── useSyncQueue.ts           # Global sync queue (Zustand)
+
+supabase/
+└── functions/
+    └── debug-dna/
+        └── index.ts              # Edge Function - SQL aggregations + Groq narrative
 ```
 
 ---
@@ -708,21 +772,21 @@ Open any project or session and click the Share button. Type the email of anothe
 </details>
 
 <details>
-<summary><b>What exactly does the AI return?</b></summary>
+<summary><b>What is Debug DNA?</b></summary>
+<br/>
+Debug DNA is a personalized analysis of your debugging patterns generated by a Supabase Edge Function. It queries your session history server-side, computes category resolution rates, severity distributions, weekly activity, and your habits, then sends the data to Groq which writes a personal narrative about your specific strengths and weaknesses as a debugger. Export it as Markdown anytime.
+</details>
+
+<details>
+<summary><b>What exactly does the AI debug panel return?</b></summary>
 <br/>
 A structured JSON analysis with: plain English summary, root cause, symptom vs cause, issue category, confidence score (0–100), 3 fix options with full code blocks, a crash timeline, an interactive checklist, suggested follow-up questions, reproduction steps, and test cases. Saved as JSONB so it persists across reloads.
 </details>
 
 <details>
-<summary><b>Can I swap the AI model?</b></summary>
-<br/>
-Yes. Change the model string in <code>src/lib/groqClient.ts</code>. Any Groq-hosted model works - replace <code>llama-3.3-70b-versatile</code> with your preferred model ID.
-</details>
-
-<details>
 <summary><b>Do I need a backend server?</b></summary>
 <br/>
-No. DevTrace AI is fully client-side. Supabase handles auth, database, and storage. PowerSync handles sync. Groq is called directly from the browser. No Express server or Node.js backend required.
+No custom backend needed. Supabase handles auth, database, storage, and Edge Functions. PowerSync handles sync. Groq is called from the browser for debug analysis and from the Edge Function for Debug DNA. No Express server or Node.js backend required.
 </details>
 
 ---
@@ -757,17 +821,25 @@ DevTrace AI is submitted to the **PowerSync AI Hackathon 2026**.
 <table width="100%">
 <tr><th align="left">Prize</th><th align="left">Why this qualifies</th></tr>
 <tr><td>🥇 <b>Core Prize</b></td><td>AI-powered developer tool built within the hackathon window using PowerSync as the core sync layer</td></tr>
-<tr><td>🏅 <b>Best Submission Using Supabase</b></td><td>Supabase drives auth (Email · GitHub · Google OAuth · magic link password reset · GitHub account linking), Postgres with RLS on all tables, Storage for avatars, WAL replication feeding PowerSync, and the shares table for collaboration</td></tr>
-<tr><td>🏅 <b>Best Local-First App</b></td><td>All reads from local SQLite via PowerSync's <code>useQuery()</code>, offline write queue with auto-sync on reconnect, and a live Sync Status page showing the full architecture and queue state in real time</td></tr>
+<tr><td>🏅 <b>Best Submission Using Supabase</b></td><td>Supabase drives auth (Email · GitHub · Google OAuth · magic link password reset · GitHub account linking), Postgres with RLS on all 5 tables, Storage for avatars, WAL replication feeding PowerSync, shares table for collaboration, and an Edge Function for Debug DNA server-side computation</td></tr>
+<tr><td>🏅 <b>Best Local-First App</b></td><td>All reads from local SQLite via PowerSync's <code>useQuery()</code>, offline write queue with auto-sync on reconnect, shares table synced offline, and a live Sync Status page showing the full architecture and queue state in real time</td></tr>
 </table>
 
 ---
 
 ## Support
 
-If DevTrace AI helped you, you can support my open-source work here:
+## Support
 
-- **GitHub Sponsors:** https://github.com/sponsors/JexanJoel
+If **DevTrace AI** helped you, consider supporting my open-source work 💙
+
+<p align="left">
+  <a href="https://github.com/sponsors/JexanJoel">
+    <img src="https://img.shields.io/badge/Sponsor%20on-GitHub-ea4aaa?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="Sponsor on GitHub" />
+  </a>
+</p>
+
+Your support helps me keep shipping, improving, and maintaining useful projects.
 
 ---
 
