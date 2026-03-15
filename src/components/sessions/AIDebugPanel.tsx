@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import {
   Sparkles, Loader2, RotateCcw, BookOpen, ChevronRight,
-  AlertTriangle, Info, Zap, Shield,
+  AlertTriangle, Info, Zap,
   MessageSquare, Send, ClipboardList, GitBranch, FlaskConical,
-  FileText, FolderTree, Copy, Check, ChevronDown, ChevronUp
+  FileText, FolderTree, Copy, Check, ChevronDown, Save, CheckCircle
 } from 'lucide-react';
 import {
   analyzeSession, sendFollowUp, analyzeLogs, analyzeStructure,
@@ -92,6 +92,8 @@ const AIDebugPanel = ({
   session, onSaveAnalysis, onSaveToLibrary, savingToLib,
   isChecked, checkedBy, onToggleChecklist, completedCount, isCollaborative, currentUserName,
 }: Props) => {
+  // Use unused props to satisfy linter or remove them if not needed
+  // In this case, they are needed for CollaborativeChecklist
   const [tab, setTab] = useState<Tab>('overview');
   const [analysis, setAnalysis] = useState<AIAnalysis | null>(session.ai_analysis ?? null);
   const [analyzing, setAnalyzing] = useState(false);
@@ -377,11 +379,13 @@ const AIDebugPanel = ({
               {tab === 'checklist' && (
                 <div className="space-y-4">
                   <CollaborativeChecklist
-                    sessionId={session.id}
-                    suggestedTasks={analysis.checklist}
+                    items={analysis.checklist}
                     isChecked={isChecked}
                     checkedBy={checkedBy}
                     onToggle={onToggleChecklist}
+                    completedCount={completedCount}
+                    isCollaborative={isCollaborative}
+                    currentUserName={currentUserName}
                   />
                 </div>
               )}
