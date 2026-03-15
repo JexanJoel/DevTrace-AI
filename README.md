@@ -827,17 +827,11 @@ DevTrace AI is submitted to the **PowerSync AI Hackathon 2026**.
 
 ---
 
-## Support
+## Support 
 
-## Support
+If DevTrace AI helped you, you can support my open-source work here: 
 
-If **DevTrace AI** helped you, consider supporting my open-source work 💙
-
-<p align="center">
-  <a href="https://github.com/sponsors/JexanJoel">
-    <img src="https://img.shields.io/badge/Sponsor%20on-GitHub-ea4aaa?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="Sponsor on GitHub" />
-  </a>
-</p>
+- **GitHub Sponsors:** https://github.com/sponsors/JexanJoel
 
 Your support helps me keep shipping, improving, and maintaining useful projects.
 
