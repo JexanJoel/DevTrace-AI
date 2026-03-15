@@ -61,8 +61,16 @@ const ProfilePage = () => {
         const { error } = await supabase.auth.unlinkIdentity(githubIdentity as any);
         if (error) throw error;
       }
-      // Also clear from profiles table
-      await updateProfile({ github_username: null } as any);
+      // Clear from profiles table
+      await supabase.from('profiles').update({
+        github_username: null,
+        github_connected: false,
+      }).eq('id', user!.id);
+      // Force refresh the user object in Zustand so identities list updates immediately
+      const { data: { user: refreshedUser } } = await supabase.auth.getUser();
+      if (refreshedUser) {
+        useAuthStore.getState().setUser(refreshedUser as any);
+      }
       toast.success('GitHub disconnected');
     } catch (err: any) {
       toast.error(err?.message ?? 'Failed to disconnect GitHub');
