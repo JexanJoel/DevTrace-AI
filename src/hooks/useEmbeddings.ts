@@ -1,5 +1,12 @@
 import { useState, useCallback } from 'react';
-import { pipeline } from '@xenova/transformers';
+import { pipeline, env } from '@xenova/transformers';
+
+// Configure transformers.js for remote loading ONLY
+env.allowLocalModels = false;
+env.useBrowserCache = true;
+env.remoteHost = 'https://huggingface.co';
+env.remotePathTemplate = '{model}/resolve/main/'; // Use 'main' instead of '{revision}' for reliability
+env.localModelPath = 'NOT_LOCAL'; // Force failure on local to ensure remote fallback
 
 let embeddingPipeline: any = null;
 
@@ -33,7 +40,7 @@ export const useEmbeddings = () => {
     }
   }, []);
 
-  const calculateCosineSimilarity = (vecA: number[], vecB: number[]): number => {
+  const calculateCosineSimilarity = useCallback((vecA: number[], vecB: number[]): number => {
     if (vecA.length !== vecB.length) return 0;
     
     let dotProduct = 0;
@@ -46,8 +53,9 @@ export const useEmbeddings = () => {
       normB += vecB[i] * vecB[i];
     }
     
-    return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
-  };
+    const similarity = dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+    return isNaN(similarity) ? 0 : similarity;
+  }, []);
 
   return { generateEmbedding, calculateCosineSimilarity, loading };
 };

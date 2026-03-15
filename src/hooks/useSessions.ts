@@ -1,3 +1,4 @@
+import { useMemo, useCallback } from 'react';
 import { useQuery } from '@powersync/react';
 import { powerSync } from '../lib/powersync';
 import { supabase } from '../lib/supabaseClient';
@@ -92,7 +93,7 @@ const useSessions = (projectId?: string) => {
   const uid = user?.id ?? '';
   const { generateEmbedding } = useEmbeddings();
 
-  const query = projectId
+  const query = useMemo(() => projectId
     ? `SELECT ds.*, p.name as project_name, p.language as project_language
        FROM debug_sessions ds
        LEFT JOIN projects p ON ds.project_id = p.id
@@ -102,12 +103,13 @@ const useSessions = (projectId?: string) => {
        FROM debug_sessions ds
        LEFT JOIN projects p ON ds.project_id = p.id
        WHERE ds.user_id = ?
-       ORDER BY ds.created_at DESC`;
-  const params = projectId ? [uid, projectId] : [uid];
+       ORDER BY ds.created_at DESC`, [projectId]);
+
+  const params = useMemo(() => projectId ? [uid, projectId] : [uid], [projectId, uid]);
 
   const { data: rawSessions = [] } = useQuery<DebugSession>(query, params);
-
-  const sessions = rawSessions.map(s => ({
+  
+  const sessions = useMemo(() => rawSessions.map(s => ({
     ...s,
     ai_analysis: s.ai_analysis
       ? (typeof s.ai_analysis === 'string' ? JSON.parse(s.ai_analysis) : s.ai_analysis)
@@ -115,10 +117,10 @@ const useSessions = (projectId?: string) => {
     project: s.project_name
       ? { name: s.project_name, language: s.project_language ?? undefined }
       : undefined,
-  }));
+  })), [rawSessions]);
 
   // ── getSession ────────────────────────────────────────────────────────────
-  const getSession = async (id: string): Promise<DebugSession | null> => {
+  const getSession = useCallback(async (id: string): Promise<DebugSession | null> => {
     const results = await powerSync.getAll<any>(
       `SELECT ds.*, p.name as project_name, p.language as project_language
        FROM debug_sessions ds
@@ -137,10 +139,10 @@ const useSessions = (projectId?: string) => {
         ? { name: s.project_name, language: s.project_language }
         : undefined,
     } as DebugSession;
-  };
+  }, []);
 
   // ── createSession ─────────────────────────────────────────────────────────
-  const createSession = async (data: CreateSessionInput) => {
+  const createSession = useCallback(async (data: CreateSessionInput) => {
     if (!user) return null;
     const id = uuidv4();
     const qid = `create_session_${id}`;
@@ -195,10 +197,10 @@ const useSessions = (projectId?: string) => {
       syncQueueUpdateItem(qid, { status: 'error' });
       return null;
     }
-  };
+  }, [user, generateEmbedding]);
 
   // ── updateSession ─────────────────────────────────────────────────────────
-  const updateSession = async (id: string, data: Partial<DebugSession>) => {
+  const updateSession = useCallback(async (id: string, data: Partial<DebugSession>) => {
     const qid = `update_session_${id}_${Date.now()}`;
     const session = sessions.find(s => s.id === id);
     const label = data.status
@@ -273,10 +275,10 @@ const useSessions = (projectId?: string) => {
       syncQueueUpdateItem(qid, { status: 'error' });
       return false;
     }
-  };
+  }, [user, sessions, generateEmbedding]);
 
   // ── deleteSession ─────────────────────────────────────────────────────────
-  const deleteSession = async (id: string) => {
+  const deleteSession = useCallback(async (id: string) => {
     const qid = `delete_session_${id}`;
     const session = sessions.find(s => s.id === id);
     syncQueueAddItem({
@@ -300,7 +302,7 @@ const useSessions = (projectId?: string) => {
       syncQueueUpdateItem(qid, { status: 'error' });
       return false;
     }
-  };
+  }, [user, sessions]);
 
   return { sessions, loading: false, getSession, createSession, updateSession, deleteSession };
 };

@@ -115,10 +115,14 @@ const SimilarSessionsCard = ({ currentSessionId, errorMessage, userId }: Props) 
           // Filter: Must have a strong semantic match OR at least 2 keyword matches
           .filter(s => (s.similarity_score ?? 0) > 0.85 || s.match_count >= 2)
           // Sort by semantic similarity first, then keywords
-          .sort((a, b) => (b.similarity_score ?? 0) - (a.similarity_score ?? 0) || b.match_count - a.match_count)
-          .slice(0, 3);
+          .sort((a, b) => (b.similarity_score ?? 0) - (a.similarity_score ?? 0) || b.match_count - a.match_count);
 
-        setSimilar(scored as SimilarSession[]);
+        // Deduplicate by ID just in case
+        const unique = scored.filter((s, index, self) => 
+          index === self.findIndex((t) => t.id === s.id)
+        ).slice(0, 3);
+
+        setSimilar(unique as SimilarSession[]);
       } catch (err) {
         console.error('SimilarSessionsCard error:', err);
       } finally {

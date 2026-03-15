@@ -120,11 +120,21 @@ const project_chat = new Table({
   created_at: column.text,
 });
 
+const shares = new Table({
+  owner_id: column.text,
+  invitee_id: column.text,
+  invitee_email: column.text,
+  resource_id: column.text,
+  resource_type: column.text,
+  created_at: column.text,
+});
+
 export const AppSchema = new Schema({
   profiles,
   projects,
   debug_sessions,
   fixes,
+  shares,
   session_presence,
   session_checklist,
   session_chat,

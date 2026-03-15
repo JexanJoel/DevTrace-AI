@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Loader2, Trash2, Save,
@@ -71,9 +71,17 @@ const SessionDetailPage = () => {
   const isOnline = useOnlineStatus();
   const { guidance: offlineGuidance, loading: loadingOffline, getOfflineGuidance } = useOfflineMemory();
   const [showOfflineAssist, setShowOfflineAssist] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
-  const session = sessions.find(s => s.id === id) ?? null;
-  const loading = sessions.length === 0 && !session;
+  const session = useMemo(() => sessions.find(s => s.id === id) ?? null, [sessions, id]);
+  
+  useEffect(() => {
+    if (sessions.length > 0 || session) {
+      setHasLoaded(true);
+    }
+  }, [sessions, session]);
+
+  const loading = !hasLoaded;
 
   useEffect(() => {
     if (session) setNotes(session.notes ?? '');

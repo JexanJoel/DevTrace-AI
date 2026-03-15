@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 import { useQuery } from '@powersync/react';
 import { powerSync } from '../lib/powersync';
 import { useAuthStore } from '../store/authStore';
@@ -74,11 +74,17 @@ const useCollaboration = (sessionId: string) => {
     [sessionId]
   );
 
-  // Filter to active collaborators — seen in last 2 minutes
-  const activeCollaborators = rawCollaborators.filter(c => {
-    const lastSeen = new Date(c.last_seen_at).getTime();
-    return Date.now() - lastSeen < 2 * 60 * 1000;
-  });
+  // Filter to active collaborators — seen in last 2 minutes, and deduplicate by user_id
+  const activeCollaborators = useMemo(() => {
+    const active = rawCollaborators.filter(c => {
+      const lastSeen = new Date(c.last_seen_at).getTime();
+      return Date.now() - lastSeen < 2 * 60 * 1000;
+    });
+    // Deduplicate by user_id to prevent React key warnings
+    return active.filter((c, index, self) => 
+      index === self.findIndex((t) => t.user_id === c.user_id)
+    );
+  }, [rawCollaborators]);
 
   const otherCollaborators = activeCollaborators.filter(c => c.user_id !== user?.id);
   const isCollaborative = otherCollaborators.length > 0;
@@ -91,26 +97,16 @@ const useCollaboration = (sessionId: string) => {
     const { displayName, avatarUrl } = getUserMeta(user);
     const now = new Date().toISOString();
 
-    // Check if row already exists in local SQLite
-    const existing = await powerSync.getAll<{ id: string }>(
-      `SELECT id FROM session_presence WHERE session_id = ? AND user_id = ? LIMIT 1`,
-      [sessionId, user.id]
+    // Use INSERT OR REPLACE (PowerSync/SQLite) to handle the unique constraint (session_id, user_id)
+    // even if we haven't explicitly defined it in the local schema yet.
+    await powerSync.execute(
+      `INSERT OR REPLACE INTO session_presence (id, session_id, user_id, display_name, avatar_url, last_seen_at, joined_at)
+       VALUES (?, ?, ?, ?, ?, ?, COALESCE((SELECT joined_at FROM session_presence WHERE session_id = ? AND user_id = ?), ?))`,
+      [
+        uuidv4(), sessionId, user.id, displayName, avatarUrl, now, 
+        sessionId, user.id, now
+      ]
     );
-
-    if (existing.length > 0) {
-      // Update last_seen_at via PowerSync mutation
-      await powerSync.execute(
-        `UPDATE session_presence SET last_seen_at = ?, display_name = ?, avatar_url = ? WHERE session_id = ? AND user_id = ?`,
-        [now, displayName, avatarUrl, sessionId, user.id]
-      );
-    } else {
-      // Insert new presence row
-      await powerSync.execute(
-        `INSERT INTO session_presence (id, session_id, user_id, display_name, avatar_url, last_seen_at, joined_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [uuidv4(), sessionId, user.id, displayName, avatarUrl, now, now]
-      );
-    }
   }, [user, sessionId]);
 
   // Remove presence on unmount
