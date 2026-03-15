@@ -4,7 +4,7 @@ import {
   Terminal, Bug, Sparkles, BookOpen,
   BarChart2, ArrowRight, Github,
   Share2, Menu, X, Wifi, WifiOff,
-  Database, Zap, Heart, FileText,
+  Database, Heart, FileText,
   CheckCircle, Library, Users
 } from 'lucide-react';
 
@@ -209,7 +209,7 @@ const LandingPage = () => {
       </section>
 
       {/* ── Marquee ── */}
-      <section className="py-8 sm:py-10 border-y border-gray-100 bg-gray-50">
+      <section className="py-8 sm:py-10 border-y border-gray-100 bg-gray-50 overflow-hidden">
         <p className="text-center text-xs text-gray-400 font-medium uppercase tracking-widest mb-5 px-4">
           Built with
         </p>
@@ -218,33 +218,103 @@ const LandingPage = () => {
 
       {/* ── Offline callout ── */}
       <section className="py-14 sm:py-20 px-4 sm:px-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="rounded-2xl border border-orange-200 bg-orange-50 p-6 sm:p-10">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-8">
-              <div className="flex-shrink-0 w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center">
-                <WifiOff size={26} className="text-orange-500" />
-              </div>
-              <div className="flex-1">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Works completely offline</h2>
-                <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-4">
-                  Powered by <strong>PowerSync</strong> — all your data syncs to a local SQLite database in the browser.
-                  Every read is instant. Every session you create offline is queued and synced automatically when you reconnect.
-                  No spinners. No dead ends.
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  <div className="flex items-center gap-2 text-sm text-orange-700 bg-white border border-orange-200 px-3 py-1.5 rounded-lg">
-                    <Wifi size={13} /> Instant reads from local SQLite
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-orange-700 bg-white border border-orange-200 px-3 py-1.5 rounded-lg">
-                    <WifiOff size={13} /> Create sessions offline
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-orange-700 bg-white border border-orange-200 px-3 py-1.5 rounded-lg">
-                    <Zap size={13} /> Auto-sync on reconnect
-                  </div>
+        <div className="max-w-5xl mx-auto">
+
+          {/* Header */}
+          <div className="text-center mb-8 sm:mb-12">
+            <span className="inline-flex items-center gap-1.5 bg-orange-50 border border-orange-200 text-orange-600 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
+              <WifiOff size={12} /> Powered by PowerSync
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-3">
+              Works completely offline
+            </h2>
+            <p className="text-gray-400 text-sm sm:text-base max-w-xl mx-auto">
+              Most tools break the moment you lose internet. DevTrace AI doesn't.
+            </p>
+          </div>
+
+          {/* Before / After */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+
+            {/* Without PowerSync */}
+            <div className="rounded-2xl border border-red-100 bg-red-50 p-5 sm:p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-7 h-7 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <WifiOff size={14} className="text-red-500" />
                 </div>
+                <p className="font-bold text-red-700 text-sm">Without PowerSync</p>
               </div>
+              <ul className="space-y-2.5">
+                {[
+                  'Every page load hits the network',
+                  'Offline = white screen or error',
+                  'Slow dashboards with loading spinners',
+                  'Sessions lost if you lose connection',
+                  'No internet? No debugging.',
+                ].map((t, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-sm text-red-700">
+                    <span className="flex-shrink-0 mt-0.5 text-red-400">✗</span>
+                    {t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* With PowerSync */}
+            <div className="rounded-2xl border border-green-100 bg-green-50 p-5 sm:p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-7 h-7 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Wifi size={14} className="text-green-600" />
+                </div>
+                <p className="font-bold text-green-700 text-sm">With PowerSync</p>
+              </div>
+              <ul className="space-y-2.5">
+                {[
+                  'All reads from local SQLite — 0ms',
+                  'Offline banner shown, app keeps working',
+                  'Dashboards load instantly, always',
+                  'Sessions created offline, synced later',
+                  'Full debugging capability anywhere',
+                ].map((t, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-sm text-green-700">
+                    <span className="flex-shrink-0 mt-0.5 text-green-500">✓</span>
+                    {t}
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
+
+          {/* How it actually works — flow */}
+          <div className="bg-gray-900 rounded-2xl p-5 sm:p-7 overflow-x-auto">
+            <p className="text-xs text-gray-500 font-mono uppercase tracking-widest mb-5">Data flow</p>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-0 min-w-[480px] sm:min-w-0">
+
+              {[
+                { label: 'Supabase',      sub: 'Source of truth',     color: 'bg-green-900 border-green-700 text-green-300' },
+                { label: 'WAL Stream',    sub: 'Postgres replication', color: 'bg-gray-800 border-gray-600 text-gray-300' },
+                { label: 'PowerSync',     sub: 'Sync engine',          color: 'bg-indigo-900 border-indigo-700 text-indigo-300' },
+                { label: 'Local SQLite',  sub: 'In your browser',      color: 'bg-orange-900 border-orange-700 text-orange-300' },
+                { label: 'useQuery()',    sub: '0ms · always ready',   color: 'bg-purple-900 border-purple-700 text-purple-300' },
+              ].map((node, i, arr) => (
+                <div key={i} className="flex sm:flex-row flex-col items-center gap-2 sm:gap-0 w-full sm:w-auto sm:flex-1">
+                  <div className={`w-full sm:w-auto flex-1 border rounded-xl px-3 py-2.5 text-center ${node.color}`}>
+                    <p className="font-bold text-xs">{node.label}</p>
+                    <p className="text-[10px] opacity-70 mt-0.5">{node.sub}</p>
+                  </div>
+                  {i < arr.length - 1 && (
+                    <div className="flex sm:flex-row flex-col items-center">
+                      <div className="text-gray-600 text-xs sm:mx-2 font-mono rotate-90 sm:rotate-0">→</div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-gray-600 font-mono mt-4">
+              Writes go directly to Supabase · PowerSync detects via WAL · local SQLite updates · <span className="text-orange-400">useQuery()</span> reflects change instantly
+            </p>
+          </div>
+
         </div>
       </section>
 
@@ -279,22 +349,21 @@ const LandingPage = () => {
 
           {/* Vertical timeline */}
           <div className="relative">
-            {/* Connecting line */}
+            {/* Connecting line — desktop only */}
             <div className="absolute left-6 sm:left-7 top-0 bottom-0 w-px bg-gray-200 hidden sm:block" />
 
-            <div className="space-y-6 sm:space-y-0">
+            <div className="space-y-4 sm:space-y-0">
               {STEPS.map((s, i) => (
-                <div key={i} className="relative flex items-start gap-5 sm:gap-6 sm:pb-10 last:pb-0">
+                <div key={i} className="relative flex items-start gap-4 sm:gap-6 sm:pb-8 last:pb-0">
                   {/* Step circle */}
                   <div className="relative z-10 flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 bg-indigo-600 rounded-2xl flex flex-col items-center justify-center shadow-lg shadow-indigo-200">
                     <div className="text-white">{s.icon}</div>
                     <span className="text-white/70 text-[9px] font-bold mt-0.5">{s.step}</span>
                   </div>
-
                   {/* Content */}
-                  <div className="flex-1 bg-white border border-gray-100 rounded-2xl p-4 sm:p-5 hover:border-indigo-200 hover:shadow-sm transition">
-                    <h3 className="font-bold text-gray-900 mb-1">{s.title}</h3>
-                    <p className="text-gray-400 text-sm leading-relaxed">{s.desc}</p>
+                  <div className="flex-1 bg-white border border-gray-100 rounded-2xl p-4 sm:p-5 hover:border-indigo-200 hover:shadow-sm transition min-w-0">
+                    <h3 className="font-bold text-gray-900 mb-1 text-sm sm:text-base">{s.title}</h3>
+                    <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">{s.desc}</p>
                   </div>
                 </div>
               ))}
