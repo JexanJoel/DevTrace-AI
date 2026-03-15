@@ -1,31 +1,74 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Terminal, Bug, Sparkles, GitBranch, BookOpen,
-  BarChart2, Shield, Zap, ArrowRight, Github,
-  CheckCircle, Users, Activity, Menu, X
+  Terminal, Bug, Sparkles, BookOpen,
+  BarChart2, ArrowRight, Github,
+  Share2, Menu, X, Wifi, WifiOff,
+  Database, Zap, FolderOpen, Heart
 } from 'lucide-react';
 
 const FEATURES = [
-  { icon: <Bug size={22} />, title: 'Session Tracking', desc: 'Log every debug session with error messages, stack traces, and severity levels.', color: 'bg-red-50 text-red-500' },
-  { icon: <Sparkles size={22} />, title: 'AI Fix Suggestions', desc: 'Get instant fixes powered by Groq + Llama 3. Analyze errors in seconds.', color: 'bg-indigo-50 text-indigo-500' },
-  { icon: <BookOpen size={22} />, title: 'Fix Library', desc: 'Save and reuse AI fixes across projects. Build your personal fix knowledge base.', color: 'bg-green-50 text-green-500' },
-  { icon: <GitBranch size={22} />, title: 'GitHub Integration', desc: 'Link your repos to projects. View repo stats, stars, and last commit directly.', color: 'bg-purple-50 text-purple-500' },
-  { icon: <BarChart2 size={22} />, title: 'Error Analytics', desc: 'Visualize your debugging patterns. Track resolution rates and error trends over time.', color: 'bg-orange-50 text-orange-500' },
-  { icon: <Shield size={22} />, title: 'Secure by Default', desc: 'Built on Supabase Auth with RLS. Your data is private and protected by default.', color: 'bg-blue-50 text-blue-500' },
+  {
+    icon: <Sparkles size={22} />,
+    title: 'AI Debug Panel — 8 Tabs',
+    desc: 'Every bug gets a full breakdown: root cause, 3 fix options with code, crash timeline, interactive checklist, follow-up chat, test cases, log analyzer, and architecture review.',
+    color: 'bg-indigo-50 text-indigo-500',
+  },
+  {
+    icon: <WifiOff size={22} />,
+    title: 'Fully Offline-First',
+    desc: 'All data reads from local SQLite via PowerSync — zero spinners, zero network dependency. Create and browse sessions without internet. Auto-syncs on reconnect.',
+    color: 'bg-orange-50 text-orange-500',
+  },
+  {
+    icon: <Bug size={22} />,
+    title: 'Session Tracking',
+    desc: 'Log errors with stack traces, code snippets, expected behavior, environment, and severity. Every session is permanent, searchable, and never lost.',
+    color: 'bg-red-50 text-red-500',
+  },
+  {
+    icon: <BookOpen size={22} />,
+    title: 'Fix Library',
+    desc: 'Save AI fixes that worked. Filter by language, copy in one click, track usage count. Build a personal knowledge base of solutions across all your projects.',
+    color: 'bg-green-50 text-green-500',
+  },
+  {
+    icon: <Share2 size={22} />,
+    title: 'Share with Teammates',
+    desc: 'Share projects and sessions with other DevTrace users for read-only collaboration. Instant access — no email required, revokable anytime.',
+    color: 'bg-purple-50 text-purple-500',
+  },
+  {
+    icon: <BarChart2 size={22} />,
+    title: 'Analytics & Insights',
+    desc: 'Project health scores, session streaks, resolution rates, AI confidence trends, and error patterns — all computed locally from your SQLite data.',
+    color: 'bg-blue-50 text-blue-500',
+  },
 ];
 
 const STEPS = [
-  { step: '01', title: 'Create a Project', desc: 'Link your codebase, set the language, and optionally connect your GitHub repo.' },
-  { step: '02', title: 'Log Debug Sessions', desc: 'Paste your error message and stack trace. Tag severity. Everything is saved instantly.' },
-  { step: '03', title: 'Get AI Fixes', desc: 'Hit "Get AI Fix" — Groq analyzes the error and returns a fix with confidence score.' },
+  {
+    step: '01',
+    title: 'Log the bug',
+    desc: 'Paste your error, stack trace, and code snippet. Tag the severity and environment. Saved instantly — even offline.',
+  },
+  {
+    step: '02',
+    title: 'Get full AI analysis',
+    desc: 'Groq + Llama 3.3 70B returns root cause, 3 fix options with code, a crash timeline, and an interactive checklist. Saved as JSONB — no re-analyzing needed.',
+  },
+  {
+    step: '03',
+    title: 'Save, share, and ship',
+    desc: 'Save the fix to your library. Share the session with a teammate. Mark it resolved. Your debugging history lives forever.',
+  },
 ];
 
-const STATS = [
-  { value: '10k+', label: 'Developers', icon: <Users size={18} /> },
-  { value: '50k+', label: 'Sessions Logged', icon: <Activity size={18} /> },
-  { value: '98%', label: 'Fix Accuracy', icon: <CheckCircle size={18} /> },
-  { value: '< 2s', label: 'AI Response', icon: <Zap size={18} /> },
+const TECH = [
+  { label: 'PowerSync', sub: 'Offline SQLite sync', color: 'border-indigo-200 bg-indigo-50 text-indigo-700' },
+  { label: 'Supabase', sub: 'Postgres + Auth + RLS', color: 'border-green-200 bg-green-50 text-green-700' },
+  { label: 'Groq', sub: 'Llama 3.3 70B', color: 'border-orange-200 bg-orange-50 text-orange-700' },
+  { label: 'React 18', sub: 'TypeScript + Vite', color: 'border-blue-200 bg-blue-50 text-blue-700' },
 ];
 
 const LandingPage = () => {
@@ -38,8 +81,6 @@ const LandingPage = () => {
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-
-          {/* Logo */}
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
               <Terminal size={15} className="text-white" />
@@ -48,7 +89,6 @@ const LandingPage = () => {
             <span className="hidden sm:inline text-xs bg-indigo-50 text-indigo-600 border border-indigo-100 px-2 py-0.5 rounded-full font-medium">Open Source</span>
           </div>
 
-          {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-3">
             <a href="https://github.com/JexanJoel/DevTrace-AI" target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition px-3 py-2">
@@ -64,16 +104,12 @@ const LandingPage = () => {
             </button>
           </div>
 
-          {/* Mobile hamburger */}
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden w-9 h-9 rounded-xl hover:bg-gray-100 flex items-center justify-center text-gray-500"
-          >
+          <button onClick={() => setMenuOpen(!menuOpen)}
+            className="md:hidden w-9 h-9 rounded-xl hover:bg-gray-100 flex items-center justify-center text-gray-500">
             {menuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
 
-        {/* Mobile menu */}
         {menuOpen && (
           <div className="md:hidden bg-white border-t border-gray-100 px-4 py-4 space-y-2">
             <a href="https://github.com/JexanJoel/DevTrace-AI" target="_blank" rel="noopener noreferrer"
@@ -98,18 +134,29 @@ const LandingPage = () => {
         <div className="absolute top-20 left-1/2 -translate-x-1/2 w-64 sm:w-[600px] h-64 sm:h-[600px] bg-indigo-200 opacity-20 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-medium px-4 py-2 rounded-full mb-6">
-            <Sparkles size={13} /> Powered by Groq + Llama 3.3 70B
+
+          {/* Badges */}
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
+            <span className="inline-flex items-center gap-1.5 bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-medium px-3 py-1.5 rounded-full">
+              <Sparkles size={12} /> Groq + Llama 3.3 70B
+            </span>
+            <span className="inline-flex items-center gap-1.5 bg-orange-50 border border-orange-100 text-orange-700 text-xs font-medium px-3 py-1.5 rounded-full">
+              <WifiOff size={12} /> Works offline
+            </span>
+            <span className="inline-flex items-center gap-1.5 bg-green-50 border border-green-100 text-green-700 text-xs font-medium px-3 py-1.5 rounded-full">
+              <Database size={12} /> Powered by PowerSync + Supabase
+            </span>
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-5 sm:mb-6">
-            Debug smarter,<br />
-            <span className="text-indigo-600">ship faster.</span>
+            Your permanent<br />
+            <span className="text-indigo-600">debugging memory.</span>
           </h1>
 
           <p className="text-base sm:text-xl text-gray-500 max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed px-2">
-            DevTrace AI is an open source debugging assistant that tracks your sessions,
-            suggests AI fixes, and helps you ship better code.
+            Log bugs, get full AI analysis, save fixes, share with teammates.
+            <br className="hidden sm:block" />
+            Everything persists. Everything syncs. Everything works — even offline.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
@@ -117,10 +164,10 @@ const LandingPage = () => {
               className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3.5 rounded-xl transition text-base shadow-lg shadow-indigo-200">
               Start debugging free <ArrowRight size={18} />
             </button>
-            <button onClick={() => navigate('/login')}
+            <a href="https://github.com/JexanJoel/DevTrace-AI" target="_blank" rel="noopener noreferrer"
               className="w-full sm:w-auto flex items-center justify-center gap-2 border-2 border-gray-200 hover:border-indigo-300 text-gray-700 font-semibold px-8 py-3.5 rounded-xl transition text-base">
-              Sign in
-            </button>
+              <Github size={18} /> View on GitHub
+            </a>
           </div>
 
           <p className="text-sm text-gray-400 mt-4">Free forever · No credit card · Open source</p>
@@ -134,6 +181,9 @@ const LandingPage = () => {
               <div className="w-3 h-3 rounded-full bg-yellow-500" />
               <div className="w-3 h-3 rounded-full bg-green-500" />
               <span className="ml-2 text-gray-500 text-xs font-mono">devtrace · session #42</span>
+              <span className="ml-auto flex items-center gap-1 text-xs text-orange-400 font-mono">
+                <WifiOff size={10} /> offline
+              </span>
             </div>
             <div className="p-4 sm:p-6 font-mono text-xs sm:text-sm space-y-3 text-left">
               <div className="flex items-start gap-3">
@@ -146,41 +196,80 @@ const LandingPage = () => {
               <div className="border-t border-gray-800 pt-3 flex items-start gap-3">
                 <span className="text-indigo-400 flex-shrink-0">⚡</span>
                 <div>
-                  <p className="text-indigo-300">AI Fix · 92% confidence</p>
-                  <p className="text-gray-400 text-xs mt-1">Add null check: <span className="text-green-300">data?.map(item =&gt; ...)</span></p>
+                  <p className="text-indigo-300">AI Analysis · 92% confidence · 8 tabs</p>
+                  <p className="text-gray-400 text-xs mt-1">Root cause · 3 fixes · Timeline · Checklist · Chat · Tests</p>
                 </div>
               </div>
-              <div className="border-t border-gray-800 pt-3 flex items-center gap-3">
-                <span className="text-green-400">✓</span>
-                <p className="text-green-300">Resolved · saved to Fix Library</p>
+              <div className="border-t border-gray-800 pt-3 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-green-400">✓</span>
+                  <p className="text-green-300">Resolved · saved to Fix Library</p>
+                </div>
+                <span className="text-xs text-gray-500 font-mono">synced offline</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stats bar */}
-      <section className="py-10 sm:py-12 px-4 sm:px-6 border-y border-gray-100 bg-gray-50">
-        <div className="max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8">
-          {STATS.map((s, i) => (
-            <div key={i} className="text-center">
-              <div className="flex items-center justify-center gap-2 text-indigo-500 mb-1">{s.icon}</div>
-              <p className="text-2xl sm:text-3xl font-bold text-gray-900">{s.value}</p>
-              <p className="text-xs sm:text-sm text-gray-400 mt-0.5">{s.label}</p>
+      {/* Tech stack trust bar */}
+      <section className="py-8 sm:py-10 px-4 sm:px-6 border-y border-gray-100 bg-gray-50">
+        <div className="max-w-4xl mx-auto">
+          <p className="text-center text-xs text-gray-400 font-medium uppercase tracking-widest mb-5">Built on</p>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            {TECH.map((t, i) => (
+              <div key={i} className={`flex flex-col items-center px-5 py-3 rounded-xl border ${t.color} min-w-[100px]`}>
+                <span className="font-bold text-sm">{t.label}</span>
+                <span className="text-xs opacity-70 mt-0.5">{t.sub}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Offline callout */}
+      <section className="py-14 sm:py-20 px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="rounded-2xl border border-orange-200 bg-orange-50 p-6 sm:p-10">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-8">
+              <div className="flex-shrink-0 w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center">
+                <WifiOff size={26} className="text-orange-500" />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                  Works completely offline
+                </h2>
+                <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-4">
+                  Powered by <strong>PowerSync</strong> — all your data syncs to a local SQLite database in the browser.
+                  Every read is instant. Every session you create offline is queued and synced automatically when you reconnect.
+                  No spinners. No "you're offline" dead ends.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <div className="flex items-center gap-2 text-sm text-orange-700 bg-white border border-orange-200 px-3 py-1.5 rounded-lg">
+                    <Wifi size={13} /> Instant reads from local SQLite
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-orange-700 bg-white border border-orange-200 px-3 py-1.5 rounded-lg">
+                    <WifiOff size={13} /> Create sessions offline
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-orange-700 bg-white border border-orange-200 px-3 py-1.5 rounded-lg">
+                    <Zap size={13} /> Auto-sync on reconnect
+                  </div>
+                </div>
+              </div>
             </div>
-          ))}
+          </div>
         </div>
       </section>
 
       {/* Features */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6">
+      <section className="py-8 sm:py-12 px-4 sm:px-6 bg-gray-50">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-10 sm:mb-16">
+          <div className="text-center mb-10 sm:mb-14">
             <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Everything you need to debug faster
+              Everything you need to debug seriously
             </h2>
             <p className="text-gray-400 text-base sm:text-lg max-w-xl mx-auto">
-              Built for developers who are tired of copy-pasting errors into ChatGPT
+              Not just a fix generator — a complete debugging assistant
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -198,7 +287,7 @@ const LandingPage = () => {
       </section>
 
       {/* How it works */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-gray-50">
+      <section className="py-16 sm:py-24 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-10 sm:mb-16">
             <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-4">How it works</h2>
@@ -220,6 +309,57 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* Supabase + PowerSync section */}
+      <section className="py-14 sm:py-20 px-4 sm:px-6 bg-gray-50">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
+              Built on the best open infrastructure
+            </h2>
+            <p className="text-gray-400 text-sm sm:text-base max-w-xl mx-auto">
+              No custom backend. No ops burden. Just great tools doing what they do best.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+            {/* Supabase */}
+            <div className="bg-white rounded-2xl border border-green-100 p-5 sm:p-6">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-9 h-9 bg-green-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Database size={18} className="text-green-600" />
+                </div>
+                <span className="font-bold text-gray-900">Supabase</span>
+              </div>
+              <ul className="space-y-1.5 text-sm text-gray-500">
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Postgres with RLS on every table</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Email, GitHub & Google OAuth</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Magic link password reset</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Storage for avatars</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> WAL replication to PowerSync</li>
+              </ul>
+            </div>
+
+            {/* PowerSync */}
+            <div className="bg-white rounded-2xl border border-indigo-100 p-5 sm:p-6">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-9 h-9 bg-indigo-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Zap size={18} className="text-indigo-600" />
+                </div>
+                <span className="font-bold text-gray-900">PowerSync</span>
+              </div>
+              <ul className="space-y-1.5 text-sm text-gray-500">
+                <li className="flex items-center gap-2"><span className="text-indigo-500">✓</span> Local SQLite in the browser</li>
+                <li className="flex items-center gap-2"><span className="text-indigo-500">✓</span> All reads are instant — 0ms</li>
+                <li className="flex items-center gap-2"><span className="text-indigo-500">✓</span> Real-time sync via WAL stream</li>
+                <li className="flex items-center gap-2"><span className="text-indigo-500">✓</span> Offline write queue</li>
+                <li className="flex items-center gap-2"><span className="text-indigo-500">✓</span> Auto-sync on reconnect</li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="py-16 sm:py-24 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto">
@@ -229,10 +369,10 @@ const LandingPage = () => {
               <Terminal size={22} className="text-white" />
             </div>
             <h2 className="text-2xl sm:text-4xl font-bold text-white mb-3 sm:mb-4">
-              Start debugging smarter today
+              Stop Googling the same bug twice
             </h2>
             <p className="text-indigo-200 text-base sm:text-lg mb-6 sm:mb-8 max-w-xl mx-auto">
-              Free forever. Open source. No credit card required.
+              Free forever. Open source. Works offline.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
               <button onClick={() => navigate('/register')}
@@ -258,7 +398,17 @@ const LandingPage = () => {
             <span className="font-bold text-gray-900 text-sm">DevTrace AI</span>
             <span className="text-gray-400 text-sm">· Open Source</span>
           </div>
-          <p className="text-gray-400 text-xs sm:text-sm text-center">Built with React, Supabase, and Groq AI · 2026</p>
+          <p className="text-gray-400 text-xs sm:text-sm text-center flex items-center gap-1">
+            Built with <Heart size={11} className="text-red-400" /> for the PowerSync AI Hackathon 2026
+          </p>
+          <div className="flex items-center gap-3 text-xs text-gray-400">
+            <a href="https://github.com/JexanJoel/DevTrace-AI" target="_blank" rel="noopener noreferrer"
+              className="hover:text-gray-700 transition flex items-center gap-1">
+              <Github size={13} /> GitHub
+            </a>
+            <span>·</span>
+            <span>MIT License</span>
+          </div>
         </div>
       </footer>
 
