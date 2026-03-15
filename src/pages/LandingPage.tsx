@@ -57,7 +57,6 @@ const Marquee = () => {
           width: max-content;
           animation: marquee 28s linear infinite;
         }
-        .marquee-track:hover { animation-play-state: paused; }
       `}</style>
       <div className="marquee-track">
         {items.map((item, i) => (
@@ -285,32 +284,53 @@ const LandingPage = () => {
             </div>
           </div>
 
-          {/* How it actually works — flow */}
-          <div className="bg-gray-900 rounded-2xl p-5 sm:p-7 overflow-x-auto">
+          {/* Data flow diagram */}
+          <div className="bg-gray-900 rounded-2xl p-5 sm:p-7">
             <p className="text-xs text-gray-500 font-mono uppercase tracking-widest mb-5">Data flow</p>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-0 min-w-[480px] sm:min-w-0">
 
+            {/* Mobile: vertical stack */}
+            <div className="flex flex-col sm:hidden gap-2">
               {[
-                { label: 'Supabase',      sub: 'Source of truth',     color: 'bg-green-900 border-green-700 text-green-300' },
-                { label: 'WAL Stream',    sub: 'Postgres replication', color: 'bg-gray-800 border-gray-600 text-gray-300' },
-                { label: 'PowerSync',     sub: 'Sync engine',          color: 'bg-indigo-900 border-indigo-700 text-indigo-300' },
-                { label: 'Local SQLite',  sub: 'In your browser',      color: 'bg-orange-900 border-orange-700 text-orange-300' },
-                { label: 'useQuery()',    sub: '0ms · always ready',   color: 'bg-purple-900 border-purple-700 text-purple-300' },
+                { label: 'Supabase',     sub: 'Source of truth',      color: 'bg-green-900 border-green-700 text-green-300' },
+                { label: 'WAL Stream',   sub: 'Postgres replication',  color: 'bg-gray-800 border-gray-600 text-gray-300' },
+                { label: 'PowerSync',    sub: 'Sync engine',           color: 'bg-indigo-900 border-indigo-700 text-indigo-300' },
+                { label: 'Local SQLite', sub: 'In your browser',       color: 'bg-orange-900 border-orange-700 text-orange-300' },
+                { label: 'useQuery()',   sub: '0ms · always ready',    color: 'bg-purple-900 border-purple-700 text-purple-300' },
               ].map((node, i, arr) => (
-                <div key={i} className="flex sm:flex-row flex-col items-center gap-2 sm:gap-0 w-full sm:w-auto sm:flex-1">
-                  <div className={`w-full sm:w-auto flex-1 border rounded-xl px-3 py-2.5 text-center ${node.color}`}>
-                    <p className="font-bold text-xs">{node.label}</p>
-                    <p className="text-[10px] opacity-70 mt-0.5">{node.sub}</p>
+                <div key={i} className="flex flex-col items-center">
+                  <div className={`w-full border rounded-xl px-4 py-3 text-center ${node.color}`}>
+                    <p className="font-bold text-sm">{node.label}</p>
+                    <p className="text-xs opacity-70 mt-0.5">{node.sub}</p>
                   </div>
                   {i < arr.length - 1 && (
-                    <div className="flex sm:flex-row flex-col items-center">
-                      <div className="text-gray-600 text-xs sm:mx-2 font-mono rotate-90 sm:rotate-0">→</div>
-                    </div>
+                    <div className="text-gray-600 text-sm font-mono my-1">↓</div>
                   )}
                 </div>
               ))}
             </div>
-            <p className="text-xs text-gray-600 font-mono mt-4">
+
+            {/* Desktop: horizontal */}
+            <div className="hidden sm:flex items-center gap-0">
+              {[
+                { label: 'Supabase',     sub: 'Source of truth',      color: 'bg-green-900 border-green-700 text-green-300' },
+                { label: 'WAL Stream',   sub: 'Postgres replication',  color: 'bg-gray-800 border-gray-600 text-gray-300' },
+                { label: 'PowerSync',    sub: 'Sync engine',           color: 'bg-indigo-900 border-indigo-700 text-indigo-300' },
+                { label: 'Local SQLite', sub: 'In your browser',       color: 'bg-orange-900 border-orange-700 text-orange-300' },
+                { label: 'useQuery()',   sub: '0ms · always ready',    color: 'bg-purple-900 border-purple-700 text-purple-300' },
+              ].map((node, i, arr) => (
+                <div key={i} className="flex items-center flex-1">
+                  <div className={`flex-1 border rounded-xl px-3 py-2.5 text-center ${node.color}`}>
+                    <p className="font-bold text-xs">{node.label}</p>
+                    <p className="text-[10px] opacity-70 mt-0.5">{node.sub}</p>
+                  </div>
+                  {i < arr.length - 1 && (
+                    <div className="text-gray-600 text-xs mx-1.5 font-mono">→</div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <p className="text-xs text-gray-600 font-mono mt-4 leading-relaxed">
               Writes go directly to Supabase · PowerSync detects via WAL · local SQLite updates · <span className="text-orange-400">useQuery()</span> reflects change instantly
             </p>
           </div>
@@ -375,83 +395,149 @@ const LandingPage = () => {
       {/* ── Built on best infra ── */}
       <section className="py-14 sm:py-20 px-4 sm:px-6 bg-gray-50">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-10">
+          <div className="text-center mb-10 sm:mb-14">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
               Built on the best open infrastructure
             </h2>
             <p className="text-gray-400 text-sm sm:text-base max-w-xl mx-auto">
-              No custom backend. No ops burden. Three best-in-class open source platforms doing what they do best.
+              No custom backend. No ops burden. Three best-in-class open source platforms — each doing exactly what they're best at.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6">
 
             {/* Supabase */}
-            <div className="bg-white rounded-2xl border border-green-100 p-5 sm:p-6 flex flex-col">
-              <div className="flex items-center gap-3 mb-4">
-                <img src="https://www.vectorlogo.zone/logos/supabase/supabase-icon.svg" alt="Supabase" className="w-8 h-8" />
-                <div>
-                  <p className="font-bold text-gray-900 leading-tight">Supabase</p>
-                  <p className="text-xs text-gray-400">Database · Auth · Storage</p>
+            <div className="relative bg-white rounded-2xl border border-green-100 overflow-hidden flex flex-col group hover:shadow-lg hover:border-green-200 transition-all duration-300">
+              {/* Top accent bar */}
+              <div className="h-1.5 w-full bg-gradient-to-r from-green-400 to-emerald-500" />
+              <div className="p-5 sm:p-6 flex flex-col flex-1">
+                {/* Header */}
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-11 h-11 rounded-2xl bg-green-50 border border-green-100 flex items-center justify-center flex-shrink-0">
+                    <img src="https://www.vectorlogo.zone/logos/supabase/supabase-icon.svg" alt="Supabase" className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-gray-900 leading-tight">Supabase</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Database · Auth · Storage</p>
+                  </div>
                 </div>
-              </div>
-              <ul className="space-y-2 text-sm text-gray-500 flex-1">
-                <li className="flex items-start gap-2"><span className="text-green-500 mt-0.5 flex-shrink-0">✓</span> Postgres with RLS on every table</li>
-                <li className="flex items-start gap-2"><span className="text-green-500 mt-0.5 flex-shrink-0">✓</span> Email, GitHub & Google OAuth</li>
-                <li className="flex items-start gap-2"><span className="text-green-500 mt-0.5 flex-shrink-0">✓</span> Magic link password reset</li>
-                <li className="flex items-start gap-2"><span className="text-green-500 mt-0.5 flex-shrink-0">✓</span> GitHub account linking</li>
-                <li className="flex items-start gap-2"><span className="text-green-500 mt-0.5 flex-shrink-0">✓</span> Storage for avatars</li>
-                <li className="flex items-start gap-2"><span className="text-green-500 mt-0.5 flex-shrink-0">✓</span> WAL replication to PowerSync</li>
-                <li className="flex items-start gap-2"><span className="text-green-500 mt-0.5 flex-shrink-0">✓</span> Sharing via RLS policies</li>
-              </ul>
-              <div className="mt-4 pt-4 border-t border-gray-100">
-                <span className="text-xs bg-green-50 text-green-600 border border-green-100 px-2.5 py-1 rounded-full font-medium">Open Source · Apache 2.0</span>
+                {/* Role tag */}
+                <p className="text-xs font-semibold text-green-600 bg-green-50 border border-green-100 px-2.5 py-1 rounded-lg w-fit mb-4">
+                  Source of truth
+                </p>
+                <ul className="space-y-2.5 text-sm text-gray-500 flex-1">
+                  {[
+                    'Postgres + RLS on every table',
+                    'Email, GitHub & Google OAuth',
+                    'Magic link password reset',
+                    'GitHub account linking',
+                    'Storage for avatars',
+                    'WAL replication to PowerSync',
+                    'Sharing enforced via RLS policies',
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2.5">
+                      <span className="text-green-500 mt-0.5 flex-shrink-0 font-bold">✓</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between">
+                  <span className="text-xs bg-green-50 text-green-600 border border-green-100 px-2.5 py-1 rounded-full font-semibold">Apache 2.0</span>
+                  <a href="https://supabase.com" target="_blank" rel="noopener noreferrer"
+                    className="text-xs text-gray-400 hover:text-green-600 transition font-medium">
+                    supabase.com →
+                  </a>
+                </div>
               </div>
             </div>
 
-            {/* PowerSync */}
-            <div className="bg-white rounded-2xl border border-indigo-100 p-5 sm:p-6 flex flex-col">
-              <div className="flex items-center gap-3 mb-4">
-                <img src="https://avatars.githubusercontent.com/u/105956274?s=48&v=4" alt="PowerSync" className="w-8 h-8 rounded-lg" />
-                <div>
-                  <p className="font-bold text-gray-900 leading-tight">PowerSync</p>
-                  <p className="text-xs text-gray-400">Offline Sync · Local SQLite</p>
+            {/* PowerSync — featured / center */}
+            <div className="relative bg-white rounded-2xl border border-indigo-200 overflow-hidden flex flex-col group hover:shadow-lg hover:border-indigo-300 transition-all duration-300 sm:scale-[1.02]">
+              <div className="h-1.5 w-full bg-gradient-to-r from-indigo-500 to-violet-500" />
+              <div className="p-5 sm:p-6 flex flex-col flex-1">
+                {/* Featured badge */}
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center flex-shrink-0">
+                      <img src="https://avatars.githubusercontent.com/u/105956274?s=48&v=4" alt="PowerSync" className="w-6 h-6 rounded-md" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-gray-900 leading-tight">PowerSync</p>
+                      <p className="text-xs text-gray-400 mt-0.5">Offline Sync · Local SQLite</p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold bg-indigo-600 text-white px-2 py-1 rounded-lg flex-shrink-0">
+                    CORE
+                  </span>
                 </div>
-              </div>
-              <ul className="space-y-2 text-sm text-gray-500 flex-1">
-                <li className="flex items-start gap-2"><span className="text-indigo-500 mt-0.5 flex-shrink-0">✓</span> Local SQLite in the browser</li>
-                <li className="flex items-start gap-2"><span className="text-indigo-500 mt-0.5 flex-shrink-0">✓</span> All reads instant — 0ms latency</li>
-                <li className="flex items-start gap-2"><span className="text-indigo-500 mt-0.5 flex-shrink-0">✓</span> Real-time sync via WAL stream</li>
-                <li className="flex items-start gap-2"><span className="text-indigo-500 mt-0.5 flex-shrink-0">✓</span> Offline write queue</li>
-                <li className="flex items-start gap-2"><span className="text-indigo-500 mt-0.5 flex-shrink-0">✓</span> Auto-sync on reconnect</li>
-                <li className="flex items-start gap-2"><span className="text-indigo-500 mt-0.5 flex-shrink-0">✓</span> Per-user sync rules</li>
-                <li className="flex items-start gap-2"><span className="text-indigo-500 mt-0.5 flex-shrink-0">✓</span> Live Sync Status page</li>
-              </ul>
-              <div className="mt-4 pt-4 border-t border-gray-100">
-                <span className="text-xs bg-indigo-50 text-indigo-600 border border-indigo-100 px-2.5 py-1 rounded-full font-medium">Open Source · Apache 2.0</span>
+                <p className="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-lg w-fit mb-4">
+                  Offline engine
+                </p>
+                <ul className="space-y-2.5 text-sm text-gray-500 flex-1">
+                  {[
+                    'Local SQLite synced to browser',
+                    'All reads instant — 0ms latency',
+                    'Real-time stream via WAL',
+                    'Offline write queue',
+                    'Auto-sync on reconnect',
+                    'Per-user sync rules',
+                    'Live Sync Status page built in',
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2.5">
+                      <span className="text-indigo-500 mt-0.5 flex-shrink-0 font-bold">✓</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between">
+                  <span className="text-xs bg-indigo-50 text-indigo-600 border border-indigo-100 px-2.5 py-1 rounded-full font-semibold">Apache 2.0</span>
+                  <a href="https://www.powersync.com" target="_blank" rel="noopener noreferrer"
+                    className="text-xs text-gray-400 hover:text-indigo-600 transition font-medium">
+                    powersync.com →
+                  </a>
+                </div>
               </div>
             </div>
 
-            {/* React */}
-            <div className="bg-white rounded-2xl border border-blue-100 p-5 sm:p-6 flex flex-col">
-              <div className="flex items-center gap-3 mb-4">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" alt="React" className="w-8 h-8" />
-                <div>
-                  <p className="font-bold text-gray-900 leading-tight">React Ecosystem</p>
-                  <p className="text-xs text-gray-400">UI · State · Build</p>
+            {/* React Ecosystem */}
+            <div className="relative bg-white rounded-2xl border border-blue-100 overflow-hidden flex flex-col group hover:shadow-lg hover:border-blue-200 transition-all duration-300">
+              <div className="h-1.5 w-full bg-gradient-to-r from-blue-400 to-cyan-500" />
+              <div className="p-5 sm:p-6 flex flex-col flex-1">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-11 h-11 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center flex-shrink-0">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" alt="React" className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-gray-900 leading-tight">React Ecosystem</p>
+                    <p className="text-xs text-gray-400 mt-0.5">UI · State · Build</p>
+                  </div>
                 </div>
-              </div>
-              <ul className="space-y-2 text-sm text-gray-500 flex-1">
-                <li className="flex items-start gap-2"><span className="text-blue-500 mt-0.5 flex-shrink-0">✓</span> React 18 + TypeScript</li>
-                <li className="flex items-start gap-2"><span className="text-blue-500 mt-0.5 flex-shrink-0">✓</span> Vite for lightning-fast builds</li>
-                <li className="flex items-start gap-2"><span className="text-blue-500 mt-0.5 flex-shrink-0">✓</span> Tailwind CSS for styling</li>
-                <li className="flex items-start gap-2"><span className="text-blue-500 mt-0.5 flex-shrink-0">✓</span> Zustand for global state</li>
-                <li className="flex items-start gap-2"><span className="text-blue-500 mt-0.5 flex-shrink-0">✓</span> Recharts for analytics</li>
-                <li className="flex items-start gap-2"><span className="text-blue-500 mt-0.5 flex-shrink-0">✓</span> React Router for navigation</li>
-                <li className="flex items-start gap-2"><span className="text-blue-500 mt-0.5 flex-shrink-0">✓</span> Deployed on Vercel</li>
-              </ul>
-              <div className="mt-4 pt-4 border-t border-gray-100">
-                <span className="text-xs bg-blue-50 text-blue-600 border border-blue-100 px-2.5 py-1 rounded-full font-medium">Open Source · MIT</span>
+                <p className="text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-lg w-fit mb-4">
+                  Frontend stack
+                </p>
+                <ul className="space-y-2.5 text-sm text-gray-500 flex-1">
+                  {[
+                    'React 18 + TypeScript',
+                    'Vite for lightning-fast builds',
+                    'Tailwind CSS for styling',
+                    'Zustand for global state',
+                    'Recharts for analytics',
+                    'React Router for navigation',
+                    'Deployed on Vercel',
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2.5">
+                      <span className="text-blue-500 mt-0.5 flex-shrink-0 font-bold">✓</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between">
+                  <span className="text-xs bg-blue-50 text-blue-600 border border-blue-100 px-2.5 py-1 rounded-full font-semibold">MIT License</span>
+                  <a href="https://react.dev" target="_blank" rel="noopener noreferrer"
+                    className="text-xs text-gray-400 hover:text-blue-600 transition font-medium">
+                    react.dev →
+                  </a>
+                </div>
               </div>
             </div>
 
