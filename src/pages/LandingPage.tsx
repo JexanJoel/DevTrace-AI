@@ -258,7 +258,7 @@ const LandingPage = () => {
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-gray-900 tracking-tighter leading-[1.1] mb-8">
-            Your team's permanent <br className="sm:hidden" />
+            Your team's permanent <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-indigo-400">debugging memory.</span>
           </h1>
 
