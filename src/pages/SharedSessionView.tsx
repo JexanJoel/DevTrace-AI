@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Loader2, Eye, Clock, FolderOpen } from 'lucide-react';
+import { ArrowLeft, Loader2, Eye, Clock, FolderOpen, MessageSquare } from 'lucide-react';
 import DashboardLayout from '../components/dashboard/DashboardLayout';
 import { StatusBadge, SeverityBadge } from '../components/sessions/StatusBadge';
 import AIDebugPanel from '../components/sessions/AIDebugPanel';
+import CollaborationBanner from '../components/sessions/CollaborationBanner';
+import SessionChat from '../components/sessions/SessionChat';
 import { supabase } from '../lib/supabaseClient';
 import { useAuthStore } from '../store/authStore';
+import useCollaboration from '../hooks/useCollaboration';
 import type { DebugSession } from '../hooks/useSessions';
 
 const ENV_COLORS: Record<string, string> = {
@@ -23,13 +26,30 @@ const SharedSessionView = () => {
   const [sharedBy, setSharedBy] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [showChat, setShowChat] = useState(false);
+
+  // ── Collaboration — presence heartbeat + chat (checklist display only) ────
+  const {
+    activeCollaborators,
+    otherCollaborators,
+    isCollaborative,
+    chatMessages,
+    sendMessage,
+    isChecked,
+    checkedBy,
+    completedCount,
+  } = useCollaboration(id ?? '');
+
+  // Auto-open chat when owner joins
+  useEffect(() => {
+    if (isCollaborative && !showChat) setShowChat(true);
+  }, [isCollaborative]);
 
   useEffect(() => {
     const load = async () => {
       if (!id || !user || authLoading) return;
       setLoading(true);
 
-      // Check for direct session share
       const { data: directShares } = await supabase
         .from('shares')
         .select('owner_id')
@@ -40,7 +60,6 @@ const SharedSessionView = () => {
 
       let ownerId = directShares?.[0]?.owner_id ?? null;
 
-      // If not a direct share, check if session belongs to a shared project
       if (!ownerId) {
         const { data: sessList } = await supabase
           .from('debug_sessions')
@@ -69,7 +88,6 @@ const SharedSessionView = () => {
         return;
       }
 
-      // Fetch owner profile
       const { data: ownerProfiles } = await supabase
         .from('profiles')
         .select('name, email')
@@ -78,7 +96,6 @@ const SharedSessionView = () => {
       const op = ownerProfiles?.[0];
       setSharedBy(op?.name || op?.email || 'Someone');
 
-      // Fetch session with project info
       const { data: rawList } = await supabase
         .from('debug_sessions')
         .select('*, projects(name, language)')
@@ -128,23 +145,55 @@ const SharedSessionView = () => {
 
   return (
     <DashboardLayout title={session.title}>
-      <div className="space-y-5">
+      <div className="space-y-5 overflow-x-hidden">
 
-        <button onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition">
-          <ArrowLeft size={14} /> Back
-        </button>
+        {/* Top bar */}
+        <div className="flex items-center justify-between gap-2 min-w-0">
+          <button onClick={() => navigate(-1)}
+            className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition flex-shrink-0">
+            <ArrowLeft size={14} /> Back
+          </button>
+
+          {/* Chat toggle — always visible so collaborator can reach out */}
+          <button
+            onClick={() => setShowChat(v => !v)}
+            className={`flex items-center gap-1.5 px-2.5 py-2 sm:px-3 rounded-xl text-sm font-medium transition relative ${
+              showChat
+                ? 'bg-indigo-600 text-white'
+                : 'border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950 text-indigo-600'
+            }`}
+          >
+            <MessageSquare size={14} />
+            <span className="hidden sm:inline">Chat</span>
+            {chatMessages.length > 0 && !showChat && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                {chatMessages.length > 9 ? '9+' : chatMessages.length}
+              </span>
+            )}
+          </button>
+        </div>
+
+        {/* Collaboration banner — appears when owner opens the same session */}
+        {otherCollaborators.length > 0 && (
+          <CollaborationBanner
+            collaborators={activeCollaborators}
+            currentUserId={user?.id ?? ''}
+          />
+        )}
 
         {/* Read-only banner */}
         <div className="flex items-center gap-2.5 p-3.5 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-xl">
           <Eye size={15} className="text-amber-500 flex-shrink-0" />
           <p className="text-sm text-amber-700 dark:text-amber-300">
             <strong>Read only</strong> · Shared by <span className="font-semibold">{sharedBy}</span>
+            {isCollaborative && (
+              <span className="ml-2 font-medium text-indigo-600 dark:text-indigo-400">· Live session active</span>
+            )}
           </p>
         </div>
 
         {/* Session header */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-6 min-w-0">
           <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white leading-snug break-words mb-3">
             {session.title}
           </h2>
@@ -169,38 +218,40 @@ const SharedSessionView = () => {
           </div>
         </div>
 
-        <div className="space-y-5">
+        {/* Content */}
+        <div className="space-y-5 min-w-0">
+
           {session.error_message && (
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-6 min-w-0">
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Error Message</p>
-              <div className="bg-red-50 dark:bg-red-950 border border-red-100 dark:border-red-900 rounded-xl p-4 font-mono text-xs sm:text-sm text-red-800 dark:text-red-300 whitespace-pre-wrap break-all">
+              <div className="bg-red-50 dark:bg-red-950 border border-red-100 dark:border-red-900 rounded-xl p-4 font-mono text-xs sm:text-sm text-red-800 dark:text-red-300 whitespace-pre-wrap break-all overflow-x-auto max-w-full">
                 {session.error_message}
               </div>
             </div>
           )}
 
           {session.stack_trace && (
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-6 min-w-0">
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Stack Trace</p>
-              <div className="bg-gray-900 rounded-xl p-4 font-mono text-xs text-gray-300 whitespace-pre-wrap overflow-x-auto max-h-48 overflow-y-auto">
+              <div className="bg-gray-900 rounded-xl p-4 font-mono text-xs text-gray-300 whitespace-pre-wrap overflow-x-auto max-h-48 overflow-y-auto max-w-full">
                 {session.stack_trace}
               </div>
             </div>
           )}
 
           {session.code_snippet && (
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-6 min-w-0">
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Related Code</p>
-              <div className="bg-gray-900 rounded-xl p-4 font-mono text-xs text-gray-300 whitespace-pre-wrap overflow-x-auto max-h-48 overflow-y-auto">
+              <div className="bg-gray-900 rounded-xl p-4 font-mono text-xs text-gray-300 whitespace-pre-wrap overflow-x-auto max-h-48 overflow-y-auto max-w-full">
                 {session.code_snippet}
               </div>
             </div>
           )}
 
           {session.expected_behavior && (
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-5 min-w-0">
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Expected Behavior</p>
-              <p className="text-sm text-gray-700 dark:text-gray-300">{session.expected_behavior}</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300 break-words">{session.expected_behavior}</p>
             </div>
           )}
 
@@ -210,24 +261,33 @@ const SharedSessionView = () => {
               onSaveAnalysis={async () => {}}
               onSaveToLibrary={async () => {}}
               savingToLib={false}
-              // Read-only view — collaboration features disabled
-              isChecked={() => false}
-              checkedBy={() => null}
+              // Checklist shows live synced state but toggling is disabled
+              isChecked={isChecked}
+              checkedBy={checkedBy}
               onToggleChecklist={() => {}}
-              completedCount={0}
-              isCollaborative={false}
+              completedCount={completedCount}
+              isCollaborative={isCollaborative}
               currentUserName=""
             />
           )}
 
           {session.notes && (
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 sm:p-6">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-6 min-w-0">
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Notes</p>
               <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{session.notes}</p>
             </div>
           )}
-        </div>
 
+          {/* Chat — full read/write for collaborators */}
+          {showChat && (
+            <SessionChat
+              messages={chatMessages}
+              onSend={sendMessage}
+              currentUserId={user?.id ?? ''}
+            />
+          )}
+
+        </div>
       </div>
     </DashboardLayout>
   );
