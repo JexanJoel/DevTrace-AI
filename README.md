@@ -31,11 +31,11 @@ DevTrace AI is your **permanent debugging memory** - log bugs, get instant AI an
 | | |
 |:--|:--|
 | 🔍 | Every bug gets a permanent structured record |
-| 🤖 | Full AI breakdown - root cause, fixes, timeline, checklist |
-| 🧬 | Debug DNA - your personal error fingerprint powered by Supabase Edge Functions |
-| 💾 | Saved as JSONB - persists across reloads, zero re-analyzing |
+| 🤖 | Full AI breakdown - root cause, fixes, timeline |
+| 🧬 | Debug DNA - your personal error fingerprint |
+| 💾 | Saved as JSONB - persists across reloads |
 | 📶 | Fully offline via PowerSync local SQLite |
-| 🔗 | Share projects and sessions with teammates (read-only) |
+| 🔗 | Share projects and sessions with teammates |
 
 </div>
 
