@@ -36,7 +36,6 @@ const SharedProjectView = () => {
   const [showChat, setShowChat] = useState(false);
 
   const {
-    activeCollaborators,
     otherCollaborators,
     isCollaborative,
     activityFeed,
