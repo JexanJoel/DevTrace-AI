@@ -194,9 +194,6 @@ const SharedSessionView = () => {
 
         {/* Session header */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-6 min-w-0">
-          <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white leading-snug break-words mb-3">
-            {session.title}
-          </h2>
           <div className="flex items-center gap-2 flex-wrap">
             <StatusBadge status={session.status} />
             <SeverityBadge severity={session.severity} />
