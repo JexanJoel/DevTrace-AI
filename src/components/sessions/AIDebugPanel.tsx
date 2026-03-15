@@ -177,7 +177,7 @@ const AIDebugPanel = ({
   return (
     <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 h-full flex flex-col overflow-hidden animate-fade-in">
 
-      <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800 flex-wrap gap-3 glass-dark">
+      <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800 flex-wrap gap-3 glass dark:glass-dark">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center">
             <Sparkles size={15} className="text-indigo-600 animate-pulse" />
@@ -187,11 +187,12 @@ const AIDebugPanel = ({
             <p className="text-xs text-gray-400">Powered by Groq · Llama 3.3 70B</p>
           </div>
           {analysis && <CategoryBadge category={analysis.category} />}
+          <span className="text-[10px] font-bold bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-lg border border-indigo-100 dark:border-indigo-800/50">PowerSync</span>
         </div>
         <div className="flex items-center gap-2">
           {analysis && (
             <button onClick={onSaveToLibrary} disabled={savingToLib}
-              className="flex items-center gap-1.5 border border-indigo-200 hover:bg-indigo-50 dark:hover:bg-indigo-950 text-indigo-600 text-xs font-medium px-3 py-1.5 rounded-xl transition disabled:opacity-40">
+              className="flex items-center gap-1.5 border border-indigo-200 dark:border-indigo-800/50 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs font-semibold px-3 py-1.5 rounded-xl transition disabled:opacity-40">
               {savingToLib ? <Loader2 size={12} className="animate-spin" /> : <BookOpen size={12} />}
               Save to Library
             </button>

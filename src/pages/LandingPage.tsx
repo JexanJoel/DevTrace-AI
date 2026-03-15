@@ -181,18 +181,18 @@ const LandingPage = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-white font-sans">
+    <div className="min-h-screen bg-white font-sans overflow-x-hidden">
 
       {/* ── Navbar ── */}
       <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-100/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Terminal size={15} className="text-white" />
+            <div className="flex items-center gap-2 group cursor-pointer" onClick={() => navigate('/')}>
+              <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                <Terminal size={15} className="text-white" />
+              </div>
+              <span className="font-bold text-gray-900 tracking-tight">DevTrace AI</span>
+              <span className="hidden sm:inline text-xs bg-indigo-50 text-indigo-600 border border-indigo-100 px-2 py-0.5 rounded-full font-bold">Open Source</span>
             </div>
-            <span className="font-bold text-gray-900">DevTrace AI</span>
-            <span className="hidden sm:inline text-xs bg-indigo-50 text-indigo-600 border border-indigo-100 px-2 py-0.5 rounded-full font-medium">Open Source</span>
-          </div>
           <div className="hidden md:flex items-center gap-3">
             <a href="https://github.com/JexanJoel/DevTrace-AI" target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition px-3 py-2">
@@ -223,11 +223,12 @@ const LandingPage = () => {
       </nav>
 
       {/* ── Hero ── */}
-      <section className="pt-28 sm:pt-32 pb-16 sm:pb-20 px-4 sm:px-6 text-center relative overflow-hidden">
+      <section className="pt-28 sm:pt-36 pb-20 sm:pb-32 px-4 sm:px-6 text-center relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-indigo-50/60 via-white to-white pointer-events-none" />
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 w-64 sm:w-[600px] h-64 sm:h-[600px] bg-indigo-200 opacity-20 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative max-w-4xl mx-auto">
-          <div className="flex flex-wrap items-center justify-center gap-2 mb-8 sm:mb-10 max-w-3xl mx-auto">
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 w-64 sm:w-[800px] h-64 sm:h-[800px] bg-indigo-200 opacity-20 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="relative max-w-5xl mx-auto">
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-8 sm:mb-12 max-w-3xl mx-auto">
             {[
               { icon: <Sparkles size={12} />, text: 'Groq + Llama 3.3 70B', color: 'bg-indigo-50 border-indigo-100 text-indigo-700' },
               { icon: <WifiOff size={12} />,  text: 'Works offline',        color: 'bg-orange-50 border-orange-100 text-orange-700' },
@@ -236,16 +237,18 @@ const LandingPage = () => {
               { icon: <History size={12} />,  text: 'Similar Sessions',     color: 'bg-amber-50 border-amber-100 text-amber-700' },
               { icon: <Dna size={12} />,      text: 'Debug DNA',            color: 'bg-violet-50 border-violet-100 text-violet-700' },
             ].map((badge, i) => (
-              <span key={i} className={`inline-flex items-center gap-1.5 border ${badge.color} text-[10px] sm:text-xs font-medium px-3 py-1.5 rounded-full shadow-sm`}>
+              <span key={i} className={`inline-flex items-center gap-1.5 border ${badge.color} text-[10px] sm:text-xs font-medium px-3 py-1.5 rounded-full shadow-sm animate-fade-in`} style={{ animationDelay: `${i * 100}ms` }}>
                 {badge.icon} {badge.text}
               </span>
             ))}
           </div>
-          <h1 className="text-4xl sm:text-6xl lg:text-8xl font-black text-gray-900 tracking-tighter leading-[0.9] mb-8">
-            <span className="whitespace-nowrap">Your team's permanent</span><br className="sm:hidden" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-indigo-400 whitespace-nowrap"> debugging memory.</span>
+
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl xl:text-8xl font-black text-gray-900 tracking-tighter leading-[1.1] mb-8">
+            Your team's permanent <br className="sm:hidden" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-indigo-400">debugging memory.</span>
           </h1>
-          <p className="text-lg sm:text-xl text-gray-500 max-w-2xl mx-auto mb-10 sm:mb-12 leading-relaxed px-4">
+
+          <p className="text-lg sm:text-xl text-gray-500 max-w-2xl mx-auto mb-10 sm:mb-14 leading-relaxed px-4">
             Log bugs, get full AI analysis, and debug with teammates in real time. 
             Everything persists, syncs, and works — <span className="text-gray-900 font-medium">even offline.</span>
           </p>
@@ -263,7 +266,7 @@ const LandingPage = () => {
         </div>
 
         {/* Hero terminal card */}
-        <div className="relative max-w-2xl mx-auto mt-12 sm:mt-16 px-2 sm:px-0">
+        <div className="relative max-w-3xl mx-auto mt-12 sm:mt-20 px-2 sm:px-0">
           <div className="bg-gray-900 rounded-2xl shadow-2xl overflow-hidden border border-gray-800">
             <div className="flex items-center gap-2 px-4 sm:px-5 py-3.5 border-b border-gray-800">
               <div className="w-3 h-3 rounded-full bg-red-500" />
@@ -538,12 +541,12 @@ const LandingPage = () => {
             <span className="inline-flex items-center gap-1.5 bg-indigo-50 border border-indigo-100 text-indigo-600 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
               <Zap size={12} /> Everything included
             </span>
-            <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-4">Everything you need to debug seriously</h2>
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 tracking-tight">Everything you need to debug seriously</h2>
             <p className="text-gray-400 text-base sm:text-lg max-w-xl mx-auto">
               Not just a fix generator — a complete team debugging platform that gets smarter over time
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
             {FEATURES.map((f, i) => {
               const c = COLOR_MAP[f.color];
               return (
@@ -585,7 +588,7 @@ const LandingPage = () => {
       <section className="py-16 sm:py-24 px-4 sm:px-6 bg-gray-50">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-10 sm:mb-16">
-            <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-4">How it works</h2>
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 tracking-tight">How it works</h2>
             <p className="text-gray-400 text-base sm:text-lg">From error to fix — and beyond</p>
           </div>
           <div className="relative">
