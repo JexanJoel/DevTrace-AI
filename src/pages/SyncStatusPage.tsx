@@ -3,22 +3,25 @@ import {
   Database, Wifi, WifiOff, RefreshCw, CheckCircle,
   Clock, Activity, ArrowRight, Zap, Shield, AlertTriangle,
   FolderOpen, Bug, BookOpen, User, Share2, TrendingUp,
-  UploadCloud, HardDrive, GitMerge
+  UploadCloud, HardDrive, GitMerge, MessageSquare
 } from 'lucide-react';
 import DashboardLayout from '../components/dashboard/DashboardLayout';
-import useSessions from '../hooks/useSessions';
-import useProjects from '../hooks/useProjects';
-import useFixes from '../hooks/useFixes';
-import useShares from '../hooks/useShares';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { useSyncQueue, type QueueItem } from '../store/useSyncQueue';
+import { useQuery } from '@powersync/react';
 
 const TABLE_META = [
-  { key: 'profiles',       label: 'Profiles',       icon: <User size={14} />,       color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-950',  bar: 'bg-purple-400' },
-  { key: 'projects',       label: 'Projects',       icon: <FolderOpen size={14} />, color: 'text-indigo-600', bg: 'bg-indigo-50 dark:bg-indigo-950',  bar: 'bg-indigo-400' },
-  { key: 'debug_sessions', label: 'Debug Sessions', icon: <Bug size={14} />,        color: 'text-blue-600',   bg: 'bg-blue-50 dark:bg-blue-950',      bar: 'bg-blue-400'   },
-  { key: 'fixes',          label: 'Fixes',          icon: <BookOpen size={14} />,   color: 'text-green-600',  bg: 'bg-green-50 dark:bg-green-950',    bar: 'bg-green-400'  },
-  { key: 'shares',         label: 'Shares',         icon: <Share2 size={14} />,     color: 'text-pink-600',   bg: 'bg-pink-50 dark:bg-pink-950',      bar: 'bg-pink-400'   },
+  { key: 'profiles',          label: 'Profiles',          icon: <User size={14} />,          color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-950',  bar: 'bg-purple-400' },
+  { key: 'projects',          label: 'Projects',          icon: <FolderOpen size={14} />,    color: 'text-indigo-600', bg: 'bg-indigo-50 dark:bg-indigo-950',  bar: 'bg-indigo-400' },
+  { key: 'debug_sessions',    label: 'Debug Sessions',    icon: <Bug size={14} />,           color: 'text-blue-600',   bg: 'bg-blue-50 dark:bg-blue-950',      bar: 'bg-blue-400'   },
+  { key: 'fixes',             label: 'Fixes',             icon: <BookOpen size={14} />,      color: 'text-green-600',  bg: 'bg-green-50 dark:bg-green-950',    bar: 'bg-green-400'  },
+  { key: 'shares',            label: 'Shares',            icon: <Share2 size={14} />,        color: 'text-pink-600',   bg: 'bg-pink-50 dark:bg-pink-950',      bar: 'bg-pink-400'   },
+  { key: 'session_presence',  label: 'Session Presence',  icon: <Clock size={14} />,         color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-950',  bar: 'bg-orange-400' },
+  { key: 'session_checklist', label: 'Session Checklist', icon: <CheckCircle size={14} />,   color: 'text-teal-600',   bg: 'bg-teal-50 dark:bg-teal-950',      bar: 'bg-teal-400'   },
+  { key: 'session_chat',      label: 'Session Chat',      icon: <Activity size={14} />,      color: 'text-cyan-600',   bg: 'bg-cyan-50 dark:bg-cyan-950',      bar: 'bg-cyan-400'   },
+  { key: 'project_presence',  label: 'Project Presence',  icon: <Clock size={14} />,         color: 'text-amber-600',  bg: 'bg-amber-50 dark:bg-amber-950',    bar: 'bg-amber-400'  },
+  { key: 'project_activity',  label: 'Project Activity',  icon: <Activity size={14} />,      color: 'text-rose-600',   bg: 'bg-rose-50 dark:bg-rose-950',      bar: 'bg-rose-400'   },
+  { key: 'project_chat',      label: 'Project Chat',      icon: <MessageSquare size={14} />, color: 'text-sky-600',    bg: 'bg-sky-50 dark:bg-sky-950',        bar: 'bg-sky-400'    },
 ];
 
 const ArchArrow = ({ label }: { label: string }) => (
@@ -46,13 +49,23 @@ const ArchNode = ({
     </div>
   </div>
 );
-
 const SyncStatusPage = () => {
   const isOnline = useOnlineStatus();
-  const { sessions } = useSessions();
-  const { projects } = useProjects();
-  const { fixes } = useFixes();
-  const { myShares } = useShares();
+
+  // ── Global table row counts — querying local SQLite ───────────────────────
+  
+  const { data: profileRows }          = useQuery('SELECT count(*) as count FROM profiles');
+  const { data: projectRows }          = useQuery('SELECT count(*) as count FROM projects');
+  const { data: sessionRows }          = useQuery('SELECT count(*) as count FROM debug_sessions');
+  const { data: fixRows }              = useQuery('SELECT count(*) as count FROM fixes');
+  const { data: shareRows }            = useQuery('SELECT count(*) as count FROM shares');
+  const { data: sessionPresenceRows }  = useQuery('SELECT count(*) as count FROM session_presence');
+  const { data: sessionChecklistRows } = useQuery('SELECT count(*) as count FROM session_checklist');
+  const { data: sessionChatRows }      = useQuery('SELECT count(*) as count FROM session_chat');
+  const { data: projectPresenceRows }  = useQuery('SELECT count(*) as count FROM project_presence');
+  const { data: projectActivityRows }  = useQuery('SELECT count(*) as count FROM project_activity');
+  const { data: projectChatRows }      = useQuery('SELECT count(*) as count FROM project_chat');
+
   const { items: queue } = useSyncQueue();
 
   const [localReads, setLocalReads] = useState(0);
@@ -65,8 +78,21 @@ const SyncStatusPage = () => {
   const doneCount     = queue.filter((q: QueueItem) => q.status === 'done').length;
   const totalWrites   = doneCount + pendingCount + syncingCount;
 
-  const sharesCount   = myShares.length;
-  const totalRows     = sessions.length + projects.length + fixes.length + sharesCount + 1; // +1 for profile
+  const rowCounts: Record<string, number> = {
+    profiles:          (profileRows?.[0] as any)?.count ?? 0,
+    projects:          (projectRows?.[0] as any)?.count ?? 0,
+    debug_sessions:    (sessionRows?.[0] as any)?.count ?? 0,
+    fixes:             (fixRows?.[0] as any)?.count ?? 0,
+    shares:            (shareRows?.[0] as any)?.count ?? 0,
+    session_presence:  (sessionPresenceRows?.[0] as any)?.count ?? 0,
+    session_checklist: (sessionChecklistRows?.[0] as any)?.count ?? 0,
+    session_chat:      (sessionChatRows?.[0] as any)?.count ?? 0,
+    project_presence:  (projectPresenceRows?.[0] as any)?.count ?? 0,
+    project_activity:  (projectActivityRows?.[0] as any)?.count ?? 0,
+    project_chat:      (projectChatRows?.[0] as any)?.count ?? 0,
+  };
+
+  const totalRows = Object.values(rowCounts).reduce((a, b) => a + b, 0);
 
   const syncHealth = isOnline && errorCount === 0 && pendingCount === 0
     ? { label: 'Healthy', color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-950', border: 'border-green-200', dot: 'bg-green-500' }
@@ -77,13 +103,13 @@ const SyncStatusPage = () => {
     : { label: 'Offline', color: 'text-orange-600',bg: 'bg-orange-50 dark:bg-orange-950',border: 'border-orange-200',dot: 'bg-orange-400' };
 
   useEffect(() => {
-    const base = sessions.length * 4 + projects.length * 3 + fixes.length * 2 + sharesCount + 20;
+    const base = rowCounts.debug_sessions * 4 + rowCounts.projects * 3 + rowCounts.fixes * 2 + rowCounts.shares + 20;
     setLocalReads(base);
 
     const events: typeof syncEvents = [];
     if (isOnline) {
       events.push({ time: 'Just now', event: 'PowerSync connected — streaming active', type: 'success' });
-      events.push({ time: '5s ago',   event: `Local SQLite synced — ${totalRows} rows across 5 tables`, type: 'success' });
+      events.push({ time: '5s ago',   event: `Local SQLite synced — ${totalRows} rows across 11 tables`, type: 'success' });
     } else {
       events.push({ time: 'Just now', event: 'Offline mode — reads from local SQLite', type: 'warning' });
     }
@@ -91,9 +117,9 @@ const SyncStatusPage = () => {
     if (pendingCount > 0) events.push({ time: 'Pending', event: `${pendingCount} item${pendingCount > 1 ? 's' : ''} queued for upload`, type: 'warning' });
     if (errorCount > 0)   events.push({ time: 'Error',   event: `${errorCount} item${errorCount > 1 ? 's' : ''} failed to sync`, type: 'warning' });
     events.push({ time: 'Session start', event: 'PowerSync database initialized — devtrace.db', type: 'info' });
-    events.push({ time: 'Session start', event: 'Schema loaded — 5 tables registered (profiles, projects, debug_sessions, fixes, shares)', type: 'info' });
+    events.push({ time: 'Session start', event: 'Schema loaded — 11 tables registered', type: 'info' });
     setSyncEvents(events);
-  }, [isOnline, sessions.length, projects.length, fixes.length, sharesCount, doneCount, pendingCount, errorCount]);
+  }, [isOnline, totalRows, doneCount, pendingCount, errorCount]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -111,11 +137,7 @@ const SyncStatusPage = () => {
   };
 
   const getRowCount = (key: string) => {
-    if (key === 'projects')       return projects.length;
-    if (key === 'debug_sessions') return sessions.length;
-    if (key === 'fixes')          return fixes.length;
-    if (key === 'shares')         return sharesCount;
-    return 1; // profiles
+    return rowCounts[key] ?? 0;
   };
 
   const maxRows = Math.max(...TABLE_META.map(t => getRowCount(t.key)), 1);
@@ -167,7 +189,7 @@ const SyncStatusPage = () => {
           <div className="flex items-center gap-3 flex-wrap">
             <div className="flex items-center gap-1.5 text-xs text-gray-500">
               <HardDrive size={13} className="text-gray-400" />
-              <span>5 tables synced</span>
+              <span>11 tables synced</span>
             </div>
             <div className="flex items-center gap-1.5 text-xs text-gray-500">
               <UploadCloud size={13} className="text-gray-400" />
@@ -243,7 +265,7 @@ const SyncStatusPage = () => {
           {[
             { label: 'Local Reads',    value: localReads.toLocaleString(), icon: <Database size={18} />, color: 'text-blue-600',   bg: 'bg-blue-50 dark:bg-blue-950',     sub: 'served instantly' },
             { label: 'Supabase Writes',value: totalWrites,                 icon: <Zap size={18} />,      color: 'text-green-600',  bg: 'bg-green-50 dark:bg-green-950',   sub: `${pendingCount} pending` },
-            { label: 'Tables Synced',  value: 5,                           icon: <Shield size={18} />,   color: 'text-violet-600', bg: 'bg-violet-50 dark:bg-violet-950', sub: '5 tables active' },
+            { label: 'Tables Synced',  value: 11,                          icon: <Shield size={18} />,   color: 'text-violet-600', bg: 'bg-violet-50 dark:bg-violet-950', sub: '11 tables active' },
             { label: 'Session Uptime', value: formatUptime(uptime),        icon: <Clock size={18} />,    color: 'text-indigo-600', bg: 'bg-indigo-50 dark:bg-indigo-950', sub: isOnline ? 'syncing' : 'offline' },
           ].map((c, i) => (
             <div key={i} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 sm:p-5">
