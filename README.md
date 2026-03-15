@@ -382,7 +382,7 @@ DevTrace AI is submitted to the **PowerSync AI Hackathon 2026**.
 
 <div align="center">
 
-[MIT License](LICENSE) | [Code of Conduct](CODE_OF_CONDUCT.md)
+<a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-f59e0b?style=for-the-badge"/></a> &nbsp; <a href="CODE_OF_CONDUCT.md"><img src="https://img.shields.io/badge/🤝-Code_of_Conduct-4f46e5?style=for-the-badge&labelColor=1e1b4b&color=4f46e5"/></a>
 
 </div>
 
