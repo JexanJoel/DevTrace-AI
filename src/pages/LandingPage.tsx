@@ -227,42 +227,35 @@ const LandingPage = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-indigo-50/60 via-white to-white pointer-events-none" />
         <div className="absolute top-20 left-1/2 -translate-x-1/2 w-64 sm:w-[600px] h-64 sm:h-[600px] bg-indigo-200 opacity-20 rounded-full blur-3xl pointer-events-none" />
         <div className="relative max-w-4xl mx-auto">
-          <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
-            <span className="inline-flex items-center gap-1.5 bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-medium px-3 py-1.5 rounded-full">
-              <Sparkles size={12} /> Groq + Llama 3.3 70B
-            </span>
-            <span className="inline-flex items-center gap-1.5 bg-orange-50 border border-orange-100 text-orange-700 text-xs font-medium px-3 py-1.5 rounded-full">
-              <WifiOff size={12} /> Works offline
-            </span>
-            <span className="inline-flex items-center gap-1.5 bg-teal-50 border border-teal-100 text-teal-700 text-xs font-medium px-3 py-1.5 rounded-full">
-              <Users size={12} /> Live Collaboration
-            </span>
-            <span className="inline-flex items-center gap-1.5 bg-cyan-50 border border-cyan-100 text-cyan-700 text-xs font-medium px-3 py-1.5 rounded-full">
-              <Activity size={12} /> Activity Feed
-            </span>
-            <span className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-100 text-amber-700 text-xs font-medium px-3 py-1.5 rounded-full">
-              <History size={12} /> Similar Sessions
-            </span>
-            <span className="inline-flex items-center gap-1.5 bg-violet-50 border border-violet-100 text-violet-700 text-xs font-medium px-3 py-1.5 rounded-full">
-              <Dna size={12} /> Debug DNA
-            </span>
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-8 sm:mb-10 max-w-3xl mx-auto">
+            {[
+              { icon: <Sparkles size={12} />, text: 'Groq + Llama 3.3 70B', color: 'bg-indigo-50 border-indigo-100 text-indigo-700' },
+              { icon: <WifiOff size={12} />,  text: 'Works offline',        color: 'bg-orange-50 border-orange-100 text-orange-700' },
+              { icon: <Users size={12} />,    text: 'Live Collaboration',   color: 'bg-teal-50 border-teal-100 text-teal-700' },
+              { icon: <Activity size={12} />, text: 'Activity Feed',        color: 'bg-cyan-50 border-cyan-100 text-cyan-700' },
+              { icon: <History size={12} />,  text: 'Similar Sessions',     color: 'bg-amber-50 border-amber-100 text-amber-700' },
+              { icon: <Dna size={12} />,      text: 'Debug DNA',            color: 'bg-violet-50 border-violet-100 text-violet-700' },
+            ].map((badge, i) => (
+              <span key={i} className={`inline-flex items-center gap-1.5 border ${badge.color} text-[10px] sm:text-xs font-medium px-3 py-1.5 rounded-full shadow-sm`}>
+                {badge.icon} {badge.text}
+              </span>
+            ))}
           </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-5 sm:mb-6">
+          <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold text-gray-900 tracking-tight leading-[1.1] mb-6 sm:mb-8">
             Your team's permanent<br />
-            <span className="text-indigo-600">debugging memory.</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-indigo-400">debugging memory.</span>
           </h1>
-          <p className="text-base sm:text-xl text-gray-500 max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed px-2">
-            Log bugs, get full AI analysis, debug with teammates in real time.
-            <br className="hidden sm:block" />
-            Everything persists. Everything syncs. Everything works — even offline.
+          <p className="text-lg sm:text-xl text-gray-500 max-w-2xl mx-auto mb-10 sm:mb-12 leading-relaxed px-4">
+            Log bugs, get full AI analysis, and debug with teammates in real time. 
+            Everything persists, syncs, and works — <span className="text-gray-900 font-medium">even offline.</span>
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 px-4">
             <button onClick={() => navigate('/register')}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3.5 rounded-xl transition text-base shadow-lg shadow-indigo-200">
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-10 py-4 rounded-2xl transition-all shadow-[0_10px_25px_-5px_rgba(79,70,229,0.3)] hover:scale-[1.02]">
               Start debugging free <ArrowRight size={18} />
             </button>
             <a href="https://github.com/JexanJoel/DevTrace-AI" target="_blank" rel="noopener noreferrer"
-              className="w-full sm:w-auto flex items-center justify-center gap-2 border-2 border-gray-200 hover:border-indigo-300 text-gray-700 font-semibold px-8 py-3.5 rounded-xl transition text-base">
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white border-2 border-gray-100 hover:border-gray-200 text-gray-700 font-bold px-10 py-4 rounded-2xl transition-all hover:bg-gray-50 hover:scale-[1.02]">
               <Github size={18} /> View on GitHub
             </a>
           </div>
@@ -550,7 +543,7 @@ const LandingPage = () => {
               Not just a fix generator — a complete team debugging platform that gets smarter over time
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
             {FEATURES.map((f, i) => {
               const c = COLOR_MAP[f.color];
               return (
