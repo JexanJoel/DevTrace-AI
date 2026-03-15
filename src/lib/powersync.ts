@@ -38,6 +38,7 @@ const debug_sessions = new Table({
   ai_fix: column.text,
   ai_analysis: column.text,
   notes: column.text,
+  error_embedding: column.text,
   created_at: column.text,
   updated_at: column.text,
 });

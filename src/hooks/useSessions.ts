@@ -5,6 +5,7 @@ import { useAuthStore } from '../store/authStore';
 import { syncQueueAddItem, syncQueueUpdateItem } from '../store/useSyncQueue';
 import { v4 as uuidv4 } from 'uuid';
 import type { AIAnalysis } from '../lib/groqClient';
+import { useEmbeddings } from './useEmbeddings';
 
 export type Status = 'open' | 'in_progress' | 'resolved';
 export type Severity = 'low' | 'medium' | 'high' | 'critical';
@@ -25,6 +26,7 @@ export interface DebugSession {
   ai_fix?: string;
   ai_analysis?: AIAnalysis | null;
   notes?: string;
+  error_embedding?: string;
   created_at: string;
   updated_at: string;
   project?: { name: string; language?: string };
@@ -47,7 +49,8 @@ export interface CreateSessionInput {
 
 const POWERSYNC_COLUMNS = new Set([
   'project_id', 'title', 'error_message', 'stack_trace', 'code_snippet',
-  'expected_behavior', 'environment', 'severity', 'status', 'notes', 'updated_at',
+  'expected_behavior', 'environment', 'severity', 'status', 'notes', 
+  'error_embedding', 'updated_at',
 ]);
 
 const SUPABASE_DIRECT_COLUMNS = new Set(['ai_analysis', 'ai_fix']);
@@ -87,6 +90,7 @@ const logProjectActivity = async (
 const useSessions = (projectId?: string) => {
   const { user } = useAuthStore();
   const uid = user?.id ?? '';
+  const { generateEmbedding } = useEmbeddings();
 
   const query = projectId
     ? `SELECT ds.*, p.name as project_name, p.language as project_language
@@ -150,12 +154,18 @@ const useSessions = (projectId?: string) => {
     });
 
     try {
+      // Generate embedding if error message exists
+      let embedding: number[] | null = null;
+      if (data.error_message) {
+        embedding = await generateEmbedding(data.error_message);
+      }
+
       await powerSync.execute(
         `INSERT INTO debug_sessions (
           id, user_id, project_id, title, error_message, stack_trace,
           code_snippet, expected_behavior, environment, severity, status,
-          notes, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          notes, error_embedding, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           id, user.id,
           data.project_id ?? null,
@@ -168,6 +178,7 @@ const useSessions = (projectId?: string) => {
           data.severity ?? 'medium',
           data.status ?? 'open',
           data.notes ?? null,
+          embedding ? JSON.stringify(embedding) : null,
           now, now,
         ]
       );
@@ -207,6 +218,15 @@ const useSessions = (projectId?: string) => {
 
       // ── Path A: small fields → PowerSync mutation queue ──────────────────
       const psPayload: Record<string, any> = { updated_at: now };
+      
+      // If error message is changing, regenerate embedding
+      if (data.error_message !== undefined && data.error_message !== session?.error_message) {
+        const embedding = await generateEmbedding(data.error_message ?? '');
+        if (embedding) {
+          psPayload.error_embedding = JSON.stringify(embedding);
+        }
+      }
+
       for (const [key, value] of Object.entries(data)) {
         if (POWERSYNC_COLUMNS.has(key)) {
           psPayload[key] = value ?? null;

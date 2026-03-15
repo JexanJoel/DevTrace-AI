@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lightbulb, ChevronRight, CheckCircle2, Clock } from 'lucide-react';
+import { ChevronRight, CheckCircle2, Clock } from 'lucide-react';
 import { powerSync } from '../../lib/powersync';
 import { SeverityBadge } from './StatusBadge';
+import { useEmbeddings } from '../../hooks/useEmbeddings';
+import { BrainCircuit, Sparkles } from 'lucide-react';
 
 interface SimilarSession {
   id: string;
@@ -12,6 +14,8 @@ interface SimilarSession {
   severity: string;
   created_at: string;
   match_count: number;
+  similarity_score?: number;
+  error_embedding?: string;
 }
 
 interface Props {
@@ -52,6 +56,7 @@ const SimilarSessionsCard = ({ currentSessionId, errorMessage, userId }: Props) 
   const navigate = useNavigate();
   const [similar, setSimilar] = useState<SimilarSession[]>([]);
   const [loading, setLoading] = useState(true);
+  const { generateEmbedding, calculateCosineSimilarity } = useEmbeddings();
 
   useEffect(() => {
     if (!errorMessage?.trim()) {
@@ -63,9 +68,11 @@ const SimilarSessionsCard = ({ currentSessionId, errorMessage, userId }: Props) 
       setLoading(true);
       try {
         const tokens = extractTokens(errorMessage);
-        if (tokens.length === 0) { setLoading(false); return; }
+        
+        // Hybrid Search step 1: Generate embedding for current error (Semantic)
+        const currentEmbedding = await generateEmbedding(errorMessage);
 
-        // Query all other sessions for this user from local SQLite — zero network
+        // Hybrid Search step 2: Fetch candidates from local SQLite
         const allSessions = await powerSync.getAll<{
           id: string;
           title: string;
@@ -73,8 +80,9 @@ const SimilarSessionsCard = ({ currentSessionId, errorMessage, userId }: Props) 
           status: string;
           severity: string;
           created_at: string;
+          error_embedding: string | null;
         }>(
-          `SELECT id, title, error_message, status, severity, created_at
+          `SELECT id, title, error_message, status, severity, created_at, error_embedding
            FROM debug_sessions
            WHERE user_id = ? AND id != ? AND error_message IS NOT NULL
            ORDER BY created_at DESC
@@ -82,16 +90,33 @@ const SimilarSessionsCard = ({ currentSessionId, errorMessage, userId }: Props) 
           [userId, currentSessionId]
         );
 
-        // Score each session by how many tokens match its error message
+        // Hybrid Search step 3: Combine Keyword matching + Semantic Similarity
         const scored = allSessions
           .map(s => {
             const haystack = (s.error_message ?? '').toLowerCase();
-            const matchCount = tokens.filter(t => haystack.includes(t)).length;
-            return { ...s, match_count: matchCount };
+            const keywordMatch = tokens.filter(t => haystack.includes(t)).length;
+            
+            let semanticScore = 0;
+            if (currentEmbedding && s.error_embedding) {
+              try {
+                const targetEmbedding = JSON.parse(s.error_embedding);
+                semanticScore = calculateCosineSimilarity(currentEmbedding, targetEmbedding);
+              } catch (e) {
+                console.warn('Failed to parse embedding for session', s.id);
+              }
+            }
+
+            return { 
+              ...s, 
+              match_count: keywordMatch, 
+              similarity_score: semanticScore 
+            };
           })
-          .filter(s => s.match_count >= 2) // at least 2 token matches
-          .sort((a, b) => b.match_count - a.match_count)
-          .slice(0, 3); // top 3 matches
+          // Filter: Must have a strong semantic match OR at least 2 keyword matches
+          .filter(s => (s.similarity_score ?? 0) > 0.85 || s.match_count >= 2)
+          // Sort by semantic similarity first, then keywords
+          .sort((a, b) => (b.similarity_score ?? 0) - (a.similarity_score ?? 0) || b.match_count - a.match_count)
+          .slice(0, 3);
 
         setSimilar(scored as SimilarSession[]);
       } catch (err) {
@@ -102,7 +127,7 @@ const SimilarSessionsCard = ({ currentSessionId, errorMessage, userId }: Props) 
     };
 
     find();
-  }, [currentSessionId, errorMessage, userId]);
+  }, [currentSessionId, errorMessage, userId, generateEmbedding, calculateCosineSimilarity]);
 
   // Don't render anything if loading or no matches
   if (loading || similar.length === 0) return null;
@@ -112,15 +137,15 @@ const SimilarSessionsCard = ({ currentSessionId, errorMessage, userId }: Props) 
 
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-7 h-7 bg-amber-50 dark:bg-amber-950 rounded-xl flex items-center justify-center flex-shrink-0">
-          <Lightbulb size={14} className="text-amber-500" />
+        <div className="w-7 h-7 bg-amber-50 dark:bg-amber-950 rounded-xl flex items-center justify-center flex-shrink-0 border border-amber-100 dark:border-amber-900 shadow-sm animate-pulse">
+          <BrainCircuit size={14} className="text-amber-500" />
         </div>
         <div>
-          <p className="text-sm font-bold text-gray-900 dark:text-white">
-            You've seen this before
+          <p className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
+            Hybrid AI Match <span className="text-[10px] bg-amber-500 text-white px-1.5 py-0.5 rounded-full uppercase tracking-widest font-black">Local RAG</span>
           </p>
           <p className="text-xs text-gray-400">
-            {similar.length} similar bug{similar.length !== 1 ? 's' : ''} found in your history — queried locally, zero network
+            Semantic similarity + keyword correlation — zero network
           </p>
         </div>
       </div>
@@ -153,9 +178,15 @@ const SimilarSessionsCard = ({ currentSessionId, errorMessage, userId }: Props) 
                   <span className="flex items-center gap-1 text-xs text-gray-400">
                     <Clock size={10} /> {timeAgo(s.created_at)}
                   </span>
-                  <span className="text-xs bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded font-medium">
-                    {s.match_count} keyword{s.match_count !== 1 ? 's' : ''} match
-                  </span>
+                  {s.similarity_score && s.similarity_score > 0.8 ? (
+                    <span className="flex items-center gap-1 text-[10px] bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 rounded-lg border border-indigo-100 dark:border-indigo-800/50 font-bold uppercase tracking-tighter">
+                      <Sparkles size={10} /> {Math.round(s.similarity_score * 100)}% Semantic Match
+                    </span>
+                  ) : (
+                    <span className="text-xs bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded font-medium">
+                      {s.match_count} keyword{s.match_count !== 1 ? 's' : ''} match
+                    </span>
+                  )}
                 </div>
               </div>
               <ChevronRight size={14} className="text-gray-300 group-hover:text-amber-500 transition flex-shrink-0 mt-1" />
