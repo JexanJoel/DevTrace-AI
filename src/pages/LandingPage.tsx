@@ -7,7 +7,7 @@ import {
   Database, Heart, FileText,
   CheckCircle, Library, Users, Dna, Zap, History,
   MessageSquare, Activity, FolderOpen, FlaskConical, Brain,
-  Code2, ShieldAlert, Repeat2
+  Code2, ShieldAlert, Repeat2, GitMerge, Share2
 } from 'lucide-react';
 
 /* ─── Marquee data ─────────────────────────────────────────────── */
@@ -25,7 +25,7 @@ const MARQUEE_ITEMS = [
   { name: 'Recharts',     logo: 'https://recharts.org/favicon.ico' },
 ];
 
-/* ─── Features ──────────────────────────────────────────────────── */
+/* ─── Features — 12 total (perfect 3×4 grid on desktop) ─────────── */
 const FEATURES = [
   {
     icon: <Sparkles size={22} />,
@@ -86,6 +86,18 @@ const FEATURES = [
     title: 'GitHub Issue Export',
     desc: 'One-click export of debug sessions to GitHub issues. Automatically includes root cause, suggested fix, and reproduction steps in a perfect template.',
     color: 'gray', tag: 'Workflow',
+  },
+  {
+    icon: <Share2 size={22} />,
+    title: 'Team Sharing',
+    desc: 'Invite any teammate by email to access your projects or sessions. Collaborators get presence, chat, and activity feed access instantly — revoke anytime from the share modal.',
+    color: 'indigo', tag: null,
+  },
+  {
+    icon: <GitMerge size={22} />,
+    title: 'Sync Status & Health',
+    desc: 'A live Sync Status page shows row counts across all 11 PowerSync tables, upload queue progress, sync health indicator, and recent sync events — all from local SQLite.',
+    color: 'green', tag: null,
   },
 ];
 
@@ -458,8 +470,6 @@ const LandingPage = () => {
                   Two specialized AI agents on Mastra Cloud go deeper than standard analysis. The Session Debugger reasons through your stack trace and returns a diff-format fix with verification steps. The Project Analyzer scans your entire session history to detect recurring patterns, systemic issues, and gives prioritized recommendations.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-
-                  {/* Session Debugger */}
                   <div className="bg-white/10 rounded-2xl p-4 space-y-3">
                     <div className="flex items-center gap-2">
                       <div className="w-7 h-7 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -479,8 +489,6 @@ const LandingPage = () => {
                       ))}
                     </div>
                   </div>
-
-                  {/* Project Analyzer */}
                   <div className="bg-white/10 rounded-2xl p-4 space-y-3">
                     <div className="flex items-center gap-2">
                       <div className="w-7 h-7 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -500,13 +508,12 @@ const LandingPage = () => {
                       ))}
                     </div>
                   </div>
-
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {[
-                    { icon: <ShieldAlert size={14} />, label: 'JWT Verified',       sub: 'Mastra key never in browser' },
-                    { icon: <Code2 size={14} />,        label: 'Structured Output',  sub: 'Rich diff UI, not plain text' },
-                    { icon: <Brain size={14} />,        label: 'Multi-step Reason',  sub: 'Agent chain of thought' },
+                    { icon: <ShieldAlert size={14} />, label: 'JWT Verified',      sub: 'Mastra key never in browser' },
+                    { icon: <Code2 size={14} />,       label: 'Structured Output', sub: 'Rich diff UI, not plain text' },
+                    { icon: <Brain size={14} />,       label: 'Multi-step Reason', sub: 'Agent chain of thought' },
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-2.5 bg-white/10 rounded-xl px-3 py-2.5">
                       <div className="text-purple-200 flex-shrink-0">{item.icon}</div>
@@ -526,8 +533,6 @@ const LandingPage = () => {
       {/* ── Live Collaboration callout ── */}
       <section className="py-14 sm:py-20 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto space-y-5">
-
-          {/* Session-level collab */}
           <div className="bg-gradient-to-br from-teal-600 to-indigo-600 rounded-2xl p-6 sm:p-10 text-white">
             <div className="flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-10">
               <div className="flex-shrink-0">
@@ -562,7 +567,6 @@ const LandingPage = () => {
             </div>
           </div>
 
-          {/* Project-level collab */}
           <div className="bg-gradient-to-br from-cyan-600 to-teal-600 rounded-2xl p-6 sm:p-10 text-white">
             <div className="flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-10">
               <div className="flex-shrink-0">
@@ -596,7 +600,6 @@ const LandingPage = () => {
               </div>
             </div>
           </div>
-
         </div>
       </section>
 
@@ -651,6 +654,7 @@ const LandingPage = () => {
               Not just a fix generator — a complete team debugging platform that gets smarter over time
             </p>
           </div>
+          {/* 12 cards = perfect 3×4 grid on desktop */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
             {FEATURES.map((f, i) => {
               const c = COLOR_MAP[f.color];
@@ -726,70 +730,99 @@ const LandingPage = () => {
 
       {/* ── Built on best infra ── */}
       <section className="py-14 sm:py-20 px-4 sm:px-6">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10 sm:mb-14">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Built on the best open infrastructure</h2>
             <p className="text-gray-400 text-sm sm:text-base max-w-xl mx-auto">
-              No custom backend. No ops burden. Three best-in-class open source platforms — each doing exactly what they're best at.
+              No custom backend. No ops burden. Four best-in-class platforms — each doing exactly what they're best at.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6">
+          {/* 4 cards — 2×2 on desktop */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
 
             {/* Supabase */}
             <div className="relative bg-white rounded-2xl border border-green-100 overflow-hidden flex flex-col group hover:shadow-lg hover:border-green-200 transition-all duration-300">
               <div className="h-1.5 w-full bg-gradient-to-r from-green-400 to-emerald-500" />
-              <div className="p-5 sm:p-6 flex flex-col flex-1">
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-11 h-11 rounded-2xl bg-green-50 border border-green-100 flex items-center justify-center flex-shrink-0">
-                    <img src="https://www.vectorlogo.zone/logos/supabase/supabase-icon.svg" alt="Supabase" className="w-6 h-6" />
+              <div className="p-5 flex flex-col flex-1">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-2xl bg-green-50 border border-green-100 flex items-center justify-center flex-shrink-0">
+                    <img src="https://www.vectorlogo.zone/logos/supabase/supabase-icon.svg" alt="Supabase" className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="font-bold text-gray-900 leading-tight">Supabase</p>
-                    <p className="text-xs text-gray-400 mt-0.5">Database · Auth · Storage · Edge</p>
+                    <p className="font-bold text-gray-900 leading-tight text-sm">Supabase</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Database · Auth · Edge</p>
                   </div>
                 </div>
-                <p className="text-xs font-semibold text-green-600 bg-green-50 border border-green-100 px-2.5 py-1 rounded-lg w-fit mb-4">Source of truth</p>
-                <ul className="space-y-2.5 text-sm text-gray-500 flex-1">
-                  {['Postgres + RLS on 11 tables','Email, GitHub & Google OAuth','Magic link password reset','GitHub account linking','Storage for avatars','WAL replication to PowerSync','3 Edge Functions (AI + DNA + Mastra)'].map((item, i) => (
-                    <li key={i} className="flex items-start gap-2.5">
+                <p className="text-xs font-semibold text-green-600 bg-green-50 border border-green-100 px-2.5 py-1 rounded-lg w-fit mb-3">Source of truth</p>
+                <ul className="space-y-2 text-xs text-gray-500 flex-1">
+                  {['Postgres + RLS on 11 tables','Email, GitHub & Google OAuth','Magic link password reset','Storage for avatars','WAL replication to PowerSync','3 Edge Functions (AI + DNA + Mastra)'].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2">
                       <span className="text-green-500 mt-0.5 flex-shrink-0 font-bold">✓</span><span>{item}</span>
                     </li>
                   ))}
                 </ul>
-                <div className="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between">
-                  <span className="text-xs bg-green-50 text-green-600 border border-green-100 px-2.5 py-1 rounded-full font-semibold">Apache 2.0</span>
+                <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+                  <span className="text-xs bg-green-50 text-green-600 border border-green-100 px-2 py-0.5 rounded-full font-semibold">Apache 2.0</span>
                   <a href="https://supabase.com" target="_blank" rel="noopener noreferrer" className="text-xs text-gray-400 hover:text-green-600 transition font-medium">supabase.com →</a>
                 </div>
               </div>
             </div>
 
-            {/* PowerSync */}
-            <div className="relative bg-white rounded-2xl border border-indigo-200 overflow-hidden flex flex-col group hover:shadow-lg hover:border-indigo-300 transition-all duration-300 sm:scale-[1.02]">
+            {/* PowerSync — highlighted */}
+            <div className="relative bg-white rounded-2xl border-2 border-indigo-300 overflow-hidden flex flex-col group hover:shadow-xl hover:border-indigo-400 transition-all duration-300">
               <div className="h-1.5 w-full bg-gradient-to-r from-indigo-500 to-violet-500" />
-              <div className="p-5 sm:p-6 flex flex-col flex-1">
-                <div className="flex items-center justify-between mb-5">
+              <div className="p-5 flex flex-col flex-1">
+                <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center flex-shrink-0">
-                      <img src="https://avatars.githubusercontent.com/u/105956274?s=48&v=4" alt="PowerSync" className="w-6 h-6 rounded-md" />
+                    <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center flex-shrink-0">
+                      <img src="https://avatars.githubusercontent.com/u/105956274?s=48&v=4" alt="PowerSync" className="w-5 h-5 rounded-md" />
                     </div>
                     <div>
-                      <p className="font-bold text-gray-900 leading-tight">PowerSync</p>
-                      <p className="text-xs text-gray-400 mt-0.5">Offline Sync · Collaboration</p>
+                      <p className="font-bold text-gray-900 leading-tight text-sm">PowerSync</p>
+                      <p className="text-xs text-gray-400 mt-0.5">Offline · Collaboration</p>
                     </div>
                   </div>
                   <span className="text-[10px] font-bold bg-indigo-600 text-white px-2 py-1 rounded-lg flex-shrink-0">CORE</span>
                 </div>
-                <p className="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-lg w-fit mb-4">Offline + collab engine</p>
-                <ul className="space-y-2.5 text-sm text-gray-500 flex-1">
+                <p className="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-lg w-fit mb-3">Offline + collab engine</p>
+                <ul className="space-y-2 text-xs text-gray-500 flex-1">
                   {['11 tables synced to local SQLite','All reads instant — 0ms latency','Session + project collaboration','Activity feed · chat · presence','Offline write queue via mutations','Embeddings stored in SQLite','5 PowerSync bucket definitions'].map((item, i) => (
-                    <li key={i} className="flex items-start gap-2.5">
+                    <li key={i} className="flex items-start gap-2">
                       <span className="text-indigo-500 mt-0.5 flex-shrink-0 font-bold">✓</span><span>{item}</span>
                     </li>
                   ))}
                 </ul>
-                <div className="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between">
-                  <span className="text-xs bg-indigo-50 text-indigo-600 border border-indigo-100 px-2.5 py-1 rounded-full font-semibold">Apache 2.0</span>
+                <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+                  <span className="text-xs bg-indigo-50 text-indigo-600 border border-indigo-100 px-2 py-0.5 rounded-full font-semibold">Apache 2.0</span>
                   <a href="https://www.powersync.com" target="_blank" rel="noopener noreferrer" className="text-xs text-gray-400 hover:text-indigo-600 transition font-medium">powersync.com →</a>
+                </div>
+              </div>
+            </div>
+
+            {/* Mastra */}
+            <div className="relative bg-white rounded-2xl border border-purple-100 overflow-hidden flex flex-col group hover:shadow-lg hover:border-purple-200 transition-all duration-300">
+              <div className="h-1.5 w-full bg-gradient-to-r from-purple-500 to-indigo-500" />
+              <div className="p-5 flex flex-col flex-1">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center flex-shrink-0">
+                    <img src="https://avatars.githubusercontent.com/u/166548570?s=48&v=4" alt="Mastra" className="w-5 h-5 rounded-md" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                  </div>
+                  <div>
+                    <p className="font-bold text-gray-900 leading-tight text-sm">Mastra</p>
+                    <p className="text-xs text-gray-400 mt-0.5">AI Agents · Cloud</p>
+                  </div>
+                </div>
+                <p className="text-xs font-semibold text-purple-600 bg-purple-50 border border-purple-100 px-2.5 py-1 rounded-lg w-fit mb-3">AI agent layer</p>
+                <ul className="space-y-2 text-xs text-gray-500 flex-1">
+                  {['Session Debugger agent','Project Analyzer agent','Multi-step chain of thought','Structured JSON output','JWT-verified Edge Function proxy','Diff-format fix UI'].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="text-purple-500 mt-0.5 flex-shrink-0 font-bold">✓</span><span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+                  <span className="text-xs bg-purple-50 text-purple-600 border border-purple-100 px-2 py-0.5 rounded-full font-semibold">Apache 2.0</span>
+                  <a href="https://mastra.ai" target="_blank" rel="noopener noreferrer" className="text-xs text-gray-400 hover:text-purple-600 transition font-medium">mastra.ai →</a>
                 </div>
               </div>
             </div>
@@ -797,26 +830,26 @@ const LandingPage = () => {
             {/* React Ecosystem */}
             <div className="relative bg-white rounded-2xl border border-blue-100 overflow-hidden flex flex-col group hover:shadow-lg hover:border-blue-200 transition-all duration-300">
               <div className="h-1.5 w-full bg-gradient-to-r from-blue-400 to-cyan-500" />
-              <div className="p-5 sm:p-6 flex flex-col flex-1">
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-11 h-11 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center flex-shrink-0">
-                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" alt="React" className="w-6 h-6" />
+              <div className="p-5 flex flex-col flex-1">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center flex-shrink-0">
+                    <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" alt="React" className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="font-bold text-gray-900 leading-tight">React Ecosystem</p>
+                    <p className="font-bold text-gray-900 leading-tight text-sm">React Ecosystem</p>
                     <p className="text-xs text-gray-400 mt-0.5">UI · State · Build</p>
                   </div>
                 </div>
-                <p className="text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-lg w-fit mb-4">Frontend stack</p>
-                <ul className="space-y-2.5 text-sm text-gray-500 flex-1">
-                  {['React 18 + TypeScript','Vite for lightning-fast builds','Tailwind CSS for styling','Zustand for global state','Recharts for analytics','React Router for navigation','Deployed on Vercel'].map((item, i) => (
-                    <li key={i} className="flex items-start gap-2.5">
+                <p className="text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-lg w-fit mb-3">Frontend stack</p>
+                <ul className="space-y-2 text-xs text-gray-500 flex-1">
+                  {['React 18 + TypeScript','Vite for lightning-fast builds','Tailwind CSS for styling','Zustand for global state','Recharts for analytics','Deployed on Vercel'].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2">
                       <span className="text-blue-500 mt-0.5 flex-shrink-0 font-bold">✓</span><span>{item}</span>
                     </li>
                   ))}
                 </ul>
-                <div className="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between">
-                  <span className="text-xs bg-blue-50 text-blue-600 border border-blue-100 px-2.5 py-1 rounded-full font-semibold">MIT License</span>
+                <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+                  <span className="text-xs bg-blue-50 text-blue-600 border border-blue-100 px-2 py-0.5 rounded-full font-semibold">MIT License</span>
                   <a href="https://react.dev" target="_blank" rel="noopener noreferrer" className="text-xs text-gray-400 hover:text-blue-600 transition font-medium">react.dev →</a>
                 </div>
               </div>
