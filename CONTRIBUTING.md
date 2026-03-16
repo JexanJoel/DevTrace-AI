@@ -511,5 +511,5 @@ Yes. Update `supabase/functions/analyze-bug/index.ts` to call any OpenAI-compati
   <br/>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-f59e0b?style=for-the-badge"/></a>
   <br/><br/>
-  <i>DevTrace AI — Building the future of collaborative debugging.</i>
+  <i>DevTrace AI - Building the future of collaborative debugging.</i>
 </div>

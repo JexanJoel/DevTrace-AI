@@ -6,7 +6,8 @@ import {
   Menu, X, Wifi, WifiOff,
   Database, Heart, FileText,
   CheckCircle, Library, Users, Dna, Zap, History,
-  MessageSquare, Activity, FolderOpen, FlaskConical, Brain
+  MessageSquare, Activity, FolderOpen, FlaskConical, Brain,
+  Code2, ShieldAlert, Repeat2
 } from 'lucide-react';
 
 /* ─── Marquee data ─────────────────────────────────────────────── */
@@ -16,6 +17,7 @@ const MARQUEE_ITEMS = [
   { name: 'Supabase',     logo: 'https://www.vectorlogo.zone/logos/supabase/supabase-icon.svg' },
   { name: 'PowerSync',    logo: 'https://avatars.githubusercontent.com/u/105956274?s=48&v=4' },
   { name: 'Groq',         logo: 'https://avatars.githubusercontent.com/u/116147397?s=48&v=4' },
+  { name: 'Mastra',       logo: 'https://avatars.githubusercontent.com/u/166548570?s=48&v=4' },
   { name: 'Vite',         logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vitejs/vitejs-original.svg' },
   { name: 'Tailwind CSS', logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg' },
   { name: 'Vercel',       logo: 'https://assets.vercel.com/image/upload/v1662130559/nextjs/Icon_dark_background.png' },
@@ -32,15 +34,21 @@ const FEATURES = [
     color: 'indigo', tag: 'Core',
   },
   {
+    icon: <Brain size={22} />,
+    title: 'Mastra AI Agents',
+    desc: 'Two specialized agents on Mastra Cloud — Session Debugger delivers a diff-format fix with risk flags, Project Analyzer detects recurring patterns and systemic issues.',
+    color: 'purple', tag: 'Mastra',
+  },
+  {
     icon: <Users size={22} />,
     title: 'Live Collaboration',
     desc: 'Debug together in real time at both session and project level. Presence indicators, shared checklist, team chat, and activity feed — all via PowerSync WAL with zero backend.',
     color: 'teal', tag: 'New',
   },
   {
-    icon: <Brain size={22} />,
+    icon: <FlaskConical size={22} />,
     title: 'Hybrid Local-First RAG',
-    desc: 'PowerSync meets transformers.js. Search your history using on-device vector similarity + Structured SQL. Finding the fix is now semantic, not just keyword-based.',
+    desc: 'On-device transformers.js embeddings + keyword scoring against local SQLite. Find semantically similar past bugs — zero network, works offline, gets smarter over time.',
     color: 'amber', tag: 'Innovation',
   },
   {
@@ -48,12 +56,6 @@ const FEATURES = [
     title: 'Project Activity Feed',
     desc: 'Every session created, resolved, or analyzed appears in a live activity feed visible to all project collaborators. Click any event to jump straight to that session.',
     color: 'cyan', tag: null,
-  },
-  {
-    icon: <History size={22} />,
-    title: 'Similar Sessions',
-    desc: 'Automatically surfaces past bugs that match your current error — queried from local SQLite with zero network. The tool gets smarter the more you use it.',
-    color: 'amber', tag: null,
   },
   {
     icon: <WifiOff size={22} />,
@@ -80,12 +82,6 @@ const FEATURES = [
     color: 'blue', tag: null,
   },
   {
-    icon: <FlaskConical size={22} />,
-    title: 'AI Regression Suite',
-    desc: 'Instantly download AI-generated .test.ts reproduction files. Turn every bug analysis into an actionable test asset to ensure the bug never returns.',
-    color: 'indigo', tag: 'Actionable',
-  },
-  {
     icon: <Github size={22} />,
     title: 'GitHub Issue Export',
     desc: 'One-click export of debug sessions to GitHub issues. Automatically includes root cause, suggested fix, and reproduction steps in a perfect template.',
@@ -95,12 +91,12 @@ const FEATURES = [
 
 const COLOR_MAP: Record<string, { bg: string; icon: string; tag: string; border: string; glow: string }> = {
   indigo: { bg: 'bg-indigo-50',  icon: 'text-indigo-600',  tag: 'bg-indigo-600 text-white',  border: 'hover:border-indigo-300', glow: 'hover:shadow-indigo-100' },
+  purple: { bg: 'bg-purple-50',  icon: 'text-purple-600',  tag: 'bg-purple-600 text-white',  border: 'hover:border-purple-300', glow: 'hover:shadow-purple-100' },
   teal:   { bg: 'bg-teal-50',    icon: 'text-teal-600',    tag: 'bg-teal-500 text-white',    border: 'hover:border-teal-300',   glow: 'hover:shadow-teal-100'   },
   amber:  { bg: 'bg-amber-50',   icon: 'text-amber-600',   tag: 'bg-amber-500 text-white',   border: 'hover:border-amber-300',  glow: 'hover:shadow-amber-100'  },
   cyan:   { bg: 'bg-cyan-50',    icon: 'text-cyan-600',    tag: 'bg-cyan-500 text-white',    border: 'hover:border-cyan-300',   glow: 'hover:shadow-cyan-100'   },
   orange: { bg: 'bg-orange-50',  icon: 'text-orange-600',  tag: 'bg-orange-500 text-white',  border: 'hover:border-orange-300', glow: 'hover:shadow-orange-100' },
   violet: { bg: 'bg-violet-50',  icon: 'text-violet-600',  tag: 'bg-violet-600 text-white',  border: 'hover:border-violet-300', glow: 'hover:shadow-violet-100' },
-  red:    { bg: 'bg-red-50',     icon: 'text-red-500',     tag: 'bg-red-500 text-white',     border: 'hover:border-red-300',    glow: 'hover:shadow-red-100'    },
   green:  { bg: 'bg-green-50',   icon: 'text-green-600',   tag: 'bg-green-600 text-white',   border: 'hover:border-green-300',  glow: 'hover:shadow-green-100'  },
   blue:   { bg: 'bg-blue-50',    icon: 'text-blue-600',    tag: 'bg-blue-600 text-white',    border: 'hover:border-blue-300',   glow: 'hover:shadow-blue-100'   },
   gray:   { bg: 'bg-gray-50',    icon: 'text-gray-600',    tag: 'bg-gray-600 text-white',    border: 'hover:border-gray-300',   glow: 'hover:shadow-gray-100'   },
@@ -118,29 +114,34 @@ const STEPS = [
   },
   {
     icon: <History size={20} />, step: '03', title: 'See similar past bugs',
-    desc: "DevTrace AI instantly queries your local SQLite for similar errors — zero network. If you've seen this bug before, it surfaces immediately.",
-    badge: 'Zero network', color: 'amber',
+    desc: 'DevTrace AI runs Hybrid RAG — on-device semantic embeddings + keyword scoring against local SQLite. Surfaces similar bugs instantly, zero network.',
+    badge: 'Hybrid RAG', color: 'amber',
   },
   {
     icon: <Sparkles size={20} />, step: '04', title: 'Get full AI analysis',
     desc: 'Click Analyze Bug — Groq + Llama 3.3 70B returns root cause, 3 fix options with code, a crash timeline, an interactive checklist, and more. All saved as JSONB.',
   },
   {
-    icon: <Users size={20} />, step: '05', title: 'Debug with your team',
+    icon: <Brain size={20} />, step: '05', title: 'Run Mastra Deep Analysis',
+    desc: 'The Session Debugger agent on Mastra Cloud reasons through your stack trace and returns a before/after diff fix, risk flags, and verification steps.',
+    badge: 'Mastra Cloud', color: 'purple',
+  },
+  {
+    icon: <Users size={20} />, step: '06', title: 'Debug with your team',
     desc: 'Invite a teammate — presence indicators appear, the checklist syncs live, team chat opens, and every action logs to the project activity feed. All via PowerSync.',
     badge: 'Live · PowerSync', color: 'teal',
   },
   {
-    icon: <Activity size={20} />, step: '06', title: 'Track project activity',
+    icon: <Activity size={20} />, step: '07', title: 'Track project activity',
     desc: 'The project activity feed shows every session created, resolved, or analyzed by any collaborator — synced in real time. Click any event to jump to that session.',
     badge: 'Real-time', color: 'cyan',
   },
   {
-    icon: <Library size={20} />, step: '07', title: 'Save to Fix Library',
+    icon: <Library size={20} />, step: '08', title: 'Save to Fix Library',
     desc: 'Save what worked. Your Fix Library grows over time — filter by language, copy fixes in one click, reuse across projects.',
   },
   {
-    icon: <Dna size={20} />, step: '08', title: 'Generate your Debug DNA',
+    icon: <Dna size={20} />, step: '09', title: 'Generate your Debug DNA',
     desc: 'Hit "Generate My DNA" — a Supabase Edge Function queries your history server-side, Groq writes your personal debugging fingerprint. Export as Markdown.',
     badge: 'Edge Function', color: 'violet',
   },
@@ -171,18 +172,21 @@ const Marquee = () => {
 /* ─── Step style maps ───────────────────────────────────────────── */
 const STEP_BADGE: Record<string, string> = {
   amber:  'bg-amber-100 text-amber-600',
+  purple: 'bg-purple-100 text-purple-600',
   teal:   'bg-teal-100 text-teal-600',
   cyan:   'bg-cyan-100 text-cyan-600',
   violet: 'bg-violet-100 text-violet-600',
 };
 const STEP_BORDER: Record<string, string> = {
   amber:  'border-amber-200 hover:border-amber-300',
+  purple: 'border-purple-200 hover:border-purple-300',
   teal:   'border-teal-200 hover:border-teal-300',
   cyan:   'border-cyan-200 hover:border-cyan-300',
   violet: 'border-violet-200 hover:border-violet-300',
 };
 const STEP_ICON_BG: Record<string, string> = {
   amber:  'bg-gradient-to-br from-amber-500 to-orange-500 shadow-amber-200',
+  purple: 'bg-gradient-to-br from-purple-600 to-indigo-600 shadow-purple-200',
   teal:   'bg-gradient-to-br from-teal-500 to-indigo-600 shadow-teal-200',
   cyan:   'bg-gradient-to-br from-cyan-500 to-teal-600 shadow-cyan-200',
   violet: 'bg-gradient-to-br from-violet-600 to-indigo-600 shadow-violet-200',
@@ -199,13 +203,13 @@ const LandingPage = () => {
       {/* ── Navbar ── */}
       <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-100/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-            <div className="flex items-center gap-2 group cursor-pointer" onClick={() => navigate('/')}>
-              <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                <Terminal size={15} className="text-white" />
-              </div>
-              <span className="font-bold text-gray-900 tracking-tight">DevTrace AI</span>
-              <span className="hidden sm:inline text-xs bg-indigo-50 text-indigo-600 border border-indigo-100 px-2 py-0.5 rounded-full font-bold">Open Source</span>
+          <div className="flex items-center gap-2 group cursor-pointer" onClick={() => navigate('/')}>
+            <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+              <Terminal size={15} className="text-white" />
             </div>
+            <span className="font-bold text-gray-900 tracking-tight">DevTrace AI</span>
+            <span className="hidden sm:inline text-xs bg-indigo-50 text-indigo-600 border border-indigo-100 px-2 py-0.5 rounded-full font-bold">Open Source</span>
+          </div>
           <div className="hidden md:flex items-center gap-3">
             <a href="https://github.com/JexanJoel/DevTrace-AI" target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition px-3 py-2">
@@ -239,19 +243,19 @@ const LandingPage = () => {
       <section className="pt-28 sm:pt-36 pb-20 sm:pb-32 px-4 sm:px-6 text-center relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-indigo-50/60 via-white to-white pointer-events-none" />
         <div className="absolute top-20 left-1/2 -translate-x-1/2 w-64 sm:w-[800px] h-64 sm:h-[800px] bg-indigo-200 opacity-20 rounded-full blur-3xl pointer-events-none" />
-        
+
         <div className="relative max-w-5xl mx-auto">
           <div className="flex flex-wrap items-center justify-center gap-2 mb-8 sm:mb-12 max-w-3xl mx-auto">
             {[
               { icon: <Sparkles size={12} />, text: 'Groq + Llama 3.3 70B', color: 'bg-indigo-50 border-indigo-100 text-indigo-700' },
-              { icon: <Brain size={12} />,    text: 'Hybrid Local-RAG',     color: 'bg-amber-50 border-amber-100 text-amber-700' },
-              { icon: <WifiOff size={12} />,  text: 'Works offline',        color: 'bg-orange-50 border-orange-100 text-orange-700' },
-              { icon: <Users size={12} />,    text: 'Live Collaboration',   color: 'bg-teal-50 border-teal-100 text-teal-700' },
-              { icon: <Activity size={12} />, text: 'Activity Feed',        color: 'bg-cyan-50 border-cyan-100 text-cyan-700' },
-              { icon: <History size={12} />,  text: 'Similar Sessions',     color: 'bg-amber-50 border-amber-100 text-amber-700' },
-              { icon: <Dna size={12} />,      text: 'Debug DNA',            color: 'bg-violet-50 border-violet-100 text-violet-700' },
+              { icon: <Brain size={12} />,    text: 'Mastra AI Agents',      color: 'bg-purple-50 border-purple-100 text-purple-700' },
+              { icon: <Brain size={12} />,    text: 'Hybrid Local-RAG',      color: 'bg-amber-50 border-amber-100 text-amber-700' },
+              { icon: <WifiOff size={12} />,  text: 'Works offline',         color: 'bg-orange-50 border-orange-100 text-orange-700' },
+              { icon: <Users size={12} />,    text: 'Live Collaboration',    color: 'bg-teal-50 border-teal-100 text-teal-700' },
+              { icon: <Activity size={12} />, text: 'Activity Feed',         color: 'bg-cyan-50 border-cyan-100 text-cyan-700' },
+              { icon: <Dna size={12} />,      text: 'Debug DNA',             color: 'bg-violet-50 border-violet-100 text-violet-700' },
             ].map((badge, i) => (
-              <span key={i} className={`inline-flex items-center gap-1.5 border ${badge.color} text-[10px] sm:text-xs font-medium px-3 py-1.5 rounded-full shadow-sm animate-fade-in`} style={{ animationDelay: `${i * 100}ms` }}>
+              <span key={i} className={`inline-flex items-center gap-1.5 border ${badge.color} text-[10px] sm:text-xs font-medium px-3 py-1.5 rounded-full shadow-sm`}>
                 {badge.icon} {badge.text}
               </span>
             ))}
@@ -263,7 +267,7 @@ const LandingPage = () => {
           </h1>
 
           <p className="text-base sm:text-lg text-gray-500 max-w-2xl mx-auto mb-10 sm:mb-14 leading-relaxed px-4">
-            Log bugs, get full AI analysis, and debug with teammates in real time. 
+            Log bugs, get full AI analysis, and debug with teammates in real time.
             Everything persists, syncs, and works — <span className="text-gray-900 font-medium">even offline.</span>
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 px-4">
@@ -303,9 +307,16 @@ const LandingPage = () => {
                 <div className="flex items-start gap-3">
                   <span className="text-amber-400 flex-shrink-0">🧠</span>
                   <div>
-                    <p className="text-amber-300">Hybrid Search: 94% Semantic Match</p>
-                    <p className="text-gray-400 text-xs mt-1">Found "Auth re-hydration bug" in 2025 history (local RAG)</p>
+                    <p className="text-amber-300">Hybrid RAG: 94% Semantic Match</p>
+                    <p className="text-gray-400 text-xs mt-1">Found "Auth re-hydration bug" in local SQLite — zero network</p>
                   </div>
+                </div>
+              </div>
+              <div className="border-t border-gray-800 pt-3 flex items-start gap-3">
+                <span className="text-purple-400 flex-shrink-0">⬡</span>
+                <div>
+                  <p className="text-purple-300">Mastra Deep Analysis · diff fix ready</p>
+                  <p className="text-gray-400 text-xs mt-1">Session Debugger agent · before/after · risk flags · verification steps</p>
                 </div>
               </div>
               <div className="border-t border-gray-800 pt-3 flex items-start gap-3">
@@ -318,8 +329,8 @@ const LandingPage = () => {
               <div className="border-t border-gray-800 pt-3 flex items-start gap-3">
                 <span className="text-indigo-400 flex-shrink-0">⚡</span>
                 <div>
-                  <p className="text-indigo-300">Analyze Bug {'->'} AI Regression Suite ready</p>
-                  <p className="text-gray-400 text-xs mt-1">Download .test.ts · Export to GitHub · 8-tab breakdown</p>
+                  <p className="text-indigo-300">AI Analysis · 92% confidence · 8 tabs</p>
+                  <p className="text-gray-400 text-xs mt-1">Root cause · 3 fixes · Timeline · Checklist · Chat · Tests</p>
                 </div>
               </div>
               <div className="border-t border-gray-800 pt-3 flex items-center justify-between">
@@ -423,6 +434,91 @@ const LandingPage = () => {
             <p className="text-xs text-gray-600 font-mono mt-4 leading-relaxed">
               Writes go directly to Supabase · PowerSync detects via WAL · local SQLite updates · <span className="text-orange-400">useQuery()</span> reflects change instantly
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Mastra AI Agents callout ── */}
+      <section className="py-14 sm:py-20 px-4 sm:px-6 bg-gray-50">
+        <div className="max-w-5xl mx-auto">
+          <div className="bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-700 rounded-2xl p-6 sm:p-10 text-white">
+            <div className="flex flex-col sm:flex-row sm:items-start gap-6 sm:gap-10">
+              <div className="flex-shrink-0">
+                <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
+                  <Brain size={32} className="text-white" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                  <h2 className="text-xl sm:text-2xl font-bold">Mastra AI Agent Layer</h2>
+                  <span className="text-[10px] font-bold bg-white/20 text-white px-2 py-1 rounded-lg">Mastra Cloud</span>
+                  <span className="text-[10px] font-bold bg-purple-400/30 text-white px-2 py-1 rounded-lg">$500 Prize</span>
+                </div>
+                <p className="text-purple-100 text-sm sm:text-base leading-relaxed mb-6">
+                  Two specialized AI agents on Mastra Cloud go deeper than standard analysis. The Session Debugger reasons through your stack trace and returns a diff-format fix with verification steps. The Project Analyzer scans your entire session history to detect recurring patterns, systemic issues, and gives prioritized recommendations.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+
+                  {/* Session Debugger */}
+                  <div className="bg-white/10 rounded-2xl p-4 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Code2 size={14} className="text-purple-200" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-white">Session Debugger</p>
+                        <p className="text-[10px] text-purple-300">Micro — single error deep dive</p>
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      {['Exact broken line identified','Before/after diff-format fix','Risk flags after applying the fix','Verification steps to confirm'].map((item, i) => (
+                        <div key={i} className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-purple-300 flex-shrink-0" />
+                          <p className="text-xs text-purple-100">{item}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Project Analyzer */}
+                  <div className="bg-white/10 rounded-2xl p-4 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Repeat2 size={14} className="text-purple-200" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-white">Project Analyzer</p>
+                        <p className="text-[10px] text-purple-300">Macro — project-wide patterns</p>
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      {['Recurring error pattern detection','Systemic architecture diagnosis','Health verdict with category chart','Prioritized recommendations'].map((item, i) => (
+                        <div key={i} className="flex items-center gap-2">
+                          <div className="w-1 h-1 rounded-full bg-purple-300 flex-shrink-0" />
+                          <p className="text-xs text-purple-100">{item}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {[
+                    { icon: <ShieldAlert size={14} />, label: 'JWT Verified',       sub: 'Mastra key never in browser' },
+                    { icon: <Code2 size={14} />,        label: 'Structured Output',  sub: 'Rich diff UI, not plain text' },
+                    { icon: <Brain size={14} />,        label: 'Multi-step Reason',  sub: 'Agent chain of thought' },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-2.5 bg-white/10 rounded-xl px-3 py-2.5">
+                      <div className="text-purple-200 flex-shrink-0">{item.icon}</div>
+                      <div>
+                        <p className="text-xs font-semibold text-white">{item.label}</p>
+                        <p className="text-xs text-purple-200">{item.sub}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -555,7 +651,7 @@ const LandingPage = () => {
               Not just a fix generator — a complete team debugging platform that gets smarter over time
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
             {FEATURES.map((f, i) => {
               const c = COLOR_MAP[f.color];
               return (
@@ -654,7 +750,7 @@ const LandingPage = () => {
                 </div>
                 <p className="text-xs font-semibold text-green-600 bg-green-50 border border-green-100 px-2.5 py-1 rounded-lg w-fit mb-4">Source of truth</p>
                 <ul className="space-y-2.5 text-sm text-gray-500 flex-1">
-                  {['Postgres + RLS on 11 tables','Email, GitHub & Google OAuth','Magic link password reset','GitHub account linking','Storage for avatars','WAL replication to PowerSync','Edge Functions for AI + Debug DNA'].map((item, i) => (
+                  {['Postgres + RLS on 11 tables','Email, GitHub & Google OAuth','Magic link password reset','GitHub account linking','Storage for avatars','WAL replication to PowerSync','3 Edge Functions (AI + DNA + Mastra)'].map((item, i) => (
                     <li key={i} className="flex items-start gap-2.5">
                       <span className="text-green-500 mt-0.5 flex-shrink-0 font-bold">✓</span><span>{item}</span>
                     </li>
@@ -685,7 +781,7 @@ const LandingPage = () => {
                 </div>
                 <p className="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-lg w-fit mb-4">Offline + collab engine</p>
                 <ul className="space-y-2.5 text-sm text-gray-500 flex-1">
-                  {['11 tables synced to local SQLite','All reads instant — 0ms latency','Session + project collaboration','Activity feed · chat · presence','Offline write queue via mutations','Similar Sessions on local SQLite','5 PowerSync bucket definitions'].map((item, i) => (
+                  {['11 tables synced to local SQLite','All reads instant — 0ms latency','Session + project collaboration','Activity feed · chat · presence','Offline write queue via mutations','Embeddings stored in SQLite','5 PowerSync bucket definitions'].map((item, i) => (
                     <li key={i} className="flex items-start gap-2.5">
                       <span className="text-indigo-500 mt-0.5 flex-shrink-0 font-bold">✓</span><span>{item}</span>
                     </li>
