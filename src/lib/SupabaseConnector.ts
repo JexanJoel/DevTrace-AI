@@ -7,11 +7,13 @@ import {
 import type { PowerSyncBackendConnector } from '@powersync/web';
 import { supabase } from './supabaseClient';
 
-// These errors mean the op is invalid and should be discarded, not retried
+// These errors mean the op is permanently invalid — discard, don't retry.
+// NOTE: 42501 (insufficient privilege / RLS denial) is intentionally NOT here.
+// If RLS blocks an op, we want it to surface as an error so it's visible,
+// not silently swallowed. Fix the missing RLS policy instead.
 const FATAL_CODES = [
-  /^22...$/,  // Data Exception
-  /^23...$/,  // Integrity Constraint Violation (e.g. duplicate key)
-  /^42501$/,  // Insufficient privilege
+  /^22...$/,  // Data Exception (bad data type, out of range, etc.)
+  /^23...$/,  // Integrity Constraint Violation (duplicate key, FK violation, etc.)
 ];
 
 const isFatal = (code: string) => FATAL_CODES.some(r => r.test(code));
@@ -38,13 +40,13 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
       }
       await transaction.complete();
     } catch (error: any) {
-      const code = error?.code ?? error?.message ?? '';
-      if (isFatal(String(code))) {
-        // Discard bad op so it doesn't block the queue forever
+      const code = String(error?.code ?? error?.message ?? '');
+      if (isFatal(code)) {
+        // Permanently bad op — discard so it doesn't block the queue forever
         console.warn('Discarding fatal PowerSync op:', lastOp, error);
         await transaction.complete();
       } else {
-        // Transient error — PowerSync will retry automatically
+        // Transient or auth error — PowerSync will retry automatically
         console.warn('PowerSync upload will retry:', error);
         throw error;
       }
@@ -58,7 +60,6 @@ export class SupabaseConnector implements PowerSyncBackendConnector {
 
     switch (op.op) {
       case UpdateType.PUT:
-        // upsert handles both inserts and replaces
         await supabase.from(table).upsert({ id, ...data }).throwOnError();
         break;
       case UpdateType.PATCH:
