@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   Brain, Loader2, ChevronDown, ChevronUp, Sparkles,
   RefreshCw, AlertCircle, CheckCircle2, Code2,
-  FileSearch, ShieldAlert, Lightbulb, ArrowRight
+  FileSearch, ShieldAlert, Lightbulb, ArrowRight, Copy, Check
 } from 'lucide-react';
 import type { DebugSession } from '../../hooks/useSessions';
 import useMastraAgent, { type MastraSessionResult } from '../../hooks/useMastraAgent';
@@ -43,25 +43,58 @@ const ConfidenceMeter = ({ value }: { value: number }) => {
 // ── Code diff block ───────────────────────────────────────────────────────────
 const CodeDiff = ({ before, after, language }: { before: string; after: string; language: string }) => {
   const [showAfter, setShowAfter] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  const currentCode = showAfter ? after : before;
+
+  const copy = () => {
+    navigator.clipboard.writeText(currentCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+      {/* Tab switcher */}
       <div className="flex border-b border-gray-200 dark:border-gray-700">
         <button
           onClick={() => setShowAfter(false)}
-          className={`flex-1 px-4 py-2 text-xs font-semibold transition ${!showAfter ? 'bg-red-50 dark:bg-red-950 text-red-600' : 'bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-gray-600'}`}
+          className={`flex-1 px-4 py-2 text-xs font-semibold transition ${
+            !showAfter
+              ? 'bg-red-50 dark:bg-red-950 text-red-600'
+              : 'bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-gray-600'
+          }`}
         >
           Before (broken)
         </button>
         <button
           onClick={() => setShowAfter(true)}
-          className={`flex-1 px-4 py-2 text-xs font-semibold transition ${showAfter ? 'bg-green-50 dark:bg-green-950 text-green-600' : 'bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-gray-600'}`}
+          className={`flex-1 px-4 py-2 text-xs font-semibold transition ${
+            showAfter
+              ? 'bg-green-50 dark:bg-green-950 text-green-600'
+              : 'bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-gray-600'
+          }`}
         >
           After (fixed)
         </button>
       </div>
-      <pre className={`p-4 text-xs font-mono overflow-x-auto leading-relaxed ${showAfter ? 'bg-green-950/50 text-green-300' : 'bg-red-950/50 text-red-300'}`}>
-        {showAfter ? after : before}
-      </pre>
+
+      {/* Code block — always solid dark bg, no transparency */}
+      <div className="relative">
+        <pre className="bg-gray-900 p-4 pr-16 text-xs font-mono overflow-x-auto leading-relaxed select-text whitespace-pre-wrap">
+          <code className={showAfter ? 'text-green-300' : 'text-red-300'}>
+            {currentCode}
+          </code>
+        </pre>
+        <button
+          onClick={copy}
+          className="absolute top-2 right-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg px-2 py-1 text-xs flex items-center gap-1 transition z-10"
+        >
+          {copied ? <><Check size={11} /> Copied</> : <><Copy size={11} /> Copy</>}
+        </button>
+      </div>
+
+      {/* Language label */}
       <div className="px-4 py-1.5 bg-gray-900 border-t border-gray-700">
         <span className="text-[10px] text-gray-500 font-mono">{language}</span>
       </div>
@@ -144,7 +177,7 @@ const StructuredResult = ({ data, onRerun }: { data: MastraSessionResult; onReru
                   <div className="px-4 py-2.5 bg-gray-50 dark:bg-gray-800 flex items-center justify-between">
                     <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">{alt.title}</p>
                   </div>
-                  <pre className="p-3 text-xs font-mono text-gray-300 bg-gray-900 overflow-x-auto leading-relaxed">{alt.code}</pre>
+                  <pre className="p-3 text-xs font-mono text-gray-300 bg-gray-900 overflow-x-auto leading-relaxed select-text">{alt.code}</pre>
                   <p className="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-800">{alt.tradeoff}</p>
                 </div>
               ))}
@@ -220,7 +253,7 @@ const StructuredResult = ({ data, onRerun }: { data: MastraSessionResult; onReru
   );
 };
 
-// ── Fallback prose renderer (when agent ignores JSON instruction) ─────────────
+// ── Fallback prose renderer ───────────────────────────────────────────────────
 const ProseResult = ({ text, onRerun }: { text: string; onRerun: () => void }) => (
   <div className="p-5 space-y-3">
     <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/40 rounded-xl px-4 py-2.5">
