@@ -40,7 +40,10 @@ const persistToDB = async (item: QueueItem, userId: string) => {
 
 const updateInDB = async (id: string, status: string) => {
   try {
-    await supabase.from('action_queue').update({ status, updated_at: new Date().toISOString() }).eq('id', id);
+    await supabase
+      .from('action_queue')
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', id);
   } catch {}
 };
 
@@ -55,7 +58,6 @@ export const useSyncQueue = create<SyncQueueState>((set, get) => ({
   addItem: (item) => {
     const full: QueueItem = { ...item, createdAt: Date.now() };
     set((state) => ({ items: [full, ...state.items] }));
-    // Persist to DB (non-blocking) — get userId from supabase session
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) persistToDB(full, data.user.id);
     });
@@ -79,7 +81,6 @@ export const useSyncQueue = create<SyncQueueState>((set, get) => ({
     done.forEach(deleteFromDB);
   },
 
-  // Called on mount to restore queue from DB
   loadFromDB: async (userId: string) => {
     try {
       const { data } = await supabase
@@ -91,15 +92,28 @@ export const useSyncQueue = create<SyncQueueState>((set, get) => ({
 
       if (!data?.length) return;
 
-      const items: QueueItem[] = data.map(row => ({
-        id: row.id,
-        action: row.action as QueueAction,
-        label: row.label,
-        status: row.status as QueueItem['status'],
-        createdAt: new Date(row.created_at).getTime(),
-      }));
+      // ── FIX: 'syncing' and 'pending' items from a previous session can
+      // never resolve — the callbacks that would call syncQueueUpdateItem
+      // are gone. Treat them as 'error' so the user can see and dismiss them.
+      const STALE_STATUSES = new Set(['syncing', 'pending']);
+      const staleIds: string[] = [];
+
+      const items: QueueItem[] = data.map(row => {
+        const isStale = STALE_STATUSES.has(row.status);
+        if (isStale) staleIds.push(row.id);
+        return {
+          id: row.id,
+          action: row.action as QueueAction,
+          label: row.label,
+          status: isStale ? 'error' : (row.status as QueueItem['status']),
+          createdAt: new Date(row.created_at ?? row.updated_at).getTime(),
+        };
+      });
 
       set({ items });
+
+      // Reflect the corrected status in DB so next reload is clean too
+      await Promise.all(staleIds.map(id => updateInDB(id, 'error')));
     } catch {}
   },
 }));
