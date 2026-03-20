@@ -1,5 +1,5 @@
 // src/components/providers/PowerSyncProvider.tsx
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { PowerSyncContext } from '@powersync/react';
 import { powerSync } from '../../lib/powersync';
 import { SupabaseConnector } from '../../lib/SupabaseConnector';
@@ -10,7 +10,6 @@ interface Props { children: ReactNode; }
 
 export const PowerSyncProvider = ({ children }: Props) => {
   const { user } = useAuthStore();
-  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -20,16 +19,11 @@ export const PowerSyncProvider = ({ children }: Props) => {
     const init = async () => {
       try {
         await powerSync.init();
-        // Connect but don't wait — works offline too
         powerSync.connect(connector).catch(() => {
-          // Connection failed (offline) — that's fine, local data still works
           console.log('PowerSync connect failed — offline mode');
         });
       } catch (e) {
         console.error('PowerSync init error:', e);
-      } finally {
-        // Always mark as initialized so UI renders with local data
-        setInitialized(true);
       }
     };
 
@@ -40,12 +34,11 @@ export const PowerSyncProvider = ({ children }: Props) => {
     };
   }, [user]);
 
-  // Always render children — even before user logs in (for landing/login pages)
-  // Once initialized, wrap with PowerSyncContext so useQuery hooks work
-  if (!user || !initialized) {
-    return <>{children}</>;
-  }
-
+  // ── FIX: Always wrap with PowerSyncContext.Provider ──────────────────────
+  // Previously, children were rendered WITHOUT the context until initialized,
+  // then moved INSIDE it — causing a full remount. During that remount,
+  // useQuery fired with uid='' and returned 0 results, which stuck.
+  // Now we always provide the context so there's no remount at all.
   return (
     <PowerSyncContext.Provider value={powerSync}>
       {children}
