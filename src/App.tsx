@@ -29,6 +29,18 @@ import SharedProjectView from './pages/SharedProjectView';
 import SharedSessionView from './pages/SharedSessionView';
 import DebugDNAPage from './pages/DebugDNAPage';
 
+// ── Wrap protected pages with PowerSync ───────────────────────────────────────
+// PowerSyncProvider must render AFTER auth is confirmed so useQuery hooks
+// never fire with uid=''. Wrapping here ensures PowerSync only inits for
+// authenticated users, with the real user.id already in the store.
+const AuthenticatedApp = ({ children }: { children: React.ReactNode }) => (
+  <ProtectedRoute>
+    <PowerSyncProvider>
+      {children}
+    </PowerSyncProvider>
+  </ProtectedRoute>
+);
+
 const App = () => {
   const { setUser, setSession, setLoading } = useAuthStore();
 
@@ -47,46 +59,44 @@ const App = () => {
   }, []);
 
   return (
-    <PowerSyncProvider>
-      <BrowserRouter>
-        <div className="flex flex-col min-h-screen">
-          <OfflineBanner />
-          <div className="flex-1">
-            <Toaster position="top-right" toastOptions={{
-              duration: 3000,
-              style: { background: '#fff', color: '#111827', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' },
-            }} />
-            <Routes>
-              {/* Public */}
-              <Route path="/"                element={<LandingPage />} />
-              <Route path="/login"           element={<LoginPage />} />
-              <Route path="/register"        element={<RegisterPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="/reset-password"  element={<ResetPasswordPage />} />
-              <Route path="/auth/callback"   element={<GitHubCallbackPage />} />
+    <BrowserRouter>
+      <div className="flex flex-col min-h-screen">
+        <OfflineBanner />
+        <div className="flex-1">
+          <Toaster position="top-right" toastOptions={{
+            duration: 3000,
+            style: { background: '#fff', color: '#111827', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '14px' },
+          }} />
+          <Routes>
+            {/* Public — no PowerSync needed */}
+            <Route path="/"                element={<LandingPage />} />
+            <Route path="/login"           element={<LoginPage />} />
+            <Route path="/register"        element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password"  element={<ResetPasswordPage />} />
+            <Route path="/auth/callback"   element={<GitHubCallbackPage />} />
 
-              {/* Protected */}
-              <Route path="/dashboard"           element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-              <Route path="/profile"             element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-              <Route path="/settings"            element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-              <Route path="/projects"            element={<ProtectedRoute><ProjectsPage /></ProtectedRoute>} />
-              <Route path="/projects/:id"        element={<ProtectedRoute><ProjectDetailPage /></ProtectedRoute>} />
-              <Route path="/sessions"            element={<ProtectedRoute><SessionsPage /></ProtectedRoute>} />
-              <Route path="/sessions/:id"        element={<ProtectedRoute><SessionDetailPage /></ProtectedRoute>} />
-              <Route path="/fixes"               element={<ProtectedRoute><FixLibraryPage /></ProtectedRoute>} />
-              <Route path="/analytics"           element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
-              <Route path="/ai-insights"         element={<ProtectedRoute><AIInsightsPage /></ProtectedRoute>} />
-              <Route path="/debug-dna"           element={<ProtectedRoute><DebugDNAPage /></ProtectedRoute>} />
-              <Route path="/sync-status"         element={<ProtectedRoute><SyncStatusPage /></ProtectedRoute>} />
-              <Route path="/shared"              element={<ProtectedRoute><SharedWithMePage /></ProtectedRoute>} />
-              <Route path="/shared/project/:id"  element={<ProtectedRoute><SharedProjectView /></ProtectedRoute>} />
-              <Route path="/shared/session/:id"  element={<ProtectedRoute><SharedSessionView /></ProtectedRoute>} />
-              <Route path="*"                    element={<Navigate to="/" replace />} />
-            </Routes>
-          </div>
+            {/* Protected — PowerSync wraps each page individually */}
+            <Route path="/dashboard"          element={<AuthenticatedApp><DashboardPage /></AuthenticatedApp>} />
+            <Route path="/profile"            element={<AuthenticatedApp><ProfilePage /></AuthenticatedApp>} />
+            <Route path="/settings"           element={<AuthenticatedApp><SettingsPage /></AuthenticatedApp>} />
+            <Route path="/projects"           element={<AuthenticatedApp><ProjectsPage /></AuthenticatedApp>} />
+            <Route path="/projects/:id"       element={<AuthenticatedApp><ProjectDetailPage /></AuthenticatedApp>} />
+            <Route path="/sessions"           element={<AuthenticatedApp><SessionsPage /></AuthenticatedApp>} />
+            <Route path="/sessions/:id"       element={<AuthenticatedApp><SessionDetailPage /></AuthenticatedApp>} />
+            <Route path="/fixes"              element={<AuthenticatedApp><FixLibraryPage /></AuthenticatedApp>} />
+            <Route path="/analytics"          element={<AuthenticatedApp><AnalyticsPage /></AuthenticatedApp>} />
+            <Route path="/ai-insights"        element={<AuthenticatedApp><AIInsightsPage /></AuthenticatedApp>} />
+            <Route path="/debug-dna"          element={<AuthenticatedApp><DebugDNAPage /></AuthenticatedApp>} />
+            <Route path="/sync-status"        element={<AuthenticatedApp><SyncStatusPage /></AuthenticatedApp>} />
+            <Route path="/shared"             element={<AuthenticatedApp><SharedWithMePage /></AuthenticatedApp>} />
+            <Route path="/shared/project/:id" element={<AuthenticatedApp><SharedProjectView /></AuthenticatedApp>} />
+            <Route path="/shared/session/:id" element={<AuthenticatedApp><SharedSessionView /></AuthenticatedApp>} />
+            <Route path="*"                   element={<Navigate to="/" replace />} />
+          </Routes>
         </div>
-      </BrowserRouter>
-    </PowerSyncProvider>
+      </div>
+    </BrowserRouter>
   );
 };
 
