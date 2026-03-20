@@ -50,14 +50,13 @@ export interface CreateSessionInput {
 
 const POWERSYNC_COLUMNS = new Set([
   'project_id', 'title', 'error_message', 'stack_trace', 'code_snippet',
-  'expected_behavior', 'environment', 'severity', 'status', 'notes', 
+  'expected_behavior', 'environment', 'severity', 'status', 'notes',
   'error_embedding', 'updated_at',
 ]);
 
 const SUPABASE_DIRECT_COLUMNS = new Set(['ai_analysis', 'ai_fix']);
 
 // ── Activity logging helper ───────────────────────────────────────────────────
-// Writes a project_activity row via PowerSync so it syncs to all collaborators
 const logProjectActivity = async (
   user: any,
   projectId: string,
@@ -83,7 +82,6 @@ const logProjectActivity = async (
       ]
     );
   } catch (err) {
-    // Activity logging is non-critical — never throw
     console.warn('logProjectActivity error:', err);
   }
 };
@@ -108,7 +106,7 @@ const useSessions = (projectId?: string) => {
   const params = useMemo(() => projectId ? [uid, projectId] : [uid], [projectId, uid]);
 
   const { data: rawSessions = [] } = useQuery<DebugSession>(query, params);
-  
+
   const sessions = useMemo(() => rawSessions.map(s => ({
     ...s,
     ai_analysis: s.ai_analysis
@@ -156,7 +154,6 @@ const useSessions = (projectId?: string) => {
     });
 
     try {
-      // Generate embedding if error message exists
       let embedding: number[] | null = null;
       if (data.error_message) {
         embedding = await generateEmbedding(data.error_message);
@@ -185,7 +182,14 @@ const useSessions = (projectId?: string) => {
         ]
       );
 
-      // Log activity to project feed
+      // ── FIX: increment project session_count so dashboard shows correctly ─
+      if (data.project_id) {
+        await powerSync.execute(
+          `UPDATE projects SET session_count = session_count + 1, updated_at = ? WHERE id = ?`,
+          [now, data.project_id]
+        );
+      }
+
       if (data.project_id) {
         await logProjectActivity(user, data.project_id, 'session_created', id, data.title);
       }
@@ -218,10 +222,8 @@ const useSessions = (projectId?: string) => {
     try {
       const now = new Date().toISOString();
 
-      // ── Path A: small fields → PowerSync mutation queue ──────────────────
       const psPayload: Record<string, any> = { updated_at: now };
-      
-      // If error message is changing, regenerate embedding
+
       if (data.error_message !== undefined && data.error_message !== session?.error_message) {
         const embedding = await generateEmbedding(data.error_message ?? '');
         if (embedding) {
@@ -245,7 +247,6 @@ const useSessions = (projectId?: string) => {
         );
       }
 
-      // ── Path B: large blob fields → direct Supabase, syncs back via WAL ──
       const hasDirectFields = Object.keys(data).some(k => SUPABASE_DIRECT_COLUMNS.has(k));
       if (hasDirectFields) {
         const directPayload: Record<string, any> = { updated_at: now };
@@ -255,7 +256,6 @@ const useSessions = (projectId?: string) => {
         if (error) throw error;
       }
 
-      // ── Log activity to project feed ────────────────────────────────────
       const pid = session?.project_id;
       const title = session?.title ?? 'Untitled';
       if (pid) {
@@ -289,12 +289,20 @@ const useSessions = (projectId?: string) => {
     });
 
     try {
-      // Log deletion before the row disappears
       if (session?.project_id) {
         await logProjectActivity(user, session.project_id, 'session_deleted', id, session.title ?? 'Untitled');
       }
 
       await powerSync.execute(`DELETE FROM debug_sessions WHERE id = ?`, [id]);
+
+      // ── FIX: decrement project session_count so dashboard stays accurate ──
+      if (session?.project_id) {
+        await powerSync.execute(
+          `UPDATE projects SET session_count = MAX(0, session_count - 1), updated_at = ? WHERE id = ?`,
+          [new Date().toISOString(), session.project_id]
+        );
+      }
+
       syncQueueUpdateItem(qid, { status: 'done' });
       return true;
     } catch (err) {
