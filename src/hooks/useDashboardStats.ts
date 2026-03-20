@@ -18,7 +18,7 @@ const useDashboardStats = () => {
   const uid = user?.id ?? '';
 
   const { data: projectStats = [] } = useQuery(
-    'SELECT id, status FROM projects WHERE user_id = ?', [uid]
+    'SELECT id FROM projects WHERE user_id = ?', [uid]
   );
   const { data: sessionStats = [] } = useQuery(
     'SELECT id, status, error_message FROM debug_sessions WHERE user_id = ?', [uid]
